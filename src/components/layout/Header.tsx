@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, ArrowUpRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import Logo from '@/components/ui/Logo';
 import { services } from '@/data/navigation';
 import { companyInfo } from '@/data/navigation';
 import { useScrollPosition } from '@/hooks/useScrollPosition';
@@ -41,12 +42,8 @@ export default function Header() {
     >
       <div className="flex items-center justify-between h-16 lg:h-18 mx-auto max-w-7xl px-6">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-3 relative z-50">
-          <img
-            src="/images/Untitled-21.png"
-            alt="Mike's Clean Cut"
-            className={`h-10 w-auto transition-all duration-300 ${lightText ? 'brightness-[10]' : ''}`}
-          />
+        <Link href="/" className={`relative z-50 transition-colors duration-300 ${lightText ? 'text-white' : 'text-foreground'}`}>
+          <Logo />
         </Link>
 
         {/* Desktop Nav */}
@@ -59,7 +56,15 @@ export default function Header() {
           <NavLink href="/contact" light={lightText}>Contact</NavLink>
         </nav>
 
-        <div className="hidden lg:block">
+        <div className="hidden lg:flex items-center gap-3">
+          <Link
+            href="/portal"
+            className={`text-[13px] font-medium transition-colors duration-300 ${
+              lightText ? 'text-white/70 hover:text-white' : 'text-foreground/55 hover:text-foreground'
+            }`}
+          >
+            Login
+          </Link>
           <Button asChild size="sm">
             <Link href="/quote">Get a Quote</Link>
           </Button>
@@ -115,9 +120,11 @@ export default function Header() {
                 <Button asChild size="lg" className="w-full mb-4">
                   <Link href="/quote">Get a Free Quote</Link>
                 </Button>
-                <p className="text-center text-sm text-muted-foreground">
+                <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
                   <a href={companyInfo.phoneHref} className="hover:text-foreground transition-colors duration-150">{companyInfo.phone}</a>
-                </p>
+                  <span className="text-border">|</span>
+                  <Link href="/portal" onClick={() => setMobileOpen(false)} className="hover:text-foreground transition-colors duration-150">Login</Link>
+                </div>
               </div>
             </div>
           </motion.div>
@@ -134,6 +141,7 @@ function NavLink({ href, children, light }: { href: string; children: string; li
   return (
     <Link
       href={href}
+      {...(active ? { 'aria-current': 'page' as const } : {})}
       className={`text-[13px] font-medium uppercase tracking-[0.12em] transition-colors duration-300 px-3 py-2 rounded-lg ${
         active
           ? 'text-brand'

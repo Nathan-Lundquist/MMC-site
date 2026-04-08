@@ -1,22 +1,17 @@
 import type { Metadata } from "next";
-import { DM_Sans, DM_Serif_Display, Geist } from "next/font/google";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
-import BackToTop from "@/components/ui/BackToTop";
+import { Source_Serif_4, Libre_Franklin } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
-
-const dmSans = DM_Sans({
-  variable: "--font-body",
+const sourceSerif = Source_Serif_4({
+  variable: "--font-display",
+  weight: ["400", "600", "700"],
   subsets: ["latin"],
   display: "swap",
 });
 
-const dmSerif = DM_Serif_Display({
-  variable: "--font-display",
-  weight: "400",
+const libreFranklin = Libre_Franklin({
+  variable: "--font-body",
   subsets: ["latin"],
   display: "swap",
 });
@@ -37,12 +32,12 @@ export const metadata: Metadata = {
     siteName: "Mike's Clean Cut Landscaping Inc.",
     url: "https://mikescleancut.com",
     title: "Mike's Clean Cut Landscaping Inc.",
-    description: "Southeast Michigan's trusted landscaping partner since 2000. Full-service landscape design, hardscaping, outdoor lighting, pools, and year-round property care.",
+    description: "Southeast Michigan's trusted landscaping partner since 2000.",
   },
   twitter: {
     card: "summary_large_image",
     title: "Mike's Clean Cut Landscaping Inc.",
-    description: "Southeast Michigan's trusted landscaping partner since 2000. Full-service landscape design, hardscaping, outdoor lighting, pools, and year-round property care.",
+    description: "Southeast Michigan's trusted landscaping partner since 2000.",
   },
 };
 
@@ -52,12 +47,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn("antialiased", dmSans.variable, dmSerif.variable, "font-sans", geist.variable)}>
-      <body className="min-h-screen flex flex-col font-body">
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <BackToTop />
+    <html lang="en" className={cn("antialiased", sourceSerif.variable, libreFranklin.variable)}>
+      <body className="min-h-screen flex flex-col font-sans">
+        {children}
       </body>
     </html>
   );

@@ -1,0 +1,295 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Auth & Users ──────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  MANAGER
+  FOREMAN
+  CREW
+}
+
+model Employee {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  role         Role     @default(CREW)
+  passwordHash String   @map("password_hash")
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  foremanOf             WorkOrder[]                @relation("Foreman")
+  crewDetails           CrewDetail[]
+  additionalCrewDetails AdditionalWorkCrewDetail[]
+
+  @@map("employees")
+}
+
+// ── Customers ─────────────────────────────────────────────
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String?
+  email     String?
+  address   String?
+  city      String?
+  state     String?  @default("MI")
+  zip       String?
+  notes     String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  workOrders WorkOrder[]
+
+  @@map("customers")
+}
+
+// ── Work Orders ───────────────────────────────────────────
+
+enum WorkOrderStatus {
+  DRAFT
+  IN_PROGRESS
+  COMPLETED
+  INVOICED
+  CANCELLED
+}
+
+model WorkOrder {
+  id               String          @id @default(cuid())
+  workOrderNumber  String          @unique @map("wo_number")
+  customerId       String          @map("customer_id")
+  customer         Customer        @relation(fields: [customerId], references: [id])
+  foremanId        String?         @map("foreman_id")
+  foreman          Employee?       @relation("Foreman", fields: [foremanId], references: [id])
+  jobType          String          @map("job_type")
+  projectStartDate DateTime?       @map("start_date")
+  projectEndDate   DateTime?       @map("end_date")
+  percentCompleted Decimal         @default(0) @db.Decimal(5, 2) @map("pct_complete")
+  totalManHours    Decimal         @default(0) @db.Decimal(8, 2) @map("total_hours")
+  notes            String?
+  materialsNotUsed String?         @map("materials_not_used")
+  status           WorkOrderStatus @default(DRAFT)
+  createdAt        DateTime        @default(now()) @map("created_at")
+  updatedAt        DateTime        @updatedAt @map("updated_at")
+
+  timeEntries         TimeEntry[]
+  payments            Payment[]
+  photos              Photo[]
+  machines            Machine[]
+  crewDetails         CrewDetail[]
+  debris              Debris[]
+  weeding             Weeding[]
+  hourlyWork          HourlyWork[]
+  materials           Material[]
+  outsourcedMaterials OutsourcedMaterial[]
+  additionalWork      AdditionalWork[]
+
+  @@map("work_orders")
+}
+
+// ── Time Entries (Day/Times of Project) ───────────────────
+
+model TimeEntry {
+  id          String    @id @default(cuid())
+  workOrderId String    @map("wo_id")
+  workOrder   WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  startTime   DateTime  @map("start_time")
+  endTime     DateTime? @map("end_time")
+
+  @@map("time_entries")
+}
+
+// ── Payments ──────────────────────────────────────────────
+
+model Payment {
+  id          String    @id @default(cuid())
+  workOrderId String    @map("wo_id")
+  workOrder   WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  date        DateTime
+  checkNumber String?   @map("check_number")
+  amount      Decimal   @db.Decimal(10, 2)
+
+  @@map("payments")
+}
+
+// ── Photos (Before/After) ─────────────────────────────────
+
+enum PhotoType {
+  BEFORE
+  AFTER
+}
+
+model Photo {
+  id          String    @id @default(cuid())
+  workOrderId String    @map("wo_id")
+  workOrder   WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  type        PhotoType
+  imagePath   String    @map("image_path")
+  uploadedAt  DateTime  @default(now()) @map("uploaded_at")
+
+  @@map("photos")
+}
+
+// ── Machines ──────────────────────────────────────────────
+
+model Machine {
+  id          String    @id @default(cuid())
+  workOrderId String    @map("wo_id")
+  workOrder   WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  vehicleInfo String    @map("vehicle_info")
+  hours       Decimal   @db.Decimal(6, 2)
+
+  @@map("machines")
+}
+
+// ── Crew Details ──────────────────────────────────────────
+
+model CrewDetail {
+  id            String    @id @default(cuid())
+  workOrderId   String    @map("wo_id")
+  workOrder     WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  date          DateTime
+  employeeId    String?   @map("employee_id")
+  employee      Employee? @relation(fields: [employeeId], references: [id])
+  jobHours      Decimal   @default(0) @db.Decimal(6, 2) @map("job_hours")
+  setupHours    Decimal   @default(0) @db.Decimal(6, 2) @map("setup_hours")
+  travelHours   Decimal   @default(0) @db.Decimal(6, 2) @map("travel_hours")
+  unloadHours   Decimal   @default(0) @db.Decimal(6, 2) @map("unload_hours")
+  deliveryHours Decimal   @default(0) @db.Decimal(6, 2) @map("delivery_hours")
+
+  @@map("crew_details")
+}
+
+// ── Debris ────────────────────────────────────────────────
+
+model Debris {
+  id          String    @id @default(cuid())
+  workOrderId String    @map("wo_id")
+  workOrder   WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  date        DateTime
+  amountYards Decimal   @db.Decimal(6, 2) @map("amount_yards")
+  type        String?
+
+  @@map("debris")
+}
+
+// ── Weeding / Bed Maintenance ─────────────────────────────
+
+enum TimeUnit {
+  HOURS
+  MINUTES
+}
+
+model Weeding {
+  id           String    @id @default(cuid())
+  workOrderId  String    @map("wo_id")
+  workOrder    WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  date         DateTime
+  numEmployees Int       @map("num_employees")
+  timeValue    Decimal   @db.Decimal(6, 2) @map("time_value")
+  timeUnit     TimeUnit  @default(HOURS) @map("time_unit")
+
+  @@map("weeding")
+}
+
+// ── Sprinkler / Landscape Lighting / Hourly Work ──────────
+
+model HourlyWork {
+  id           String    @id @default(cuid())
+  workOrderId  String    @map("wo_id")
+  workOrder    WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  date         DateTime
+  typeOfWork   String    @map("type_of_work")
+  numEmployees Int       @map("num_employees")
+  timeValue    Decimal   @db.Decimal(6, 2) @map("time_value")
+  timeUnit     TimeUnit  @default(HOURS) @map("time_unit")
+
+  @@map("hourly_work")
+}
+
+// ── MCC Materials ─────────────────────────────────────────
+
+model Material {
+  id          String    @id @default(cuid())
+  workOrderId String    @map("wo_id")
+  workOrder   WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  material    String
+  qty         Decimal   @db.Decimal(10, 2)
+  units       String?
+
+  @@map("materials")
+}
+
+// ── Outsourced Materials ──────────────────────────────────
+
+model OutsourcedMaterial {
+  id          String    @id @default(cuid())
+  workOrderId String    @map("wo_id")
+  workOrder   WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  supplier    String
+  material    String
+  qty         Decimal   @db.Decimal(10, 2)
+  unit        String?
+  cost        Decimal?  @db.Decimal(10, 2)
+  perUnitCost Decimal?  @db.Decimal(10, 2) @map("per_unit_cost")
+  taxIncluded Boolean   @default(false) @map("tax_included")
+
+  @@map("outsourced_materials")
+}
+
+// ── Approved / Additional Work ────────────────────────────
+
+model AdditionalWork {
+  id          String    @id @default(cuid())
+  workOrderId String    @map("wo_id")
+  workOrder   WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  number      Int?
+  date        DateTime?
+  status      String?
+  typeOfWork  String?   @map("type_of_work")
+  description String?
+
+  crewDetails AdditionalWorkCrewDetail[]
+  materials   AdditionalWorkMaterial[]
+
+  @@map("additional_work")
+}
+
+model AdditionalWorkCrewDetail {
+  id               String         @id @default(cuid())
+  additionalWorkId String         @map("addl_work_id")
+  additionalWork   AdditionalWork @relation(fields: [additionalWorkId], references: [id], onDelete: Cascade)
+  number           Int?
+  date             DateTime?
+  employeeId       String?        @map("employee_id")
+  employee         Employee?      @relation(fields: [employeeId], references: [id])
+  jobHours         Decimal        @default(0) @db.Decimal(6, 2) @map("job_hours")
+  deliveryHours    Decimal        @default(0) @db.Decimal(6, 2) @map("delivery_hours")
+
+  @@map("additional_work_crew")
+}
+
+model AdditionalWorkMaterial {
+  id               String         @id @default(cuid())
+  additionalWorkId String         @map("addl_work_id")
+  additionalWork   AdditionalWork @relation(fields: [additionalWorkId], references: [id], onDelete: Cascade)
+  material         String
+  qty              Decimal        @db.Decimal(10, 2)
+  units            String?
+  isOutsourced     Boolean        @default(false) @map("is_outsourced")
+  supplier         String?
+  cost             Decimal?       @db.Decimal(10, 2)
+  perUnitCost      Decimal?       @db.Decimal(10, 2) @map("per_unit_cost")
+
+  @@map("additional_work_materials")
+}
