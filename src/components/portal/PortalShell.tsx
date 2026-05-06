@@ -11,6 +11,8 @@ import {
   UserCog,
   Package,
   BarChart3,
+  DollarSign,
+  Table,
   Settings,
   Shield,
   LogOut,
@@ -46,6 +48,8 @@ const NAV_SECTIONS: NavSection[] = [
       { href: "/portal/materials", label: "Materials", icon: Package },
       { href: "/portal/customers", label: "All Customers", icon: Users },
       { href: "/portal/breakdown", label: "Breakdown", icon: BarChart3 },
+      { href: "/portal/costing", label: "Job Costing", icon: DollarSign },
+      { href: "/portal/costing/bulk", label: "Bulk Costing", icon: Table },
     ],
   },
   {

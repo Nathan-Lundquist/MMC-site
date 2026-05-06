@@ -31,12 +31,11 @@ export default function CTABanner({
           initial={{ opacity: 0, y: 20, scale: 0.98 }}
           whileInView={{ opacity: 1, y: 0, scale: 1 }}
           viewport={{ once: true, margin: '-60px' }}
-          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.9, ease: [0.33, 1, 0.68, 1] }}
           className="relative bg-foreground rounded-3xl overflow-hidden"
         >
-          {/* Decorative gradient wash */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,oklch(0.464_0.161_26.2/0.12),transparent_60%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,oklch(0.42_0.09_145/0.06),transparent_50%)]" />
+          {/* Subtle brand tint */}
+          <div className="absolute inset-0 bg-brand/[0.08]" />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 relative">
             {/* Content */}
@@ -44,7 +43,7 @@ export default function CTABanner({
               <h2 className="font-display text-3xl lg:text-4xl xl:text-5xl text-white leading-[1.05] mb-5">
                 {heading}
               </h2>
-              <p className="text-white/60 leading-relaxed mb-10 max-w-md text-[15px]">
+              <p className="text-white/75 leading-relaxed mb-10 max-w-md text-[15px]">
                 {subtitle}
               </p>
               <div className="flex gap-3 flex-wrap">

@@ -8,16 +8,16 @@ import { Button } from '@/components/ui/button';
 import { companyInfo } from '@/data/navigation';
 import { useRef } from 'react';
 
-const spring = [0.16, 1, 0.3, 1] as const;
+const ease = [0.33, 1, 0.68, 1] as const;
 
 const fadeUp = (delay: number) => ({
   initial: { opacity: 0, y: 30 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.9, delay, ease: spring } },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.9, delay, ease: ease } },
 });
 
 const scaleIn = (delay: number) => ({
   initial: { opacity: 0, scale: 1.08 },
-  animate: { opacity: 1, scale: 1, transition: { duration: 1.2, delay, ease: spring } },
+  animate: { opacity: 1, scale: 1, transition: { duration: 1.2, delay, ease: ease } },
 });
 
 export default function HeroSection() {
@@ -32,11 +32,6 @@ export default function HeroSection() {
 
   return (
     <section ref={heroRef} className="relative min-h-[100dvh] bg-background overflow-hidden">
-      {/* Subtle grid texture */}
-      <div className="absolute inset-0 opacity-[0.04]" style={{
-        backgroundImage: 'linear-gradient(rgba(0,0,0,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,.04) 1px, transparent 1px)',
-        backgroundSize: '60px 60px',
-      }} />
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 min-h-[100dvh] flex flex-col">
         {/* Main content area — two columns */}
@@ -92,23 +87,6 @@ export default function HeroSection() {
               </Button>
             </motion.div>
 
-            {/* Stats row */}
-            <motion.div
-              {...fadeUp(0.6)}
-              className="mt-12 flex items-center gap-8"
-            >
-              {[
-                { value: '25+', label: 'Years' },
-                { value: '1K+', label: 'Projects' },
-                { value: '5.0', label: 'Rating' },
-              ].map((s, i) => (
-                <div key={s.label} className="flex items-baseline gap-2">
-                  <span className="font-display text-2xl text-foreground">{s.value}</span>
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground/50">{s.label}</span>
-                  {i < 2 && <span className="ml-6 w-px h-5 bg-border" />}
-                </div>
-              ))}
-            </motion.div>
           </div>
 
           {/* Right — Asymmetric image grid */}
@@ -162,9 +140,6 @@ export default function HeroSection() {
                 />
               </motion.div>
 
-              {/* Decorative brand accent */}
-              <div className="absolute -bottom-4 -left-4 w-24 h-24 rounded-full border border-brand/20 hidden lg:block" />
-              <div className="absolute -top-4 -right-4 w-16 h-16 rounded-full bg-brand/10 hidden lg:block" />
             </div>
           </div>
         </div>

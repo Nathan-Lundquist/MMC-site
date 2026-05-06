@@ -23,9 +23,7 @@ export default function ServiceGrid() {
 
   return (
     <section className="py-24 lg:py-36 bg-secondary relative overflow-hidden">
-      {/* Decorative elements */}
       <div className="absolute top-0 left-0 right-0 divider-organic" />
-      <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full bg-foreground/[0.03] blur-3xl pointer-events-none" />
 
       <div className="mx-auto max-w-7xl px-6">
         {/* Section header */}
@@ -38,7 +36,7 @@ export default function ServiceGrid() {
             <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl text-foreground leading-[1]">
               Crafted services for
               <br />
-              <span className="text-brand italic">every outdoor need</span>
+              every outdoor need
             </h2>
           </AnimateOnScroll>
           <AnimateOnScroll delay={0.15} className="lg:col-span-4 lg:col-start-9 flex items-end">
@@ -58,9 +56,6 @@ export default function ServiceGrid() {
                   href={`/services/${service.slug}`}
                   className="group block bg-card rounded-2xl p-8 lg:p-10 h-full border border-border card-hover relative overflow-hidden"
                 >
-                  {/* Hover accent glow */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-brand/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
                   <div className="relative">
                     <div className="flex items-start justify-between mb-8">
                       <div className="w-14 h-14 rounded-2xl bg-brand/8 flex items-center justify-center group-hover:bg-brand transition-all duration-500">

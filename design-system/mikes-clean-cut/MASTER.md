@@ -7,8 +7,8 @@
 ---
 
 **Project:** Mikes Clean Cut
-**Generated:** 2026-03-29 11:12:02
-**Category:** Legal Services
+**Generated:** 2026-04-01 14:54:21
+**Category:** Landscaping & Hardscaping Services
 
 ---
 
@@ -16,26 +16,28 @@
 
 ### Color Palette
 
-| Role | Hex | CSS Variable |
-|------|-----|--------------|
-| Primary | `#2563EB` | `--color-primary` |
-| Secondary | `#3B82F6` | `--color-secondary` |
-| CTA/Accent | `#F97316` | `--color-cta` |
-| Background | `#F8FAFC` | `--color-background` |
-| Text | `#1E293B` | `--color-text` |
+| Role | Hex | OKLCH | CSS Variable |
+|------|-----|-------|--------------|
+| Brand/CTA | `#a02323` | `oklch(0.464 0.161 26.2)` | `--brand` / `--accent` |
+| Primary (dark) | `#1a1a1a` | `oklch(0.13 0 0)` | `--primary` |
+| Background | `#f5f5f5` | `oklch(0.975 0 0)` | `--background` |
+| Card | `#ffffff` | `oklch(1 0 0)` | `--card` |
+| Secondary | `#ebebeb` | `oklch(0.95 0 0)` | `--secondary` |
+| Muted text | `#666666` | `oklch(0.42 0 0)` | `--muted-foreground` |
+| Border | `#e0e0e0` | `oklch(0.91 0 0)` | `--border` |
 
-**Color Notes:** Professional navy + blue CTA
+**Color Notes:** Deep brick red brand + near-black primary + neutral grey scale. Red conveys authority and craftsmanship without being aggressive.
 
 ### Typography
 
-- **Heading Font:** Lexend
-- **Body Font:** Source Sans 3
-- **Mood:** corporate, trustworthy, accessible, readable, professional, clean
-- **Google Fonts:** [Lexend + Source Sans 3](https://fonts.google.com/share?selection.family=Lexend:wght@300;400;500;600;700|Source+Sans+3:wght@300;400;500;600;700)
+- **Heading Font:** Poppins
+- **Body Font:** Open Sans
+- **Mood:** modern, professional, clean, corporate, friendly, approachable
+- **Google Fonts:** [Poppins + Open Sans](https://fonts.google.com/share?selection.family=Open+Sans:wght@300;400;500;600;700|Poppins:wght@400;500;600;700)
 
 **CSS Import:**
 ```css
-@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Source+Sans+3:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
 ```
 
 ### Spacing Variables
@@ -63,91 +65,24 @@
 
 ## Component Specs
 
-### Buttons
+### Components
 
-```css
-/* Primary Button */
-.btn-primary {
-  background: #F97316;
-  color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 200ms ease;
-  cursor: pointer;
-}
+All UI primitives use **shadcn/ui** (Radix Nova) installed via CLI.
+Colors reference CSS variables — never hardcode hex in components.
 
-.btn-primary:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
-
-/* Secondary Button */
-.btn-secondary {
-  background: transparent;
-  color: #2563EB;
-  border: 2px solid #2563EB;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 200ms ease;
-  cursor: pointer;
-}
-```
-
-### Cards
-
-```css
-.card {
-  background: #F8FAFC;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: var(--shadow-md);
-  transition: all 200ms ease;
-  cursor: pointer;
-}
-
-.card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
-}
-```
-
-### Inputs
-
-```css
-.input {
-  padding: 12px 16px;
-  border: 1px solid #E2E8F0;
-  border-radius: 8px;
-  font-size: 16px;
-  transition: border-color 200ms ease;
-}
-
-.input:focus {
-  border-color: #2563EB;
-  outline: none;
-  box-shadow: 0 0 0 3px #2563EB20;
-}
-```
-
-### Modals
-
-```css
-.modal-overlay {
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-}
-
-.modal {
-  background: white;
-  border-radius: 16px;
-  padding: 32px;
-  box-shadow: var(--shadow-xl);
-  max-width: 500px;
-  width: 90%;
-}
-```
+| Component | Import | Notes |
+|-----------|--------|-------|
+| Button | `@/components/ui/button` | `default` = brand red, `outline`, `outline-brand`, `ghost`, `link` |
+| Input | `@/components/ui/input` | h-11, rounded-lg, focus ring = brand |
+| Textarea | `@/components/ui/textarea` | min-h-120px, resizable |
+| Label | `@/components/ui/label` | Always pair with Input |
+| Badge | `@/components/ui/badge` | cva variants |
+| Dialog | `@/components/ui/dialog` | Radix — requires DialogTitle + DialogDescription |
+| Card | `@/components/ui/card` | Compound: Card, CardHeader, CardTitle, CardContent, CardFooter |
+| Accordion | `@/components/ui/accordion` | For FAQ sections |
+| Select | `@/components/ui/select` | For form dropdowns |
+| Sheet | `@/components/ui/sheet` | Side panels / mobile drawers |
+| Separator | `@/components/ui/separator` | Dividers |
 
 ---
 
@@ -163,17 +98,17 @@
 
 ### Page Pattern
 
-**Pattern Name:** Enterprise Gateway
+**Pattern Name:** Minimal Single Column
 
-- **Conversion Strategy:** Path selection (I am a...). Mega menu navigation. Trust signals prominent.
-- **CTA Placement:** Contact Sales (Primary) + Login (Secondary)
-- **Section Order:** 1. Hero (Video/Mission), 2. Solutions by Industry, 3. Solutions by Role, 4. Client Logos, 5. Contact Sales
+- **Conversion Strategy:** Single CTA focus. Large typography. Lots of whitespace. No nav clutter. Mobile-first.
+- **CTA Placement:** Center, large CTA button
+- **Section Order:** 1. Hero headline, 2. Short description, 3. Benefit bullets (3 max), 4. CTA, 5. Footer
 
 ---
 
 ## Anti-Patterns (Do NOT Use)
 
-- ❌ Outdated design
+- ❌ Playful design
 - ❌ Hidden credentials
 - ❌ AI purple/pink gradients
 

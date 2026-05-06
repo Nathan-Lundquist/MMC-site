@@ -61,7 +61,27 @@ enum WorkOrderStatus {
   IN_PROGRESS
   COMPLETED
   INVOICED
+  PAID
   CANCELLED
+}
+
+enum JobCategory {
+  LANDSCAPE
+  FALL_CLEANUP
+  SPRING_CLEANUP
+  SUBCONTRACTOR
+  IN_HOUSE_REPAIR
+  BED_MAINTENANCE
+  SPRINKLER
+  LIGHTING
+  HARDSCAPE
+  OTHER
+}
+
+enum DataSource {
+  MANUAL
+  ZOHO
+  EXCEL_IMPORT
 }
 
 model WorkOrder {
@@ -72,6 +92,7 @@ model WorkOrder {
   foremanId        String?         @map("foreman_id")
   foreman          Employee?       @relation("Foreman", fields: [foremanId], references: [id])
   jobType          String          @map("job_type")
+  jobCategory      JobCategory     @default(OTHER) @map("job_category")
   projectStartDate DateTime?       @map("start_date")
   projectEndDate   DateTime?       @map("end_date")
   percentCompleted Decimal         @default(0) @db.Decimal(5, 2) @map("pct_complete")
@@ -79,8 +100,48 @@ model WorkOrder {
   notes            String?
   materialsNotUsed String?         @map("materials_not_used")
   status           WorkOrderStatus @default(DRAFT)
-  createdAt        DateTime        @default(now()) @map("created_at")
-  updatedAt        DateTime        @updatedAt @map("updated_at")
+
+  // ── Job Costing: Estimates ──
+  invoiceNumber      String?   @map("invoice_number")
+  invoiceAmount      Decimal?  @db.Decimal(10, 2) @map("invoice_amount")
+  estCrewWage        Decimal?  @db.Decimal(10, 2) @map("est_crew_wage")
+  estHours           Decimal?  @db.Decimal(8, 2) @map("est_hours")
+  estCrewTotal       Decimal?  @db.Decimal(10, 2) @map("est_crew_total")
+
+  // ── Job Costing: Actuals ──
+  crewWage           Decimal?  @db.Decimal(10, 2) @map("crew_wage")
+  actualHours        Decimal?  @db.Decimal(8, 2) @map("actual_hours")
+  crewTotal          Decimal?  @db.Decimal(10, 2) @map("crew_total")
+  materialCost       Decimal?  @db.Decimal(10, 2) @map("material_cost")
+  subCost            Decimal?  @db.Decimal(10, 2) @map("sub_cost")
+  dumpCost           Decimal?  @db.Decimal(10, 2) @map("dump_cost")
+  fuelCost           Decimal?  @db.Decimal(10, 2) @map("fuel_cost")
+
+  // ── Job Costing: Totals ──
+  totalDirectExpense   Decimal?  @db.Decimal(10, 2) @map("total_direct_expense")
+  totalIndirectExpense Decimal?  @db.Decimal(10, 2) @map("total_indirect_expense")
+  profit               Decimal?  @db.Decimal(10, 2) @map("profit")
+  profitPercent        Decimal?  @db.Decimal(8, 4) @map("profit_pct")
+
+  // ── Payment Tracking ──
+  amountPaid         Decimal?  @db.Decimal(10, 2) @map("amount_paid")
+  datePaid           DateTime? @map("date_paid")
+  amountOwed         Decimal?  @db.Decimal(10, 2) @map("amount_owed")
+
+  // ── Weekly Analysis (Estimated vs Actual Man Hours) ──
+  estCrewSize        Int?      @map("est_crew_size")
+  estTotalManHours   Decimal?  @db.Decimal(8, 2) @map("est_total_man_hours")
+  actualTravelHours  Decimal?  @db.Decimal(8, 2) @map("actual_travel_hours")
+  actualJobTime      Decimal?  @db.Decimal(8, 2) @map("actual_job_time")
+  actualSetupUnload  Decimal?  @db.Decimal(8, 2) @map("actual_setup_unload")
+  actualTotalManHours Decimal? @db.Decimal(8, 2) @map("actual_total_man_hours")
+
+  // ── Metadata ──
+  dataSource       DataSource  @default(MANUAL) @map("data_source")
+  sourceFile       String?     @map("source_file")
+  sourceYear       Int?        @map("source_year")
+  createdAt        DateTime    @default(now()) @map("created_at")
+  updatedAt        DateTime    @updatedAt @map("updated_at")
 
   timeEntries         TimeEntry[]
   payments            Payment[]

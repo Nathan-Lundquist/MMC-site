@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, Pencil } from "lucide-react";
+import { ArrowLeft, DollarSign, Pencil } from "lucide-react";
 
 export default async function JobDetailPage({
   params,
@@ -69,12 +69,20 @@ export default async function JobDetailPage({
             {wo.jobType} &mdash; {wo.customer.name}
           </p>
         </div>
-        <Link href={`/portal/jobs/${wo.id}/edit`}>
-          <Button className="gap-2 bg-brand text-brand-foreground hover:bg-brand/90">
-            <Pencil className="w-4 h-4" />
-            Edit
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href={`/portal/jobs/${wo.id}/costing`}>
+            <Button variant="outline-brand" className="gap-2">
+              <DollarSign className="w-4 h-4" />
+              Cost This Job
+            </Button>
+          </Link>
+          <Link href={`/portal/jobs/${wo.id}/edit`}>
+            <Button className="gap-2 bg-brand text-brand-foreground hover:bg-brand/90">
+              <Pencil className="w-4 h-4" />
+              Edit
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Overview */}

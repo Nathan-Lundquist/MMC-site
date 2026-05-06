@@ -11,9 +11,6 @@ export default function TestimonialPreview() {
 
   return (
     <section className="py-24 lg:py-36 relative overflow-hidden">
-      {/* Decorative accents */}
-      <div className="absolute top-20 -left-40 w-80 h-80 rounded-full bg-brand/[0.02] blur-[80px] pointer-events-none" />
-
       <div className="mx-auto max-w-7xl px-6">
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-16 lg:mb-20">
           <AnimateOnScroll>
@@ -24,7 +21,7 @@ export default function TestimonialPreview() {
             <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl text-foreground leading-[1]">
               What our clients
               <br />
-              <span className="text-brand italic">have to say</span>
+              have to say
             </h2>
           </AnimateOnScroll>
           <AnimateOnScroll delay={0.1}>
@@ -59,7 +56,7 @@ export default function TestimonialPreview() {
                 </blockquote>
 
                 <div className="pt-6 border-t border-border flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-full bg-gradient-to-br from-brand/20 to-brand/5 flex items-center justify-center text-sm font-display text-brand">
+                  <div className="w-11 h-11 rounded-full bg-brand/10 flex items-center justify-center text-sm font-display text-brand">
                     {t.author.charAt(0)}
                   </div>
                   <div>

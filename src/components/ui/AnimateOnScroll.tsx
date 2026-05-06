@@ -4,7 +4,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import type { ReactNode } from 'react';
 import { useRef } from 'react';
 
-const springEase = [0.16, 1, 0.3, 1] as const;
+const ease = [0.33, 1, 0.68, 1] as const;
 
 interface AnimateOnScrollProps {
   children: ReactNode;
@@ -39,7 +39,7 @@ export default function AnimateOnScroll({
       initial={v.hidden}
       whileInView={v.visible}
       viewport={{ once: true, margin: '-60px' }}
-      transition={{ duration: 0.9, delay, ease: springEase }}
+      transition={{ duration: 0.9, delay, ease: ease }}
     >
       {children}
     </Component>
@@ -73,7 +73,7 @@ export function StaggerItem({ children, className }: { children: ReactNode; clas
           opacity: 1,
           y: 0,
           scale: 1,
-          transition: { duration: 0.7, ease: springEase },
+          transition: { duration: 0.7, ease: ease },
         },
       }}
     >
@@ -129,7 +129,7 @@ export function RevealOnScroll({
       initial={{ clipPath: clip.hidden, opacity: 0 }}
       whileInView={{ clipPath: clip.visible, opacity: 1 }}
       viewport={{ once: true, margin: '-60px' }}
-      transition={{ duration: 1.1, ease: springEase }}
+      transition={{ duration: 1.1, ease: ease }}
     >
       {children}
     </motion.div>

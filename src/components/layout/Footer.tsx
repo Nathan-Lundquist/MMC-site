@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Logo from '@/components/ui/Logo';
 import { services, quickLinks, companyInfo } from '@/data/navigation';
 
 export default function Footer() {
@@ -8,11 +9,7 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-6 pt-24 pb-16 relative">
         {/* Top — brand statement */}
         <div className="mb-16 lg:mb-20">
-          <img
-            src="/images/Untitled-21.png"
-            alt={companyInfo.name}
-            className="h-10 mb-8 brightness-[10]"
-          />
+          <Logo className="text-white mb-8" />
           <p className="font-display text-3xl lg:text-4xl text-white/80 max-w-lg leading-[1.15]">
             Dream it. Design it.
             <br />
@@ -27,14 +24,14 @@ export default function Footer() {
           <div className="lg:col-span-3">
             <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/30 mb-5">Contact</p>
             <div className="flex flex-col gap-1">
-              <a href={companyInfo.phoneHref} className="text-sm text-white/50 hover:text-white transition-colors duration-150 py-1.5 min-h-[44px] flex items-center">{companyInfo.phone}</a>
-              <a href={`mailto:${companyInfo.email}`} className="text-sm text-white/50 hover:text-white transition-colors duration-150 py-1.5 min-h-[44px] flex items-center">{companyInfo.email}</a>
-              <p className="text-sm text-white/25 py-1.5">{companyInfo.fax} (fax)</p>
+              <a href={companyInfo.phoneHref} className="text-sm text-white/70 hover:text-white transition-colors duration-150 py-1.5 min-h-[44px] flex items-center">{companyInfo.phone}</a>
+              <a href={`mailto:${companyInfo.email}`} className="text-sm text-white/70 hover:text-white transition-colors duration-150 py-1.5 min-h-[44px] flex items-center">{companyInfo.email}</a>
+              <p className="text-sm text-white/50 py-1.5">{companyInfo.fax} (fax)</p>
             </div>
             <div className="mt-6 pt-6 border-t border-white/[0.06]">
-              <p className="text-sm text-white/35">Mon – Fri: 9am – 4pm</p>
-              <p className="text-sm text-white/25 mt-1">{companyInfo.address}</p>
-              <p className="text-sm text-white/25">{companyInfo.city}</p>
+              <p className="text-sm text-white/60">Mon – Fri: 9am – 4pm</p>
+              <p className="text-sm text-white/50 mt-1">{companyInfo.address}</p>
+              <p className="text-sm text-white/50">{companyInfo.city}</p>
             </div>
           </div>
 
@@ -46,7 +43,7 @@ export default function Footer() {
                 <Link
                   key={link.to}
                   href={link.to}
-                  className="text-sm text-white/35 hover:text-white transition-colors duration-150 py-1.5 min-h-[44px] flex items-center"
+                  className="text-sm text-white/60 hover:text-white transition-colors duration-150 py-1.5 min-h-[44px] flex items-center"
                 >
                   {link.label}
                 </Link>
@@ -62,7 +59,7 @@ export default function Footer() {
                 <Link
                   key={s.slug}
                   href={`/services/${s.slug}`}
-                  className="text-sm text-white/35 hover:text-white transition-colors duration-150 py-1.5 min-h-[44px] flex items-center"
+                  className="text-sm text-white/60 hover:text-white transition-colors duration-150 py-1.5 min-h-[44px] flex items-center"
                 >
                   {s.label}
                 </Link>

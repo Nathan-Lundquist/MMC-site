@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { MapPin, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import AnimateOnScroll, { RevealOnScroll, Parallax } from '@/components/ui/AnimateOnScroll';
+import AnimateOnScroll, { RevealOnScroll } from '@/components/ui/AnimateOnScroll';
 
 const areas = [
   'Rochester Hills', 'Troy', 'Shelby Twp', 'Sterling Heights',
@@ -22,17 +22,17 @@ export default function ServiceArea() {
           {/* Image with parallax */}
           <div className="relative">
             <RevealOnScroll direction="left">
-              <Parallax speed={0.12} className="rounded-3xl overflow-hidden">
+              <div className="rounded-3xl overflow-hidden">
                 <div className="relative aspect-[4/3]">
                   <Image
                     src="/images/site/front-yard.jpg"
                     alt="Front yard landscape design in Southeast Michigan"
                     fill
-                    className="object-cover scale-110"
+                    className="object-cover"
                     sizes="(max-width: 1024px) 100vw, 50vw"
                   />
                 </div>
-              </Parallax>
+              </div>
             </RevealOnScroll>
 
             {/* Floating badge */}
@@ -43,7 +43,7 @@ export default function ServiceArea() {
                 </div>
                 <div>
                   <p className="text-white text-sm font-semibold">SE Michigan</p>
-                  <p className="text-white/40 text-xs">Oakland & Macomb</p>
+                  <p className="text-white/60 text-xs">Oakland & Macomb</p>
                 </div>
               </div>
             </AnimateOnScroll>
@@ -56,9 +56,7 @@ export default function ServiceArea() {
               Service Area
             </p>
             <h3 className="font-display text-3xl lg:text-4xl xl:text-5xl text-foreground mb-5 leading-[1.05]">
-              Oakland & Macomb
-              <br />
-              <span className="text-brand italic">Counties</span>
+              Oakland &amp; Macomb Counties
             </h3>
             <p className="text-muted-foreground mb-10 leading-relaxed text-[15px] max-w-md">
               Based in Rochester Hills, our crews serve residential and commercial properties throughout Southeast Michigan.
