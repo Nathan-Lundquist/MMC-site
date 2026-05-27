@@ -396,8 +396,8 @@ export function WorkOrderForm({ customers, employees, initialData }: Props) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!customerId || !foremanId || !woNumber) {
-      setError("Customer, Foreman, and Work Order Number are required.");
+    if (!customerId || !woNumber) {
+      setError("Customer and Work Order Number are required.");
       return;
     }
     setError("");

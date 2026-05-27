@@ -16,6 +16,8 @@ export interface BlogPost {
 const BLOG_DIR = path.join(process.cwd(), 'src/content/blog');
 
 export function getAllPosts(): BlogPost[] {
+  if (!fs.existsSync(BLOG_DIR)) return [];
+
   const files = fs.readdirSync(BLOG_DIR).filter((f) => f.endsWith('.mdx'));
 
   const posts = files.map((filename) => {
@@ -41,8 +43,24 @@ export function getAllPosts(): BlogPost[] {
 }
 
 export function getPostBySlug(slug: string): BlogPost | undefined {
-  const posts = getAllPosts();
-  return posts.find((p) => p.slug === slug);
+  if (!fs.existsSync(BLOG_DIR)) return undefined;
+
+  const filePath = path.join(BLOG_DIR, `${slug}.mdx`);
+  if (!fs.existsSync(filePath)) return undefined;
+
+  const raw = fs.readFileSync(filePath, 'utf-8');
+  const { data, content } = matter(raw);
+
+  return {
+    slug,
+    title: data.title,
+    description: data.description,
+    date: data.date,
+    author: data.author,
+    image: data.image,
+    tags: data.tags || [],
+    content,
+  } as BlogPost;
 }
 
 export function getAllSlugs(): string[] {

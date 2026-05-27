@@ -194,28 +194,30 @@ export function CostingForm({ workOrder }: { workOrder: CostingWorkOrder }) {
     setError(null);
 
     try {
+      // Use explicit empty-string checks — `|| null` erases valid zero values
+      const parseOrNull = (v: string): number | null =>
+        v === "" ? null : parseFloat(v);
+
       const body = {
         invoiceNumber: invoiceNumber || null,
-        invoiceAmount: invoiceAmount ? parseFloat(invoiceAmount) : null,
-        estCrewWage: estCrewWage ? parseFloat(estCrewWage) : null,
-        estHours: estHours ? parseFloat(estHours) : null,
-        estCrewTotal: estCrewTotal || null,
-        crewWage: crewWage ? parseFloat(crewWage) : null,
-        actualHours: actualHours ? parseFloat(actualHours) : null,
-        crewTotal: crewTotal || null,
-        materialCost: materialCost ? parseFloat(materialCost) : null,
-        subCost: subCost ? parseFloat(subCost) : null,
-        dumpCost: dumpCost ? parseFloat(dumpCost) : null,
-        fuelCost: fuelCost ? parseFloat(fuelCost) : null,
-        totalDirectExpense: totalDirectExpense || null,
-        totalIndirectExpense: totalIndirectExpense
-          ? parseFloat(totalIndirectExpense)
-          : null,
-        profit: profit || null,
-        profitPercent: profitPercent || null,
-        amountPaid: amountPaid ? parseFloat(amountPaid) : null,
+        invoiceAmount: parseOrNull(invoiceAmount),
+        estCrewWage: parseOrNull(estCrewWage),
+        estHours: parseOrNull(estHours),
+        estCrewTotal: estCrewWage || estHours ? estCrewTotal : null,
+        crewWage: parseOrNull(crewWage),
+        actualHours: parseOrNull(actualHours),
+        crewTotal: crewWage || actualHours ? crewTotal : null,
+        materialCost: parseOrNull(materialCost),
+        subCost: parseOrNull(subCost),
+        dumpCost: parseOrNull(dumpCost),
+        fuelCost: parseOrNull(fuelCost),
+        totalDirectExpense: invoiceAmount ? totalDirectExpense : null,
+        totalIndirectExpense: parseOrNull(totalIndirectExpense),
+        profit: invoiceAmount ? profit : null,
+        profitPercent: invoiceAmount ? profitPercent : null,
+        amountPaid: parseOrNull(amountPaid),
         datePaid: datePaid || null,
-        amountOwed: amountOwed || null,
+        amountOwed: invoiceAmount ? amountOwed : null,
       };
 
       const res = await fetch(`/api/jobs/${workOrder.id}/costing`, {

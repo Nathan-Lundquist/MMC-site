@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { requireAuth } from "@/lib/api-auth";
 
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { error: authError } = await requireAuth();
+  if (authError) return authError;
+
   const { id } = await params;
   try {
     const wo = await prisma.workOrder.findUnique({
@@ -45,6 +49,9 @@ export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { error: authError } = await requireAuth();
+  if (authError) return authError;
+
   const { id } = await params;
   try {
     const body = await req.json();
@@ -94,9 +101,15 @@ export async function PUT(
     }
 
     const pct = parseFloat(pctComplete) || 0;
-    let status: "DRAFT" | "IN_PROGRESS" | "COMPLETED" = "DRAFT";
-    if (pct >= 100) status = "COMPLETED";
-    else if (pct > 0) status = "IN_PROGRESS";
+
+    // Preserve INVOICED/PAID status set by costing — only auto-set for non-financial statuses
+    const FINANCIAL_STATUSES: string[] = ["INVOICED", "PAID"];
+    let status = existing.status;
+    if (!FINANCIAL_STATUSES.includes(existing.status)) {
+      if (pct >= 100) status = "COMPLETED" as typeof status;
+      else if (pct > 0) status = "IN_PROGRESS" as typeof status;
+      else status = "DRAFT" as typeof status;
+    }
 
     const workOrder = await prisma.$transaction(async (tx) => {
       // Delete all child records — we'll re-create them from the form data
@@ -430,8 +443,7 @@ export async function PUT(
     return NextResponse.json({ id: workOrder.id });
   } catch (err) {
     console.error("Update job failed:", err);
-    const message =
-      err instanceof Error ? err.message : "Failed to update job";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error(err);
+    return NextResponse.json({ error: "Failed to update job" }, { status: 500 });
   }
 }

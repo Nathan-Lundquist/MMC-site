@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { Prisma } from "@prisma/client";
+import { requireAuth } from "@/lib/api-auth";
 
 interface BulkUpdateItem {
   id: string;
@@ -22,6 +23,9 @@ function toDecimal(v: number | null | undefined): Prisma.Decimal | null {
 }
 
 export async function PUT(req: NextRequest) {
+  const { error: authError } = await requireAuth(["ADMIN", "MANAGER"]);
+  if (authError) return authError;
+
   try {
     const body = await req.json();
     const { updates } = body as { updates: BulkUpdateItem[] };
@@ -123,6 +127,9 @@ export async function PUT(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
+  const { error: authError } = await requireAuth();
+  if (authError) return authError;
+
   try {
     const { searchParams } = new URL(req.url);
     const year = searchParams.get("year");

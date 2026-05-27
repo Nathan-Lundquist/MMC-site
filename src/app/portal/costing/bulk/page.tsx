@@ -281,19 +281,24 @@ export default function BulkCostingPage() {
     setSaveResult(null);
 
     try {
+      // Use explicit empty-string check — `|| null` erases valid zero values
+      const numOrNull = (woId: string, field: keyof EditableFields): number | null => {
+        const raw = getFieldValue(woId, field);
+        return raw === "" ? null : toNum(raw);
+      };
+
       const updates = Array.from(dirtyRows).map((woId) => ({
         id: woId,
         invoiceNumber: getFieldValue(woId, "invoiceNumber") || null,
-        invoiceAmount: toNum(getFieldValue(woId, "invoiceAmount")) || null,
-        estCrewTotal: toNum(getFieldValue(woId, "estCrewTotal")) || null,
-        crewTotal: toNum(getFieldValue(woId, "crewTotal")) || null,
-        materialCost: toNum(getFieldValue(woId, "materialCost")) || null,
-        subCost: toNum(getFieldValue(woId, "subCost")) || null,
-        dumpCost: toNum(getFieldValue(woId, "dumpCost")) || null,
-        fuelCost: toNum(getFieldValue(woId, "fuelCost")) || null,
-        totalIndirectExpense:
-          toNum(getFieldValue(woId, "totalIndirectExpense")) || null,
-        amountPaid: toNum(getFieldValue(woId, "amountPaid")) || null,
+        invoiceAmount: numOrNull(woId, "invoiceAmount"),
+        estCrewTotal: numOrNull(woId, "estCrewTotal"),
+        crewTotal: numOrNull(woId, "crewTotal"),
+        materialCost: numOrNull(woId, "materialCost"),
+        subCost: numOrNull(woId, "subCost"),
+        dumpCost: numOrNull(woId, "dumpCost"),
+        fuelCost: numOrNull(woId, "fuelCost"),
+        totalIndirectExpense: numOrNull(woId, "totalIndirectExpense"),
+        amountPaid: numOrNull(woId, "amountPaid"),
       }));
 
       const res = await fetch("/api/jobs/bulk-costing", {

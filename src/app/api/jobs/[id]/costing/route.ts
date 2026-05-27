@@ -1,11 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { WorkOrderStatus } from "@prisma/client";
+import { Prisma, WorkOrderStatus } from "@prisma/client";
+import { requireAuth } from "@/lib/api-auth";
+
+function toDecimal(v: number | null | undefined): Prisma.Decimal | null {
+  if (v === null || v === undefined || isNaN(v)) return null;
+  return new Prisma.Decimal(v);
+}
 
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { error: authError } = await requireAuth(["ADMIN", "MANAGER"]);
+  if (authError) return authError;
+
   const { id } = await params;
 
   try {
@@ -54,33 +63,34 @@ export async function PUT(
       status = "INVOICED";
     }
 
+    const parseNum = (v: unknown): number | null => {
+      if (v === null || v === undefined) return null;
+      const n = parseFloat(String(v));
+      return isNaN(n) ? null : n;
+    };
+
     const workOrder = await prisma.workOrder.update({
       where: { id },
       data: {
         invoiceNumber: invoiceNumber ?? null,
-        invoiceAmount: invoiceAmount != null ? parseFloat(invoiceAmount) : null,
-        estCrewWage: estCrewWage != null ? parseFloat(estCrewWage) : null,
-        estHours: estHours != null ? parseFloat(estHours) : null,
-        estCrewTotal: estCrewTotal != null ? parseFloat(estCrewTotal) : null,
-        crewWage: crewWage != null ? parseFloat(crewWage) : null,
-        actualHours: actualHours != null ? parseFloat(actualHours) : null,
-        crewTotal: crewTotal != null ? parseFloat(crewTotal) : null,
-        materialCost: materialCost != null ? parseFloat(materialCost) : null,
-        subCost: subCost != null ? parseFloat(subCost) : null,
-        dumpCost: dumpCost != null ? parseFloat(dumpCost) : null,
-        fuelCost: fuelCost != null ? parseFloat(fuelCost) : null,
-        totalDirectExpense:
-          totalDirectExpense != null ? parseFloat(totalDirectExpense) : null,
-        totalIndirectExpense:
-          totalIndirectExpense != null
-            ? parseFloat(totalIndirectExpense)
-            : null,
-        profit: profit != null ? parseFloat(profit) : null,
-        profitPercent:
-          profitPercent != null ? parseFloat(profitPercent) : null,
-        amountPaid: amountPaid != null ? parseFloat(amountPaid) : null,
+        invoiceAmount: toDecimal(parseNum(invoiceAmount)),
+        estCrewWage: toDecimal(parseNum(estCrewWage)),
+        estHours: toDecimal(parseNum(estHours)),
+        estCrewTotal: toDecimal(parseNum(estCrewTotal)),
+        crewWage: toDecimal(parseNum(crewWage)),
+        actualHours: toDecimal(parseNum(actualHours)),
+        crewTotal: toDecimal(parseNum(crewTotal)),
+        materialCost: toDecimal(parseNum(materialCost)),
+        subCost: toDecimal(parseNum(subCost)),
+        dumpCost: toDecimal(parseNum(dumpCost)),
+        fuelCost: toDecimal(parseNum(fuelCost)),
+        totalDirectExpense: toDecimal(parseNum(totalDirectExpense)),
+        totalIndirectExpense: toDecimal(parseNum(totalIndirectExpense)),
+        profit: toDecimal(parseNum(profit)),
+        profitPercent: toDecimal(parseNum(profitPercent)),
+        amountPaid: toDecimal(parseNum(amountPaid)),
         datePaid: datePaid ? new Date(datePaid) : null,
-        amountOwed: amountOwed != null ? parseFloat(amountOwed) : null,
+        amountOwed: toDecimal(parseNum(amountOwed)),
         status,
       },
     });
@@ -88,8 +98,7 @@ export async function PUT(
     return NextResponse.json({ id: workOrder.id, status: workOrder.status });
   } catch (err) {
     console.error("Update costing failed:", err);
-    const message =
-      err instanceof Error ? err.message : "Failed to update costing data";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error(err);
+    return NextResponse.json({ error: "Failed to update costing data" }, { status: 500 });
   }
 }

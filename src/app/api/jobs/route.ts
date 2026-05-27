@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { requireAuth } from "@/lib/api-auth";
 
 export async function POST(req: NextRequest) {
+  const { error } = await requireAuth();
+  if (error) return error;
+
   try {
     const body = await req.json();
 
@@ -370,13 +374,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ id: workOrder.id }, { status: 201 });
   } catch (err) {
     console.error("Work order creation failed:", err);
-    const message =
-      err instanceof Error ? err.message : "Failed to create work order";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error(err);
+    return NextResponse.json({ error: "Failed to create work order" }, { status: 500 });
   }
 }
 
 export async function GET() {
+  const { error } = await requireAuth();
+  if (error) return error;
+
   try {
     const workOrders = await prisma.workOrder.findMany({
       orderBy: { createdAt: "desc" },

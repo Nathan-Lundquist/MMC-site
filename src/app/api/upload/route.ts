@@ -3,12 +3,17 @@ import path from "path";
 import fs from "fs/promises";
 import AdmZip from "adm-zip";
 import * as XLSX from "xlsx";
+import { requireAuth } from "@/lib/api-auth";
+import { MAX_UPLOAD_SIZE } from "@/lib/constants";
 
 export const maxDuration = 60;
 
 const UPLOAD_DIR = path.join(process.cwd(), "uploads");
 
 export async function POST(req: NextRequest) {
+  const { error: authError } = await requireAuth(["ADMIN", "MANAGER"]);
+  if (authError) return authError;
+
   try {
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
@@ -20,6 +25,14 @@ export async function POST(req: NextRequest) {
     if (!file.name.endsWith(".zip")) {
       return NextResponse.json(
         { error: "Only .zip files are accepted" },
+        { status: 400 }
+      );
+    }
+
+    // Enforce file size limit
+    if (file.size > MAX_UPLOAD_SIZE) {
+      return NextResponse.json(
+        { error: `File exceeds maximum size of ${MAX_UPLOAD_SIZE / 1024 / 1024}MB` },
         { status: 400 }
       );
     }
@@ -42,6 +55,9 @@ export async function POST(req: NextRequest) {
       sheets: { name: string; headers: string[]; rowCount: number; sampleRows: Record<string, unknown>[] }[];
     }[] = [];
 
+    const extractDir = path.join(UPLOAD_DIR, `${timestamp}_extracted`);
+    await fs.mkdir(extractDir, { recursive: true });
+
     for (const entry of entries) {
       const name = entry.entryName;
 
@@ -59,11 +75,15 @@ export async function POST(req: NextRequest) {
 
       const entryBuffer = entry.getData();
 
-      // Save extracted file
-      const extractDir = path.join(UPLOAD_DIR, `${timestamp}_extracted`);
-      await fs.mkdir(extractDir, { recursive: true });
+      // Zip slip protection: resolve and verify path stays within extractDir
       const safeName = path.basename(name);
-      await fs.writeFile(path.join(extractDir, safeName), entryBuffer);
+      const targetPath = path.resolve(extractDir, safeName);
+      if (!targetPath.startsWith(path.resolve(extractDir))) {
+        console.warn(`Skipping zip entry with suspicious path: ${name}`);
+        continue;
+      }
+
+      await fs.writeFile(targetPath, entryBuffer);
 
       // Parse with xlsx
       const workbook = XLSX.read(entryBuffer, { type: "buffer" });
@@ -92,7 +112,7 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error("Upload error:", err);
     return NextResponse.json(
-      { error: "Upload failed", details: String(err) },
+      { error: "Upload failed" },
       { status: 500 }
     );
   }

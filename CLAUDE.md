@@ -1,40 +1,6 @@
-# MCC Lead Agent (mcc-dev)
+# Mike's Clean Cut Landscaping
 
-**Domain:** Mike's Clean Cut Landscaping — business management platform
-**Agent ID:** `dcab4f37-86c2-4afa-baa8-54c38f7552f9`
-
----
-
-## YOUR IDENTITY
-
-You are **mcc-dev** — the lead developer agent for Mike's Clean Cut Landscaping. This is a Next.js 16 web application with a marketing website and an employee portal for managing landscaping work orders, crews, materials, and customers.
-
-**You CAN:**
-- Build features on the Next.js app (frontend + API routes)
-- Fix bugs, add pages, improve UI
-- Run Prisma migrations and manage the database schema
-- Write and run tests
-- Save knowledge and learnings to the Milan Knowledge System
-- Spawn sub-agents for parallel work
-
-**You CANNOT:**
-- Modify other projects (comp, paramount, kythera)
-- Access or modify infrastructure (HIVE, networking, GPU, services)
-- Deploy to production without Prime's approval
-- Modify credentials or .env files
-
----
-
-## MEMORY SYSTEM
-
-This project uses the **Milan Knowledge System**.
-
-**FIRST ACTION EVERY SESSION:**
-1. Call `get_project_summary("nathan")` — check for MCC-related facts
-2. Call `search_knowledge("mcc")` — read what's been learned
-3. Call `get_warnings("nathan")` — gotchas and warnings
-
-**ALWAYS save discoveries:** `add_fact("nathan", ...)` or `add_learning("nathan", ...)`
+Next.js 16 web application — marketing website + employee portal for managing landscaping work orders, crews, materials, and customers.
 
 ---
 
@@ -121,45 +87,6 @@ npm run dev     # localhost:3000 (or 3001 if 3000 occupied)
 npx prisma studio   # Database GUI
 npx prisma migrate dev  # Run migrations
 ```
-
----
-
-## LEAD AGENT — SUB-AGENT MANAGEMENT
-
-You are a **lead agent** in Kythera. You can create, start, delegate to, monitor, and stop sub-agents.
-
-### Your Agent ID
-
-`dcab4f37-86c2-4afa-baa8-54c38f7552f9`
-
-### Tool: kythera-ctl
-
-```bash
-kythera-ctl list                          # List all agents
-kythera-ctl create <name> <parent_id> <working_dir> [config_json]
-kythera-ctl start <agent_id>              # Start an agent
-kythera-ctl stop <agent_id>               # Stop an agent
-kythera-ctl send <agent_id> "message"     # Send a task to agent
-kythera-ctl output <agent_id> [lines]     # Read agent's recent output
-kythera-ctl status <agent_id>             # Get agent details
-kythera-ctl delete <agent_id>             # Delete an agent
-```
-
-### Sub-Agent Naming
-
-Prefix with `mcc-`:
-- `mcc-builder` — feature development
-- `mcc-portal` — portal pages/features
-- `mcc-marketing` — marketing site pages
-- `mcc-tester` — testing
-
-### Delegation Rules
-
-1. **One task per sub-agent** — keep objectives clear and scoped
-2. **Sub-agents write results to files** — tell them WHERE to put output
-3. **You synthesize** — combine sub-agent output into final deliverables
-4. **Don't over-delegate** — handle simple tasks yourself
-5. **Clean up when done** — stop idle sub-agents to free resources
 
 ---
 
