@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { WorkOrderForm } from "@/components/portal/WorkOrderForm";
+import { WorkOrderForm } from "@/components/portal/work-order-form";
 
 export default async function NewWorkOrderPage() {
   const [customers, employees] = await Promise.all([

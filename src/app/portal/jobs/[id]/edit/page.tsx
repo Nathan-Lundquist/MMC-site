@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import {
   WorkOrderForm,
   WorkOrderInitialData,
-} from "@/components/portal/WorkOrderForm";
+} from "@/components/portal/work-order-form";
 
 function fmtDate(d: Date | null): string {
   if (!d) return "";

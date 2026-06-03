@@ -1,20 +1,27 @@
 /**
- * Format a number as USD currency string.
+ * Format a number (or Prisma Decimal) as USD currency string.
+ * Returns "—" for null/undefined/NaN.
  */
-export function formatCurrency(value: number): string {
+export function formatCurrency(value: number | { toNumber?: () => number } | null | undefined): string {
+  if (value === null || value === undefined) return "—";
+  const num = typeof value === "number" ? value : Number(value);
+  if (isNaN(num)) return "—";
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
-  }).format(value);
+    minimumFractionDigits: 2,
+  }).format(num);
 }
 
 /**
- * Format a date string or Date object as a short locale date (MM/DD/YYYY).
+ * Format a date string or Date object as a short locale date.
+ * Returns "—" for null/undefined.
  */
-export function formatDate(date: Date | string): string {
+export function formatDate(date: Date | string | null | undefined): string {
+  if (!date) return "—";
   return new Date(date).toLocaleDateString("en-US", {
-    month: "2-digit",
-    day: "2-digit",
+    month: "short",
+    day: "numeric",
     year: "numeric",
   });
 }

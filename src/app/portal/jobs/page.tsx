@@ -5,29 +5,12 @@ import { Card } from "@/components/ui/card";
 import { Plus, ClipboardList, Pencil, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Prisma } from "@prisma/client";
+import { formatCurrency, formatDate } from "@/lib/format";
+import { StatusBadge } from "@/components/portal/StatusBadge";
+import { PageNumbersLink as PageNumbers, PaginationLink } from "@/components/portal/PageNumbers";
 import JobsToolbar from "./JobsToolbar";
 
 const PAGE_SIZE = 25;
-
-function formatCurrency(value: Prisma.Decimal | number | null | undefined): string {
-  if (value === null || value === undefined) return "—";
-  const num = typeof value === "number" ? value : Number(value);
-  if (isNaN(num)) return "—";
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-  }).format(num);
-}
-
-function formatDate(date: Date | null | undefined): string {
-  if (!date) return "—";
-  return new Date(date).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
 
 export default async function WorkOrdersPage({
   searchParams,
@@ -310,28 +293,6 @@ export default async function WorkOrdersPage({
 
 // ── Sub-components ──────────────────────────────────────────
 
-function StatusBadge({ status }: { status: string }) {
-  const colors: Record<string, string> = {
-    DRAFT: "bg-secondary text-secondary-foreground",
-    IN_PROGRESS: "bg-blue-100 text-blue-800",
-    COMPLETED: "bg-green-100 text-green-800",
-    INVOICED: "bg-brand/10 text-brand",
-    PAID: "bg-emerald-100 text-emerald-800",
-    CANCELLED: "bg-destructive/10 text-destructive",
-  };
-
-  return (
-    <span
-      className={cn(
-        "inline-flex px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap",
-        colors[status] || colors.DRAFT
-      )}
-    >
-      {status.replace(/_/g, " ")}
-    </span>
-  );
-}
-
 function ProfitCell({
   profit,
   profitPct,
@@ -358,90 +319,3 @@ function ProfitCell({
   );
 }
 
-function PaginationLink({
-  href,
-  disabled,
-  label,
-  children,
-}: {
-  href: string;
-  disabled: boolean;
-  label: string;
-  children: React.ReactNode;
-}) {
-  if (disabled) {
-    return (
-      <span
-        className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-muted-foreground/40 cursor-not-allowed"
-        aria-label={label}
-      >
-        {children}
-      </span>
-    );
-  }
-
-  return (
-    <Link
-      href={href}
-      className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
-      aria-label={label}
-    >
-      {children}
-    </Link>
-  );
-}
-
-function PageNumbers({
-  currentPage,
-  totalPages,
-  pageUrl,
-}: {
-  currentPage: number;
-  totalPages: number;
-  pageUrl: (page: number) => string;
-}) {
-  // Show up to 5 page numbers centered around current page
-  const pages: (number | "ellipsis")[] = [];
-
-  if (totalPages <= 7) {
-    for (let i = 1; i <= totalPages; i++) pages.push(i);
-  } else {
-    pages.push(1);
-    if (currentPage > 3) pages.push("ellipsis");
-
-    const start = Math.max(2, currentPage - 1);
-    const end = Math.min(totalPages - 1, currentPage + 1);
-    for (let i = start; i <= end; i++) pages.push(i);
-
-    if (currentPage < totalPages - 2) pages.push("ellipsis");
-    pages.push(totalPages);
-  }
-
-  return (
-    <div className="flex items-center gap-1">
-      {pages.map((p, idx) =>
-        p === "ellipsis" ? (
-          <span
-            key={`ellipsis-${idx}`}
-            className="inline-flex items-center justify-center w-8 h-8 text-muted-foreground text-xs"
-          >
-            ...
-          </span>
-        ) : (
-          <Link
-            key={p}
-            href={pageUrl(p)}
-            className={cn(
-              "inline-flex items-center justify-center w-8 h-8 rounded-lg text-sm transition-colors",
-              p === currentPage
-                ? "bg-brand text-brand-foreground font-medium"
-                : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-            )}
-          >
-            {p}
-          </Link>
-        )
-      )}
-    </div>
-  );
-}

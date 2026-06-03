@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { Prisma } from "@prisma/client";
+import { StatusBadge } from "@/components/portal/StatusBadge";
 
 /* ─────────────────────────────────────────────────────────
    Types for raw query results
@@ -539,7 +540,7 @@ export default async function CostingPage({
                       {fmt(j.amount_owed)}
                     </td>
                     <td className="py-2 text-right">
-                      <StatusBadge status={j.status} />
+                      <StatusBadge status={j.status} size="xs" />
                     </td>
                   </tr>
                 ))}
@@ -696,20 +697,3 @@ function JobTable({ jobs }: { jobs: TopJobRow[] }) {
   );
 }
 
-function StatusBadge({ status }: { status: string }) {
-  const colors: Record<string, string> = {
-    DRAFT: "bg-secondary text-secondary-foreground",
-    IN_PROGRESS: "bg-blue-100 text-blue-800",
-    COMPLETED: "bg-green-100 text-green-800",
-    INVOICED: "bg-brand/10 text-brand",
-    PAID: "bg-green-100 text-green-800",
-    CANCELLED: "bg-destructive/10 text-destructive",
-  };
-  return (
-    <span
-      className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium ${colors[status] || colors.DRAFT}`}
-    >
-      {status.replace("_", " ")}
-    </span>
-  );
-}

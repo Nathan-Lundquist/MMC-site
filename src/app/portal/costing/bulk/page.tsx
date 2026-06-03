@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { PageNumbersButton as PageNumbers, PaginationButton } from "@/components/portal/PageNumbers";
 import {
   ChevronLeft,
   ChevronRight,
@@ -877,86 +878,3 @@ function CellInput({
   );
 }
 
-/* ─────────────────────────────────────────────────────────
-   Pagination sub-components
-   ───────────────────────────────────────────────────────── */
-
-function PaginationButton({
-  onClick,
-  disabled,
-  label,
-  children,
-}: {
-  onClick: () => void;
-  disabled: boolean;
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      aria-label={label}
-      className={cn(
-        "inline-flex items-center justify-center w-8 h-8 rounded-lg transition-colors",
-        disabled
-          ? "text-muted-foreground/40 cursor-not-allowed"
-          : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-      )}
-    >
-      {children}
-    </button>
-  );
-}
-
-function PageNumbers({
-  currentPage,
-  totalPages,
-  onPageChange,
-}: {
-  currentPage: number;
-  totalPages: number;
-  onPageChange: (page: number) => void;
-}) {
-  const pages: (number | "ellipsis")[] = [];
-
-  if (totalPages <= 7) {
-    for (let i = 1; i <= totalPages; i++) pages.push(i);
-  } else {
-    pages.push(1);
-    if (currentPage > 3) pages.push("ellipsis");
-    const start = Math.max(2, currentPage - 1);
-    const end = Math.min(totalPages - 1, currentPage + 1);
-    for (let i = start; i <= end; i++) pages.push(i);
-    if (currentPage < totalPages - 2) pages.push("ellipsis");
-    pages.push(totalPages);
-  }
-
-  return (
-    <div className="flex items-center gap-1">
-      {pages.map((p, idx) =>
-        p === "ellipsis" ? (
-          <span
-            key={`ellipsis-${idx}`}
-            className="inline-flex items-center justify-center w-8 h-8 text-muted-foreground text-xs"
-          >
-            ...
-          </span>
-        ) : (
-          <button
-            key={p}
-            onClick={() => onPageChange(p)}
-            className={cn(
-              "inline-flex items-center justify-center w-8 h-8 rounded-lg text-sm transition-colors",
-              p === currentPage
-                ? "bg-brand text-brand-foreground font-medium"
-                : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-            )}
-          >
-            {p}
-          </button>
-        )
-      )}
-    </div>
-  );
-}
