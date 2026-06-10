@@ -15,6 +15,7 @@ import {
   Table,
   Settings,
   Shield,
+  Upload,
   LogOut,
   Menu,
   X,
@@ -57,6 +58,7 @@ const NAV_SECTIONS: NavSection[] = [
     adminOnly: true,
     items: [
       { href: "/portal/employees", label: "All Employees", icon: UserCog },
+      { href: "/portal/upload", label: "Upload Data", icon: Upload },
       { href: "/portal/admin", label: "Current Admin", icon: Shield },
       { href: "/portal/settings", label: "Settings", icon: Settings },
     ],

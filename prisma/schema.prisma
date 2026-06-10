@@ -309,6 +309,75 @@ model OutsourcedMaterial {
   @@map("outsourced_materials")
 }
 
+// ── Snow Storm Events ───────────────────────────────────────
+
+model SnowStorm {
+  id              String   @id @default(cuid())
+  description     String
+  eventStart      DateTime @map("event_start")
+  eventEnd        DateTime @map("event_end")
+  masterTimeOnSite Decimal @default(0) @db.Decimal(8, 2) @map("master_time_on_site")
+  fuelCost        Decimal  @default(0) @db.Decimal(10, 2) @map("fuel_cost")
+  laborCost       Decimal  @default(0) @db.Decimal(10, 2) @map("labor_cost")
+  subCost         Decimal  @default(0) @db.Decimal(10, 2) @map("sub_cost")
+  indirectCost    Decimal  @default(0) @db.Decimal(10, 2) @map("indirect_cost")
+  directCost      Decimal  @default(0) @db.Decimal(10, 2) @map("direct_cost")
+  totalCost       Decimal  @default(0) @db.Decimal(10, 2) @map("total_cost")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  siteServices SnowSiteService[]
+
+  @@map("snow_storms")
+}
+
+// ── Snow Site Services (per-site per-storm detail) ──────────
+
+model SnowSiteService {
+  id               String    @id @default(cuid())
+  stormId          String?   @map("storm_id")
+  storm            SnowStorm? @relation(fields: [stormId], references: [id], onDelete: Cascade)
+  siteName         String    @map("site_name")
+  startTime        DateTime  @map("start_time")
+  endTime          DateTime  @map("end_time")
+  servicesPerformed String   @map("services_performed")
+
+  // Materials used
+  bulkSaltYards    Decimal   @default(0) @db.Decimal(8, 2) @map("bulk_salt_yards")
+  iceMelterBags    Decimal   @default(0) @db.Decimal(8, 2) @map("ice_melter_bags")
+  calciumChlorideBags Decimal @default(0) @db.Decimal(8, 2) @map("calcium_chloride_bags")
+
+  // Worker info
+  workerName       String?   @map("worker_name")
+  addedUser        String?   @map("added_user")
+
+  // Counts
+  plowCount        Int       @default(0) @map("plow_count")
+  saltLotCount     Int       @default(0) @map("salt_lot_count")
+  shovelCount      Int       @default(0) @map("shovel_count")
+  saltWalkCount    Int       @default(0) @map("salt_walk_count")
+
+  // Additional work
+  additionalWorkRequested Boolean @default(false) @map("addl_work_requested")
+  additionalWorkDesc      String? @map("addl_work_desc")
+
+  // Costs
+  totalDirect      Decimal   @default(0) @db.Decimal(10, 2) @map("total_direct")
+  totalIndirect    Decimal   @default(0) @db.Decimal(10, 2) @map("total_indirect")
+  employeeCost     Decimal   @default(0) @db.Decimal(10, 2) @map("employee_cost")
+  subCost          Decimal   @default(0) @db.Decimal(10, 2) @map("sub_cost")
+  siteNotes        String?   @map("site_notes")
+
+  // Material costs
+  bulkSaltCost     Decimal   @default(0) @db.Decimal(10, 2) @map("bulk_salt_cost")
+  calciumCost      Decimal   @default(0) @db.Decimal(10, 2) @map("calcium_cost")
+  fuelCost         Decimal   @default(0) @db.Decimal(10, 2) @map("fuel_cost")
+  iceMelterCost    Decimal   @default(0) @db.Decimal(10, 2) @map("ice_melter_cost")
+
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  @@map("snow_site_services")
+}
+
 // ── Approved / Additional Work ────────────────────────────
 
 model AdditionalWork {

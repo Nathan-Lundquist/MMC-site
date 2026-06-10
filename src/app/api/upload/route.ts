@@ -22,9 +22,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    if (!file.name.endsWith(".zip")) {
+    const ext = path.extname(file.name).toLowerCase();
+    if (![".zip", ".xlsx", ".xls", ".csv"].includes(ext)) {
       return NextResponse.json(
-        { error: "Only .zip files are accepted" },
+        { error: "Only .zip, .xlsx, .xls, and .csv files are accepted" },
         { status: 400 }
       );
     }
@@ -40,53 +41,76 @@ export async function POST(req: NextRequest) {
     // Ensure upload dir exists
     await fs.mkdir(UPLOAD_DIR, { recursive: true });
 
-    // Save the zip file
     const buffer = Buffer.from(await file.arrayBuffer());
     const timestamp = Date.now();
-    const zipPath = path.join(UPLOAD_DIR, `${timestamp}_${file.name}`);
-    await fs.writeFile(zipPath, buffer);
-
-    // Extract and parse Excel files
-    const zip = new AdmZip(buffer);
-    const entries = zip.getEntries();
 
     const results: {
       fileName: string;
       sheets: { name: string; headers: string[]; rowCount: number; sampleRows: Record<string, unknown>[] }[];
     }[] = [];
 
-    const extractDir = path.join(UPLOAD_DIR, `${timestamp}_extracted`);
-    await fs.mkdir(extractDir, { recursive: true });
+    if (ext === ".zip") {
+      // Save the zip file
+      const zipPath = path.join(UPLOAD_DIR, `${timestamp}_${file.name}`);
+      await fs.writeFile(zipPath, buffer);
 
-    for (const entry of entries) {
-      const name = entry.entryName;
+      // Extract and parse Excel files
+      const zip = new AdmZip(buffer);
+      const entries = zip.getEntries();
 
-      // Skip directories, hidden files, macOS resource forks
-      if (
-        entry.isDirectory ||
-        name.startsWith("__MACOSX") ||
-        name.startsWith(".")
-      ) {
-        continue;
+      const extractDir = path.join(UPLOAD_DIR, `${timestamp}_extracted`);
+      await fs.mkdir(extractDir, { recursive: true });
+
+      for (const entry of entries) {
+        const name = entry.entryName;
+
+        // Skip directories, hidden files, macOS resource forks
+        if (
+          entry.isDirectory ||
+          name.startsWith("__MACOSX") ||
+          name.startsWith(".")
+        ) {
+          continue;
+        }
+
+        const entryExt = path.extname(name).toLowerCase();
+        if (![".xlsx", ".xls", ".csv"].includes(entryExt)) continue;
+
+        const entryBuffer = entry.getData();
+
+        // Zip slip protection: resolve and verify path stays within extractDir
+        const safeName = path.basename(name);
+        const targetPath = path.resolve(extractDir, safeName);
+        if (!targetPath.startsWith(path.resolve(extractDir))) {
+          console.warn(`Skipping zip entry with suspicious path: ${name}`);
+          continue;
+        }
+
+        await fs.writeFile(targetPath, entryBuffer);
+
+        // Parse with xlsx
+        const workbook = XLSX.read(entryBuffer, { type: "buffer" });
+        const sheets = workbook.SheetNames.map((sheetName) => {
+          const sheet = workbook.Sheets[sheetName];
+          const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet);
+          const headers = json.length > 0 ? Object.keys(json[0]) : [];
+          const sampleRows = json.slice(0, 5);
+          return {
+            name: sheetName,
+            headers,
+            rowCount: json.length,
+            sampleRows,
+          };
+        });
+
+        results.push({ fileName: path.basename(name), sheets });
       }
+    } else {
+      // Direct file upload (xlsx, xls, csv)
+      const filePath = path.join(UPLOAD_DIR, `${timestamp}_${file.name}`);
+      await fs.writeFile(filePath, buffer);
 
-      const ext = path.extname(name).toLowerCase();
-      if (![".xlsx", ".xls", ".csv"].includes(ext)) continue;
-
-      const entryBuffer = entry.getData();
-
-      // Zip slip protection: resolve and verify path stays within extractDir
-      const safeName = path.basename(name);
-      const targetPath = path.resolve(extractDir, safeName);
-      if (!targetPath.startsWith(path.resolve(extractDir))) {
-        console.warn(`Skipping zip entry with suspicious path: ${name}`);
-        continue;
-      }
-
-      await fs.writeFile(targetPath, entryBuffer);
-
-      // Parse with xlsx
-      const workbook = XLSX.read(entryBuffer, { type: "buffer" });
+      const workbook = XLSX.read(buffer, { type: "buffer" });
       const sheets = workbook.SheetNames.map((sheetName) => {
         const sheet = workbook.Sheets[sheetName];
         const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet);
@@ -100,12 +124,12 @@ export async function POST(req: NextRequest) {
         };
       });
 
-      results.push({ fileName: path.basename(name), sheets });
+      results.push({ fileName: file.name, sheets });
     }
 
     return NextResponse.json({
       message: "Upload successful",
-      zipFile: file.name,
+      uploadedFile: file.name,
       filesFound: results.length,
       files: results,
     });
