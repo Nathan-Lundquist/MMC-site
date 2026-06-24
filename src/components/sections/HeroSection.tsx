@@ -133,7 +133,7 @@ export default function HeroSection() {
               >
                 <Image
                   src="/images/site/fire-pit.jpg"
-                  alt="Fire pit patio with Adirondack chairs"
+                  alt="Custom paver fire pit with seating wall"
                   fill
                   className="object-cover"
                   sizes="20vw"

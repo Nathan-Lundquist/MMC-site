@@ -86,6 +86,7 @@ export default function Home() {
       <TestimonialPreview />
       <ServiceArea />
       <CTABanner
+        variant="inline"
         heading="Your Dream Landscape Starts Here"
         subtitle="Schedule your free consultation with Mike's Clean Cut Landscaping today."
         primaryLabel="Request a Quote"

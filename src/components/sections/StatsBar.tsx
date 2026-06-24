@@ -58,7 +58,7 @@ function AnimatedNumber({ target, suffix }: { target: number; suffix: string }) 
 
 export default function StatsBar() {
   return (
-    <section className="py-24 lg:py-32 relative overflow-hidden">
+    <section className="py-16 lg:py-20 relative overflow-hidden">
       <div className="mx-auto max-w-7xl px-6">
         <motion.div
           initial="hidden"

@@ -86,7 +86,7 @@ export default function Careers() {
                 </p>
               </div>
               <div className="relative aspect-[4/3] rounded-2xl overflow-hidden">
-                <Image src="/images/site/outdoor-kitchen-2.jpg" alt="Team building an outdoor kitchen" fill className="object-cover" sizes="(max-width: 1024px) 100vw, 50vw" />
+                <Image src="/images/site/outdoor-kitchen-2.jpg" alt="Custom paver patio with pergola by MCC crew" fill className="object-cover" sizes="(max-width: 1024px) 100vw, 50vw" />
               </div>
             </div>
           </AnimateOnScroll>

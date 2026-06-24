@@ -22,7 +22,7 @@ export default function ServiceGrid() {
   const displayServices = servicesData.filter(s => featured.includes(s.slug));
 
   return (
-    <section className="py-24 lg:py-36 bg-secondary relative overflow-hidden">
+    <section className="py-20 lg:py-28 bg-secondary relative overflow-hidden">
       <div className="absolute top-0 left-0 right-0 divider-organic" />
 
       <div className="mx-auto max-w-7xl px-6">
@@ -54,16 +54,31 @@ export default function ServiceGrid() {
               <StaggerItem key={service.slug}>
                 <Link
                   href={`/services/${service.slug}`}
-                  className="group block bg-card rounded-2xl p-8 lg:p-10 h-full border border-border card-hover relative overflow-hidden"
+                  className="group block bg-card rounded-2xl h-full border border-border card-hover relative overflow-hidden"
                 >
-                  <div className="relative">
-                    <div className="flex items-start justify-between mb-8">
-                      <div className="w-14 h-14 rounded-2xl bg-brand/8 flex items-center justify-center group-hover:bg-brand transition-all duration-500">
-                        <Icon size={24} className="text-brand group-hover:text-white transition-colors duration-500" strokeWidth={1.5} />
-                      </div>
-                      <ArrowUpRight size={18} className="text-border group-hover:text-brand group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-300 mt-1" />
+                  {/* Image */}
+                  <div className="relative aspect-[16/10] overflow-hidden">
+                    <Image
+                      src={service.homeImage}
+                      alt={service.shortTitle}
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                    <div className="absolute top-4 right-4">
+                      <ArrowUpRight size={18} className="text-white/60 group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-300" />
                     </div>
-                    <h3 className="font-display text-xl text-foreground mb-3">{service.shortTitle}</h3>
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-7 lg:p-8">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-9 h-9 rounded-lg bg-brand/8 flex items-center justify-center group-hover:bg-brand transition-all duration-500">
+                        <Icon size={17} className="text-brand group-hover:text-white transition-colors duration-500" strokeWidth={1.5} />
+                      </div>
+                      <h3 className="font-display text-lg text-foreground">{service.shortTitle}</h3>
+                    </div>
                     <p className="text-sm text-muted-foreground leading-relaxed">{service.homeDescription}</p>
                   </div>
                 </Link>

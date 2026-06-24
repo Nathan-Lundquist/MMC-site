@@ -10,7 +10,7 @@ export default function TestimonialPreview() {
   const featured = testimonials.slice(0, 3);
 
   return (
-    <section className="py-24 lg:py-36 relative overflow-hidden">
+    <section className="py-20 lg:py-28 relative overflow-hidden">
       <div className="mx-auto max-w-7xl px-6">
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-16 lg:mb-20">
           <AnimateOnScroll>

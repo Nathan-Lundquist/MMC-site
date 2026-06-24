@@ -29,7 +29,7 @@ const items = [
 
 export default function WhyChooseUs() {
   return (
-    <section className="py-24 lg:py-36 overflow-hidden relative">
+    <section className="py-20 lg:py-32 overflow-hidden relative">
       <div className="mx-auto max-w-7xl px-6">
         {/* Header */}
         <AnimateOnScroll className="mb-20">

@@ -14,7 +14,7 @@ const areas = [
 
 export default function ServiceArea() {
   return (
-    <section className="py-24 lg:py-36 bg-secondary relative overflow-hidden">
+    <section className="py-20 lg:py-28 bg-secondary relative overflow-hidden">
       <div className="absolute top-0 left-0 right-0 divider-organic" />
 
       <div className="mx-auto max-w-7xl px-6">

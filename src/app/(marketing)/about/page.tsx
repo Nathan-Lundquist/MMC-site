@@ -38,7 +38,7 @@ export default function About() {
           <AnimateOnScroll>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
               <div className="relative aspect-[3/4] rounded-2xl overflow-hidden">
-                <Image src="/images/site/outdoor-kitchen.jpg" alt="Custom outdoor kitchen by Mike's Clean Cut Landscaping" fill className="object-cover" sizes="(max-width: 1024px) 100vw, 50vw" />
+                <Image src="/images/site/outdoor-kitchen.jpg" alt="Stone outdoor kitchen built by Mike's Clean Cut Landscaping" fill className="object-cover" sizes="(max-width: 1024px) 100vw, 50vw" />
               </div>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground mb-4 flex items-center gap-3">

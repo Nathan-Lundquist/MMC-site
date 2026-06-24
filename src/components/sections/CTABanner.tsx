@@ -14,6 +14,7 @@ interface CTABannerProps {
   primaryTo?: string;
   secondaryLabel?: string;
   secondaryHref?: string;
+  variant?: 'default' | 'inline';
 }
 
 export default function CTABanner({
@@ -23,7 +24,49 @@ export default function CTABanner({
   primaryTo = '/quote',
   secondaryLabel = 'Call Us Now',
   secondaryHref = companyInfo.phoneHref,
+  variant = 'default',
 }: CTABannerProps) {
+  if (variant === 'inline') {
+    return (
+      <section className="py-16 lg:py-20 border-t border-border">
+        <div className="mx-auto max-w-7xl px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-60px' }}
+            transition={{ duration: 0.9, ease: [0.33, 1, 0.68, 1] }}
+            className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8"
+          >
+            <div>
+              <h2 className="font-display text-2xl lg:text-3xl text-foreground mb-2">
+                {heading}
+              </h2>
+              <p className="text-muted-foreground text-[15px]">
+                {subtitle}
+              </p>
+            </div>
+            <div className="flex gap-3 flex-wrap flex-shrink-0">
+              <Button asChild size="lg">
+                <Link href={primaryTo}>
+                  {primaryLabel}
+                  <ArrowRight size={16} />
+                </Link>
+              </Button>
+              {secondaryHref && (
+                <Button asChild variant="outline" size="lg">
+                  <a href={secondaryHref}>
+                    <Phone size={16} />
+                    {secondaryLabel}
+                  </a>
+                </Button>
+              )}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-8 lg:py-12">
       <div className="mx-auto max-w-7xl px-6">
