@@ -156,6 +156,7 @@ model WorkOrder {
   materials           Material[]
   outsourcedMaterials OutsourcedMaterial[]
   additionalWork      AdditionalWork[]
+  crewWorkLogs        CrewWorkLog[]
 
   @@map("work_orders")
 }
@@ -403,6 +404,49 @@ model SnowSiteService {
   createdAt        DateTime  @default(now()) @map("created_at")
 
   @@map("snow_site_services")
+}
+
+// ── Landscape Materials (settings-managed fixed list) ──────
+
+model LandscapeMaterial {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  unit      String   @default("")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  logMaterials CrewWorkLogMaterial[]
+
+  @@map("landscape_materials")
+}
+
+// ── Crew Work Logs (field entries linked to work orders) ────
+
+model CrewWorkLog {
+  id          String    @id @default(cuid())
+  workOrderId String    @map("wo_id")
+  workOrder   WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  workType    String    @map("work_type")
+  startTime   DateTime  @map("start_time")
+  endTime     DateTime  @map("end_time")
+  crewMembers Json      @map("crew_members")
+  notes       String?
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  materials CrewWorkLogMaterial[]
+
+  @@map("crew_work_logs")
+}
+
+model CrewWorkLogMaterial {
+  id         String             @id @default(cuid())
+  logId      String             @map("log_id")
+  log        CrewWorkLog        @relation(fields: [logId], references: [id], onDelete: Cascade)
+  materialId String             @map("material_id")
+  material   LandscapeMaterial  @relation(fields: [materialId], references: [id])
+  quantity   Decimal            @db.Decimal(10, 2)
+
+  @@map("crew_work_log_materials")
 }
 
 // ── Approved / Additional Work ────────────────────────────

@@ -164,3 +164,34 @@ export const snowStormSchema = z.object({
   eventStart: z.string().min(1, "Event start is required"),
   eventEnd: z.string().min(1, "Event end is required"),
 });
+
+// --- Landscape crew form schemas ---
+
+export const crewWorkLogSchema = z.object({
+  workOrderId: z.string().min(1, "Work order is required"),
+  workType: z.string().min(1, "Work type is required"),
+  startTime: z.string().min(1, "Start time is required"),
+  endTime: z.string().min(1, "End time is required"),
+  crewMembers: z.array(z.string()).min(1, "At least one crew member required"),
+  materials: z
+    .array(
+      z.object({
+        materialId: z.string().min(1),
+        quantity: z.number().min(0),
+      })
+    )
+    .optional()
+    .default([]),
+  notes: z.string().optional().default(""),
+});
+
+export const landscapeMaterialSchema = z.object({
+  name: z.string().min(1, "Material name is required").max(200),
+  unit: z.string().max(50).optional().default(""),
+});
+
+export const landscapeMaterialUpdateSchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  unit: z.string().max(50).optional(),
+  active: z.boolean().optional(),
+});
