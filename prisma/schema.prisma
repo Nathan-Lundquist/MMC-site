@@ -20,6 +20,7 @@ enum Role {
 model Employee {
   id           String   @id @default(cuid())
   email        String   @unique
+  username     String?  @unique
   name         String
   role         Role     @default(CREW)
   passwordHash String   @map("password_hash")
@@ -307,6 +308,32 @@ model OutsourcedMaterial {
   taxIncluded Boolean   @default(false) @map("tax_included")
 
   @@map("outsourced_materials")
+}
+
+// ── Snow Sites (fixed site list) ────────────────────────────
+
+model SnowSite {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("snow_sites")
+}
+
+// ── Snow Rates (material/labor rate config) ─────────────────
+
+model SnowRate {
+  id                 String   @id @default(cuid())
+  bulkSaltPerYard    Decimal  @default(0) @db.Decimal(10, 2) @map("bulk_salt_per_yard")
+  iceMelterPerBag    Decimal  @default(0) @db.Decimal(10, 2) @map("ice_melter_per_bag")
+  calciumPerBag      Decimal  @default(0) @db.Decimal(10, 2) @map("calcium_per_bag")
+  employeePerHour    Decimal  @default(0) @db.Decimal(10, 2) @map("employee_per_hour")
+  fuelPerHour        Decimal  @default(0) @db.Decimal(10, 2) @map("fuel_per_hour")
+  indirectMultiplier Decimal  @default(0) @db.Decimal(5, 4) @map("indirect_multiplier")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  @@map("snow_rates")
 }
 
 // ── Snow Storm Events ───────────────────────────────────────
