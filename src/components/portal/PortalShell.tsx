@@ -19,6 +19,7 @@ import {
   CloudSnow,
   ClipboardPlus,
   PenLine,
+  Trees,
   LogOut,
   Menu,
   X,
@@ -38,6 +39,7 @@ interface NavItem {
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   adminOnly?: boolean;
+  exact?: boolean;
 }
 
 interface NavSection {
@@ -55,6 +57,7 @@ const NAV_SECTIONS: NavSection[] = [
   {
     heading: "Landscaping",
     items: [
+      { href: "/portal/landscape", label: "Active Jobs", icon: Trees, exact: true },
       { href: "/portal/landscape/log", label: "Log Work", icon: PenLine },
       { href: "/portal/jobs", label: "Jobs", icon: ClipboardList },
       { href: "/portal/materials", label: "Materials", icon: Package },
@@ -159,8 +162,8 @@ export function PortalShell({
                   {section.items.map((item) => {
                     if (item.adminOnly && !["ADMIN", "MANAGER"].includes(user.role)) return null;
                     const active =
-                      item.href === "/portal"
-                        ? pathname === "/portal"
+                      item.href === "/portal" || item.exact
+                        ? pathname === item.href
                         : pathname === item.href || pathname.startsWith(item.href + "/");
                     return (
                       <Link

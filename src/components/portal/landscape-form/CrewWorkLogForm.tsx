@@ -41,18 +41,20 @@ export function CrewWorkLogForm({
   materials,
   employees,
   currentUser,
+  defaultWorkOrderId,
 }: {
   workOrders: WorkOrderOption[];
   materials: MaterialOption[];
   employees: Employee[];
   currentUser: string;
+  defaultWorkOrderId?: string;
 }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
   // Work order
-  const [workOrderId, setWorkOrderId] = useState("");
+  const [workOrderId, setWorkOrderId] = useState(defaultWorkOrderId || "");
 
   // Work type
   const [workType, setWorkType] = useState("");

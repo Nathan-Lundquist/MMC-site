@@ -1,19 +1,13 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { CrewWorkLogForm } from "@/components/portal/landscape-form";
+import { ActiveWorkOrders } from "@/components/portal/landscape-form";
 
-export default async function LandscapeLogPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ wo?: string }>;
-}) {
+export default async function LandscapePage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
 
-  const { wo } = await searchParams;
-
-  const [workOrders, materials, employees] = await Promise.all([
+  const [workOrders, customers] = await Promise.all([
     prisma.workOrder.findMany({
       where: { status: { in: ["DRAFT", "IN_PROGRESS"] } },
       orderBy: { createdAt: "desc" },
@@ -21,14 +15,15 @@ export default async function LandscapeLogPage({
         id: true,
         workOrderNumber: true,
         jobType: true,
+        jobCategory: true,
+        status: true,
+        notes: true,
+        projectStartDate: true,
         customer: { select: { name: true } },
+        _count: { select: { crewWorkLogs: true } },
       },
     }),
-    prisma.landscapeMaterial.findMany({
-      where: { active: true },
-      orderBy: { name: "asc" },
-    }),
-    prisma.employee.findMany({
+    prisma.customer.findMany({
       where: { active: true },
       orderBy: { name: "asc" },
       select: { id: true, name: true },
@@ -38,23 +33,19 @@ export default async function LandscapeLogPage({
   return (
     <div className="max-w-lg mx-auto pb-24 sm:pb-6">
       <h1 className="font-display text-xl font-bold text-foreground mb-4">
-        Log Work
+        Landscape Work
       </h1>
-      <CrewWorkLogForm
+      <ActiveWorkOrders
         workOrders={workOrders.map((wo) => ({
           id: wo.id,
           workOrderNumber: wo.workOrderNumber,
           jobType: wo.jobType,
+          status: wo.status,
           customerName: wo.customer.name,
+          startDate: wo.projectStartDate?.toISOString() || null,
+          logCount: wo._count.crewWorkLogs,
         }))}
-        materials={materials.map((m) => ({
-          id: m.id,
-          name: m.name,
-          unit: m.unit,
-        }))}
-        employees={employees}
-        currentUser={session.user.name || ""}
-        defaultWorkOrderId={wo}
+        customers={customers}
       />
     </div>
   );
