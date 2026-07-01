@@ -33,7 +33,7 @@ export default function CTABanner({
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-60px' }}
+            viewport={{ once: true, margin: '80px' }}
             transition={{ duration: 0.9, ease: [0.33, 1, 0.68, 1] }}
             className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8"
           >
@@ -73,7 +73,7 @@ export default function CTABanner({
         <motion.div
           initial={{ opacity: 0, y: 20, scale: 0.98 }}
           whileInView={{ opacity: 1, y: 0, scale: 1 }}
-          viewport={{ once: true, margin: '-60px' }}
+          viewport={{ once: true, margin: '80px' }}
           transition={{ duration: 0.9, ease: [0.33, 1, 0.68, 1] }}
           className="relative bg-foreground rounded-3xl overflow-hidden"
         >
