@@ -18,6 +18,7 @@ import {
   Upload,
   CloudSnow,
   ClipboardPlus,
+  PenLine,
   LogOut,
   Menu,
   X,
@@ -54,12 +55,14 @@ const NAV_SECTIONS: NavSection[] = [
   {
     heading: "Landscaping",
     items: [
+      { href: "/portal/landscape/log", label: "Log Work", icon: PenLine },
       { href: "/portal/jobs", label: "Jobs", icon: ClipboardList },
       { href: "/portal/materials", label: "Materials", icon: Package },
       { href: "/portal/customers", label: "All Customers", icon: Users },
       { href: "/portal/breakdown", label: "Breakdown", icon: BarChart3 },
       { href: "/portal/costing", label: "Job Costing", icon: DollarSign },
       { href: "/portal/costing/bulk", label: "Bulk Costing", icon: Table },
+      { href: "/portal/landscape/settings", label: "Landscape Settings", icon: Settings, adminOnly: true },
     ],
   },
   {
