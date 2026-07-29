@@ -120,3 +120,78 @@ export const workOrderBodySchema = z.object({
 });
 
 export type WorkOrderBody = z.infer<typeof workOrderBodySchema>;
+
+// --- Snow schemas ---
+
+export const snowSiteSchema = z.object({
+  name: z.string().min(1, "Site name is required").max(200),
+});
+
+export const snowSiteUpdateSchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  active: z.boolean().optional(),
+});
+
+export const snowRateSchema = z.object({
+  bulkSaltPerYard: z.number().min(0),
+  iceMelterPerBag: z.number().min(0),
+  calciumPerBag: z.number().min(0),
+  employeePerHour: z.number().min(0),
+  fuelPerHour: z.number().min(0),
+  indirectMultiplier: z.number().min(0),
+});
+
+export const snowSiteServiceSchema = z.object({
+  siteId: z.string().min(1, "Site is required"),
+  startTime: z.string().min(1, "Start time is required"),
+  endTime: z.string().min(1, "End time is required"),
+  servicesPerformed: z.string().optional().default(""),
+  plowCount: z.number().int().min(0).optional().default(0),
+  saltLotCount: z.number().int().min(0).optional().default(0),
+  shovelCount: z.number().int().min(0).optional().default(0),
+  saltWalkCount: z.number().int().min(0).optional().default(0),
+  bulkSaltYards: z.number().min(0).optional().default(0),
+  iceMelterBags: z.number().min(0).optional().default(0),
+  calciumChlorideBags: z.number().min(0).optional().default(0),
+  crewMembers: z.array(z.string()).min(1, "At least one crew member required"),
+  additionalWorkRequested: z.boolean().optional().default(false),
+  additionalWorkDesc: z.string().optional().default(""),
+  siteNotes: z.string().optional().default(""),
+});
+
+export const snowStormSchema = z.object({
+  description: z.string().min(1, "Description is required"),
+  eventStart: z.string().min(1, "Event start is required"),
+  eventEnd: z.string().min(1, "Event end is required"),
+});
+
+// --- Landscape crew form schemas ---
+
+export const crewWorkLogSchema = z.object({
+  workOrderId: z.string().min(1, "Work order is required"),
+  workType: z.string().min(1, "Work type is required"),
+  startTime: z.string().min(1, "Start time is required"),
+  endTime: z.string().min(1, "End time is required"),
+  crewMembers: z.array(z.string()).min(1, "At least one crew member required"),
+  materials: z
+    .array(
+      z.object({
+        materialId: z.string().min(1),
+        quantity: z.number().min(0),
+      })
+    )
+    .optional()
+    .default([]),
+  notes: z.string().optional().default(""),
+});
+
+export const landscapeMaterialSchema = z.object({
+  name: z.string().min(1, "Material name is required").max(200),
+  unit: z.string().max(50).optional().default(""),
+});
+
+export const landscapeMaterialUpdateSchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  unit: z.string().max(50).optional(),
+  active: z.boolean().optional(),
+});

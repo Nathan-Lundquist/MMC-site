@@ -16,6 +16,10 @@ import {
   Settings,
   Shield,
   Upload,
+  CloudSnow,
+  ClipboardPlus,
+  PenLine,
+  Trees,
   LogOut,
   Menu,
   X,
@@ -30,9 +34,17 @@ interface PortalUser {
   role: string;
 }
 
+interface NavItem {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  adminOnly?: boolean;
+  exact?: boolean;
+}
+
 interface NavSection {
   heading?: string;
-  items: { href: string; label: string; icon: React.ComponentType<{ className?: string }> }[];
+  items: NavItem[];
   adminOnly?: boolean;
 }
 
@@ -45,12 +57,23 @@ const NAV_SECTIONS: NavSection[] = [
   {
     heading: "Landscaping",
     items: [
+      { href: "/portal/landscape", label: "Active Jobs", icon: Trees, exact: true },
+      { href: "/portal/landscape/log", label: "Log Work", icon: PenLine },
       { href: "/portal/jobs", label: "Jobs", icon: ClipboardList },
       { href: "/portal/materials", label: "Materials", icon: Package },
       { href: "/portal/customers", label: "All Customers", icon: Users },
       { href: "/portal/breakdown", label: "Breakdown", icon: BarChart3 },
       { href: "/portal/costing", label: "Job Costing", icon: DollarSign },
       { href: "/portal/costing/bulk", label: "Bulk Costing", icon: Table },
+      { href: "/portal/landscape/settings", label: "Landscape Settings", icon: Settings, adminOnly: true },
+    ],
+  },
+  {
+    heading: "Snow Removal",
+    items: [
+      { href: "/portal/snow", label: "Storms", icon: CloudSnow },
+      { href: "/portal/snow/log", label: "Log Visit", icon: ClipboardPlus },
+      { href: "/portal/snow/settings", label: "Snow Settings", icon: Settings, adminOnly: true },
     ],
   },
   {
@@ -137,10 +160,11 @@ export function PortalShell({
                 )}
                 <div className="space-y-0.5">
                   {section.items.map((item) => {
+                    if (item.adminOnly && !["ADMIN", "MANAGER"].includes(user.role)) return null;
                     const active =
-                      item.href === "/portal"
-                        ? pathname === "/portal"
-                        : pathname.startsWith(item.href);
+                      item.href === "/portal" || item.exact
+                        ? pathname === item.href
+                        : pathname === item.href || pathname.startsWith(item.href + "/");
                     return (
                       <Link
                         key={item.href}

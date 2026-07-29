@@ -9,28 +9,30 @@ async function main() {
 
   const admin = await prisma.employee.upsert({
     where: { email: "admin@mikescleancut.com" },
-    update: {},
+    update: { username: "admin" },
     create: {
       email: "admin@mikescleancut.com",
+      username: "admin",
       name: "Mike Admin",
       role: "ADMIN",
       passwordHash,
     },
   });
-  console.log("Created admin:", admin.email);
+  console.log("Created admin:", admin.username);
 
   const foremanHash = await bcrypt.hash("foreman123", 12);
   const foreman = await prisma.employee.upsert({
     where: { email: "foreman@mikescleancut.com" },
-    update: {},
+    update: { username: "dave" },
     create: {
       email: "foreman@mikescleancut.com",
+      username: "dave",
       name: "Dave Foreman",
       role: "FOREMAN",
       passwordHash: foremanHash,
     },
   });
-  console.log("Created foreman:", foreman.email);
+  console.log("Created foreman:", foreman.username);
 
   const customer = await prisma.customer.upsert({
     where: { id: "sample-customer-1" },

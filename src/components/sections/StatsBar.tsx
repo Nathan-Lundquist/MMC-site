@@ -63,7 +63,7 @@ export default function StatsBar() {
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: '-80px' }}
+          viewport={{ once: true, margin: '80px' }}
           variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.12 } } }}
           className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12"
         >

@@ -38,7 +38,7 @@ export default function AnimateOnScroll({
       className={className}
       initial={v.hidden}
       whileInView={v.visible}
-      viewport={{ once: true, margin: '-60px' }}
+      viewport={{ once: true, margin: '80px' }}
       transition={{ duration: 0.9, delay, ease: ease }}
     >
       {children}
@@ -52,7 +52,7 @@ export function StaggerContainer({ children, className }: { children: ReactNode;
       className={className}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, margin: '-60px' }}
+      viewport={{ once: true, margin: '80px' }}
       variants={{
         hidden: {},
         visible: { transition: { staggerChildren: 0.12, delayChildren: 0.05 } },
@@ -128,7 +128,7 @@ export function RevealOnScroll({
       className={className}
       initial={{ clipPath: clip.hidden, opacity: 0 }}
       whileInView={{ clipPath: clip.visible, opacity: 1 }}
-      viewport={{ once: true, margin: '-60px' }}
+      viewport={{ once: true, margin: '80px' }}
       transition={{ duration: 1.1, ease: ease }}
     >
       {children}
