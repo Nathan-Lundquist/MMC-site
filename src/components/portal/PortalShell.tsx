@@ -23,6 +23,8 @@ import {
   LogOut,
   Menu,
   X,
+  Timer,
+  CalendarClock,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -74,6 +76,13 @@ const NAV_SECTIONS: NavSection[] = [
       { href: "/portal/snow", label: "Storms", icon: CloudSnow },
       { href: "/portal/snow/log", label: "Log Visit", icon: ClipboardPlus },
       { href: "/portal/snow/settings", label: "Snow Settings", icon: Settings, adminOnly: true },
+    ],
+  },
+  {
+    heading: "Time",
+    items: [
+      { href: "/portal/time", label: "My Clock", icon: Timer, exact: true },
+      { href: "/portal/time/log", label: "Time Log", icon: CalendarClock, adminOnly: true },
     ],
   },
   {

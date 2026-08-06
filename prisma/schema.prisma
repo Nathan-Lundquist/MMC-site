@@ -31,6 +31,7 @@ model Employee {
   foremanOf             WorkOrder[]                @relation("Foreman")
   crewDetails           CrewDetail[]
   additionalCrewDetails AdditionalWorkCrewDetail[]
+  punchRecords          PunchRecord[]
 
   @@map("employees")
 }
@@ -157,6 +158,7 @@ model WorkOrder {
   outsourcedMaterials OutsourcedMaterial[]
   additionalWork      AdditionalWork[]
   crewWorkLogs        CrewWorkLog[]
+  punchRecords        PunchRecord[]
 
   @@map("work_orders")
 }
@@ -494,4 +496,40 @@ model AdditionalWorkMaterial {
   perUnitCost      Decimal?       @db.Decimal(10, 2) @map("per_unit_cost")
 
   @@map("additional_work_materials")
+}
+
+// ── Punch In / Punch Out ──────────────────────────────────
+
+enum ExtraType {
+  DELIVERY
+  SETUP
+  UNLOAD
+  OTHER
+}
+
+model PunchRecord {
+  id          String       @id @default(cuid())
+  employeeId  String       @map("employee_id")
+  employee    Employee     @relation(fields: [employeeId], references: [id])
+  workOrderId String?      @map("wo_id")
+  workOrder   WorkOrder?   @relation(fields: [workOrderId], references: [id])
+  punchIn     DateTime     @map("punch_in")
+  punchOut    DateTime?    @map("punch_out")
+  notes       String?
+  extras      PunchExtra[]
+  createdAt   DateTime     @default(now()) @map("created_at")
+
+  @@map("punch_records")
+}
+
+model PunchExtra {
+  id            String      @id @default(cuid())
+  punchRecordId String      @map("punch_record_id")
+  punchRecord   PunchRecord @relation(fields: [punchRecordId], references: [id], onDelete: Cascade)
+  type          ExtraType
+  hours         Decimal     @db.Decimal(5, 2)
+  notes         String?
+  createdAt     DateTime    @default(now()) @map("created_at")
+
+  @@map("punch_extras")
 }
