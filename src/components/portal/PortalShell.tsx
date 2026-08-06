@@ -25,6 +25,7 @@ import {
   X,
   Timer,
   CalendarClock,
+  Tractor,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -83,6 +84,13 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: "/portal/time", label: "My Clock", icon: Timer, exact: true },
       { href: "/portal/time/log", label: "Time Log", icon: CalendarClock, adminOnly: true },
+    ],
+  },
+  {
+    heading: "Fleet",
+    adminOnly: true,
+    items: [
+      { href: "/portal/machines", label: "Maintenance", icon: Tractor },
     ],
   },
   {
