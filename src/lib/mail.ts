@@ -10,6 +10,7 @@ interface SendMailOptions {
   replyTo?: string;
 }
 
+
 async function getAccessToken(): Promise<string> {
   const tokenUrl = `https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/token`;
 

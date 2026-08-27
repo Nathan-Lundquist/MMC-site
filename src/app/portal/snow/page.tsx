@@ -9,9 +9,9 @@ import { Decimal } from "@prisma/client/runtime/library";
 // A storm in Nov/Dec belongs to that year's season start; Jan–Oct belongs to prev year
 function seasonKey(date: Date): string {
   const y = date.getUTCFullYear();
-  const m = date.getUTCMonth(); // 0-indexed; Oct=9, Nov=10
+  const m = date.getUTCMonth();
   const start = m >= 10 ? y : y - 1;
-  return `${start}–${String(start + 1).slice(2)}`;
+  return `${start}-${String(start + 1).slice(2)}`;
 }
 
 function dec(n: Decimal | null) {
