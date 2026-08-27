@@ -9,6 +9,7 @@ import { Decimal } from "@prisma/client/runtime/library";
 import { PageNumbersLink } from "@/components/portal/PageNumbers";
 
 const VISITS_PER_PAGE = 50;
+const JOBS_PER_PAGE = 25;
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -45,19 +46,19 @@ export default async function ReportDetailPage({
   searchParams,
 }: {
   params: Promise<{ tab: string; key: string }>;
-  searchParams: Promise<{ spage?: string }>;
+  searchParams: Promise<{ spage?: string; lpage?: string }>;
 }) {
   const session = await auth();
   if (!session?.user) redirect("/login");
 
   const { tab, key } = await params;
-  const { spage } = await searchParams;
+  const { spage, lpage } = await searchParams;
 
   if (tab === "snow") return <SnowSeasonDetail season={key} spage={spage} />;
   if (["spring", "summer", "fall"].includes(tab)) {
     const year = parseInt(key);
     if (isNaN(year)) notFound();
-    return <LandscapeDetail tab={tab} year={year} />;
+    return <LandscapeDetail tab={tab} year={year} lpage={lpage} />;
   }
   notFound();
 }
@@ -374,84 +375,101 @@ async function SnowSeasonDetail({ season, spage }: { season: string; spage?: str
 
 // ── Landscape Season Detail ────────────────────────────────────────────────
 
-async function LandscapeDetail({ tab, year }: { tab: string; year: number }) {
+async function LandscapeDetail({ tab, year, lpage }: { tab: string; year: number; lpage?: string }) {
   const { months, labels } = SEASON_MONTHS[tab];
+  const seasonStart = new Date(Date.UTC(year, months[0], 1));
+  const seasonEnd   = new Date(Date.UTC(year, months[months.length - 1] + 1, 1));
+  const where = { projectStartDate: { gte: seasonStart, lt: seasonEnd } } as const;
 
-  const jobs = await prisma.workOrder.findMany({
-    where: { projectStartDate: { not: null } },
-    select: {
-      projectStartDate: true,
-      invoiceAmount: true,
-      profit: true,
-      jobCategory: true,
-      totalManHours: true,
-      customer: { select: { name: true } },
-    },
-  });
+  const page = Math.max(1, parseInt(lpage ?? "1"));
 
-  const seasonal = jobs.filter((j) => {
-    if (!j.projectStartDate) return false;
-    const y = j.projectStartDate.getUTCFullYear();
-    const m = j.projectStartDate.getUTCMonth();
-    return y === year && months.includes(m);
-  });
+  // Per-month date ranges
+  const [m0Range, m1Range, m2Range] = months.map((m) => ({
+    gte: new Date(Date.UTC(year, m, 1)),
+    lt:  new Date(Date.UTC(year, m + 1, 1)),
+  }));
 
-  if (seasonal.length === 0) notFound();
-
-  // Totals
-  const totals = seasonal.reduce(
-    (acc, j) => ({
-      jobs: acc.jobs + 1,
-      revenue: acc.revenue + n(j.invoiceAmount),
-      profit: acc.profit + n(j.profit),
-      hours: acc.hours + n(j.totalManHours),
+  const [aggregate, catGroups, custGroups, jobs, totalJobs, m0, m1, m2] = await Promise.all([
+    prisma.workOrder.aggregate({
+      where,
+      _sum: { invoiceAmount: true, profit: true, totalManHours: true },
+      _count: { id: true },
     }),
-    { jobs: 0, revenue: 0, profit: 0, hours: 0 }
-  );
+    prisma.workOrder.groupBy({
+      by: ["jobCategory"],
+      where,
+      _count: { id: true },
+      _sum: { invoiceAmount: true, profit: true },
+      orderBy: { _sum: { invoiceAmount: "desc" } },
+    }),
+    prisma.workOrder.groupBy({
+      by: ["customerId"],
+      where,
+      _count: { id: true },
+      _sum: { invoiceAmount: true },
+      orderBy: { _sum: { invoiceAmount: "desc" } },
+      take: 10,
+    }),
+    prisma.workOrder.findMany({
+      where,
+      select: {
+        workOrderNumber: true,
+        jobType: true,
+        jobCategory: true,
+        projectStartDate: true,
+        invoiceAmount: true,
+        profit: true,
+        customer: { select: { name: true } },
+      },
+      orderBy: { projectStartDate: "asc" },
+      skip: (page - 1) * JOBS_PER_PAGE,
+      take: JOBS_PER_PAGE,
+    }),
+    prisma.workOrder.count({ where }),
+    prisma.workOrder.aggregate({ where: { projectStartDate: m0Range }, _sum: { invoiceAmount: true, profit: true }, _count: { id: true } }),
+    prisma.workOrder.aggregate({ where: { projectStartDate: m1Range }, _sum: { invoiceAmount: true, profit: true }, _count: { id: true } }),
+    prisma.workOrder.aggregate({ where: { projectStartDate: m2Range }, _sum: { invoiceAmount: true, profit: true }, _count: { id: true } }),
+  ]);
 
-  // By category
-  type CatRow = { jobs: number; revenue: number; profit: number };
-  const catMap = new Map<string, CatRow>();
-  for (const j of seasonal) {
-    const k = j.jobCategory;
-    const row = catMap.get(k) ?? { jobs: 0, revenue: 0, profit: 0 };
-    row.jobs++;
-    row.revenue += n(j.invoiceAmount);
-    row.profit += n(j.profit);
-    catMap.set(k, row);
-  }
-  const categories = [...catMap.entries()]
-    .map(([cat, data]) => ({ cat, ...data }))
-    .sort((a, b) => b.revenue - a.revenue);
-  const maxCatRevenue = Math.max(...categories.map((c) => c.revenue));
+  if (totalJobs === 0) notFound();
 
-  // By month
-  const monthBreakdown = months.map((m, i) => {
-    const mJobs = seasonal.filter((j) => j.projectStartDate!.getUTCMonth() === m);
-    return {
-      label: labels[i],
-      jobs: mJobs.length,
-      revenue: mJobs.reduce((s, j) => s + n(j.invoiceAmount), 0),
-      profit: mJobs.reduce((s, j) => s + n(j.profit), 0),
-    };
+  // Resolve customer names for top 10
+  const customerNames = await prisma.customer.findMany({
+    where: { id: { in: custGroups.map((g) => g.customerId) } },
+    select: { id: true, name: true },
   });
-  const maxMonthRevenue = Math.max(...monthBreakdown.map((m) => m.revenue));
+  const customerNameMap = new Map(customerNames.map((c) => [c.id, c.name]));
 
-  // Top customers
-  type CustRow = { jobs: number; revenue: number };
-  const custMap = new Map<string, CustRow>();
-  for (const j of seasonal) {
-    const name = j.customer.name;
-    const row = custMap.get(name) ?? { jobs: 0, revenue: 0 };
-    row.jobs++;
-    row.revenue += n(j.invoiceAmount);
-    custMap.set(name, row);
-  }
-  const topCustomers = [...custMap.entries()]
-    .map(([name, data]) => ({ name, ...data }))
-    .sort((a, b) => b.revenue - a.revenue)
-    .slice(0, 10);
+  const totals = {
+    jobs: aggregate._count.id,
+    revenue: n(aggregate._sum.invoiceAmount),
+    profit: n(aggregate._sum.profit),
+    hours: n(aggregate._sum.totalManHours),
+  };
 
+  const categories = catGroups.map((g) => ({
+    cat: g.jobCategory as string,
+    jobs: g._count.id,
+    revenue: n(g._sum.invoiceAmount),
+    profit: n(g._sum.profit),
+  }));
+  const maxCatRevenue = Math.max(...categories.map((c) => c.revenue), 0);
+
+  const monthBreakdown = [m0, m1, m2].map((m, i) => ({
+    label: labels[i],
+    jobs: m._count.id,
+    revenue: n(m._sum.invoiceAmount),
+    profit: n(m._sum.profit),
+  }));
+  const maxMonthRevenue = Math.max(...monthBreakdown.map((m) => m.revenue), 0);
+
+  const topCustomers = custGroups.map((g) => ({
+    name: customerNameMap.get(g.customerId) ?? g.customerId,
+    jobs: g._count.id,
+    revenue: n(g._sum.invoiceAmount),
+  }));
+
+  const totalPages = Math.ceil(totalJobs / JOBS_PER_PAGE);
   const seasonLabel = SEASON_LABEL[tab];
 
   return (
@@ -487,7 +505,7 @@ async function LandscapeDetail({ tab, year }: { tab: string; year: number }) {
         {/* Month Breakdown */}
         <Section title="Month Breakdown">
           <div className="space-y-3">
-            {monthBreakdown.map((m, i) => (
+            {monthBreakdown.map((m) => (
               <HBar
                 key={m.label}
                 label={m.label}
@@ -600,6 +618,56 @@ async function LandscapeDetail({ tab, year }: { tab: string; year: number }) {
           </div>
         </Section>
       )}
+
+      {/* All Jobs — paginated */}
+      <Section title={`All Jobs (${totalJobs.toLocaleString()})`}>
+        <div className="overflow-x-auto -mx-4 sm:mx-0">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border text-left">
+                <th className="pb-2 pr-3 font-medium text-muted-foreground whitespace-nowrap">Date</th>
+                <th className="pb-2 pr-3 font-medium text-muted-foreground">Customer</th>
+                <th className="pb-2 pr-3 font-medium text-muted-foreground hidden sm:table-cell">Type</th>
+                <th className="pb-2 pr-3 font-medium text-muted-foreground hidden md:table-cell">Category</th>
+                <th className="pb-2 pr-3 font-medium text-muted-foreground text-right hidden sm:table-cell">Profit</th>
+                <th className="pb-2 font-medium text-muted-foreground text-right">Revenue</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/50">
+              {jobs.map((j, i) => (
+                <tr key={i} className="hover:bg-secondary/20 transition-colors">
+                  <td className="py-1.5 pr-3 text-muted-foreground whitespace-nowrap text-xs">
+                    {j.projectStartDate
+                      ? j.projectStartDate.toLocaleDateString("en-US", { timeZone: "UTC", month: "short", day: "numeric" })
+                      : "—"}
+                  </td>
+                  <td className="py-1.5 pr-3 font-medium text-foreground text-xs">{j.customer.name}</td>
+                  <td className="py-1.5 pr-3 text-muted-foreground text-xs hidden sm:table-cell max-w-[160px] truncate">{j.jobType}</td>
+                  <td className="py-1.5 pr-3 text-muted-foreground text-xs hidden md:table-cell">{catLabel(j.jobCategory)}</td>
+                  <td className="py-1.5 pr-3 text-right tabular-nums text-xs hidden sm:table-cell">
+                    {j.profit ? formatCurrency(j.profit) : "—"}
+                  </td>
+                  <td className="py-1.5 text-right tabular-nums text-xs font-medium">
+                    {j.invoiceAmount ? formatCurrency(j.invoiceAmount) : "—"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between pt-3 border-t border-border mt-2">
+            <p className="text-xs text-muted-foreground">
+              Showing {((page - 1) * JOBS_PER_PAGE) + 1}–{Math.min(page * JOBS_PER_PAGE, totalJobs)} of {totalJobs.toLocaleString()}
+            </p>
+            <PageNumbersLink
+              currentPage={page}
+              totalPages={totalPages}
+              pageUrl={(p) => `/portal/reports/${tab}/${year}?lpage=${p}`}
+            />
+          </div>
+        )}
+      </Section>
     </div>
   );
 }
