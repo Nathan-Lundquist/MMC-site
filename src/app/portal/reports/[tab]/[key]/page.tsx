@@ -6,6 +6,9 @@ import { Card } from "@/components/ui/card";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { ArrowLeft, Download } from "lucide-react";
 import { Decimal } from "@prisma/client/runtime/library";
+import { PageNumbersLink } from "@/components/portal/PageNumbers";
+
+const VISITS_PER_PAGE = 50;
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -39,15 +42,18 @@ const BAR_COLORS = [
 
 export default async function ReportDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ tab: string; key: string }>;
+  searchParams: Promise<{ spage?: string }>;
 }) {
   const session = await auth();
   if (!session?.user) redirect("/login");
 
   const { tab, key } = await params;
+  const { spage } = await searchParams;
 
-  if (tab === "snow") return <SnowSeasonDetail season={key} />;
+  if (tab === "snow") return <SnowSeasonDetail season={key} spage={spage} />;
   if (["spring", "summer", "fall"].includes(tab)) {
     const year = parseInt(key);
     if (isNaN(year)) notFound();
@@ -58,27 +64,55 @@ export default async function ReportDetailPage({
 
 // ── Snow Season Detail ─────────────────────────────────────────────────────
 
-async function SnowSeasonDetail({ season }: { season: string }) {
-  // Parse "2025-26" → startYear=2025
+async function SnowSeasonDetail({ season, spage }: { season: string; spage?: string }) {
   const startYear = parseInt(season.split("-")[0]);
   if (isNaN(startYear)) notFound();
 
-  const allStorms = await prisma.snowStorm.findMany({
-    orderBy: { eventStart: "asc" },
-    include: { _count: { select: { siteServices: true } } },
-  });
+  const seasonStart = new Date(Date.UTC(startYear, 10, 1));
+  const seasonEnd   = new Date(Date.UTC(startYear + 2, 0, 1));
+  const seasonWhere = { storm: { eventStart: { gte: seasonStart, lt: seasonEnd } } } as const;
 
-  // Filter to this season
-  const storms = allStorms.filter((s) => {
-    const y = s.eventStart.getUTCFullYear();
-    const m = s.eventStart.getUTCMonth();
-    return m >= 10 ? y === startYear : y === startYear + 1;
-  });
+  const page = Math.max(1, parseInt(spage ?? "1"));
 
-  if (storms.length === 0) notFound();
+  // All queries in parallel
+  const [allStorms, siteGroups, visits, totalVisits] = await Promise.all([
+    prisma.snowStorm.findMany({
+      where: { eventStart: { gte: seasonStart, lt: seasonEnd } },
+      orderBy: { eventStart: "asc" },
+      include: { _count: { select: { siteServices: true } } },
+    }),
+    // Cost by site — DB-aggregated, no JS loop over thousands of rows
+    prisma.snowSiteService.groupBy({
+      by: ["siteName"],
+      where: seasonWhere,
+      _count: { id: true },
+      _sum: {
+        employeeCost: true, subCost: true, fuelCost: true,
+        bulkSaltCost: true, iceMelterCost: true, calciumCost: true,
+        totalDirect: true, totalIndirect: true,
+      },
+      orderBy: { _sum: { totalDirect: "desc" } },
+    }),
+    // Paginated site visits
+    prisma.snowSiteService.findMany({
+      where: seasonWhere,
+      select: {
+        siteName: true, startTime: true, servicesPerformed: true, workerName: true,
+        employeeCost: true, subCost: true, fuelCost: true,
+        totalDirect: true, totalIndirect: true,
+        storm: { select: { eventStart: true } },
+      },
+      orderBy: [{ storm: { eventStart: "asc" } }, { startTime: "asc" }],
+      skip: (page - 1) * VISITS_PER_PAGE,
+      take: VISITS_PER_PAGE,
+    }),
+    prisma.snowSiteService.count({ where: seasonWhere }),
+  ]);
 
-  // Aggregate totals
-  const totals = storms.reduce(
+  if (allStorms.length === 0) notFound();
+
+  // Storm-level aggregates (small list — fine in JS)
+  const totals = allStorms.reduce(
     (acc, s) => ({
       storms: acc.storms + 1,
       sites: acc.sites + s._count.siteServices,
@@ -92,22 +126,19 @@ async function SnowSeasonDetail({ season }: { season: string }) {
     { storms: 0, sites: 0, totalCost: 0, labor: 0, sub: 0, fuel: 0, direct: 0, indirect: 0 }
   );
 
-  // Cost by month
-  const byMonth = new Map<string, { label: string; totalCost: number; storms: number }>();
   const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  for (const s of storms) {
+  const byMonth = new Map<string, { label: string; totalCost: number; storms: number }>();
+  for (const s of allStorms) {
     const m = s.eventStart.getUTCMonth();
     const y = s.eventStart.getUTCFullYear();
     const k = `${y}-${String(m).padStart(2, "0")}`;
     const existing = byMonth.get(k) ?? { label: `${monthNames[m]} ${y}`, totalCost: 0, storms: 0 };
-    existing.totalCost += n(s.totalCost);
-    existing.storms++;
+    existing.totalCost += n(s.totalCost); existing.storms++;
     byMonth.set(k, existing);
   }
   const monthData = [...byMonth.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([, v]) => v);
   const maxMonthCost = Math.max(...monthData.map((m) => m.totalCost));
 
-  // Cost breakdown (labor vs sub vs fuel)
   const costTypes = [
     { label: "Labor", value: totals.labor },
     { label: "Subcontractors", value: totals.sub },
@@ -116,50 +147,20 @@ async function SnowSeasonDetail({ season }: { season: string }) {
   ].filter((c) => c.value > 0);
   const maxCostType = Math.max(...costTypes.map((c) => c.value));
 
-  // All site services for this season (for cost-by-site and visits table)
-  const seasonStart = new Date(Date.UTC(startYear, 10, 1));
-  const seasonEnd   = new Date(Date.UTC(startYear + 2, 0, 1));
-
-  const siteServices = await prisma.snowSiteService.findMany({
-    where: { storm: { eventStart: { gte: seasonStart, lt: seasonEnd } } },
-    select: {
-      siteName: true, startTime: true, endTime: true,
-      servicesPerformed: true, workerName: true,
-      plowCount: true, saltLotCount: true, shovelCount: true, saltWalkCount: true,
-      employeeCost: true, subCost: true, fuelCost: true,
-      bulkSaltCost: true, iceMelterCost: true, calciumCost: true,
-      bulkSaltYards: true, iceMelterBags: true, calciumChlorideBags: true,
-      totalDirect: true, totalIndirect: true, siteNotes: true,
-      storm: { select: { eventStart: true, description: true } },
-    },
-    orderBy: [{ storm: { eventStart: "asc" } }, { startTime: "asc" }],
-  });
-
-  // Aggregate by site
-  type SiteTotals = {
-    visits: number; labor: number; sub: number; fuel: number;
-    bulkSalt: number; iceMelter: number; calcium: number;
-    direct: number; indirect: number;
-  };
-  const siteMap = new Map<string, SiteTotals>();
-  for (const svc of siteServices) {
-    const row = siteMap.get(svc.siteName) ?? {
-      visits: 0, labor: 0, sub: 0, fuel: 0, bulkSalt: 0, iceMelter: 0, calcium: 0, direct: 0, indirect: 0,
-    };
-    row.visits++;
-    row.labor    += n(svc.employeeCost);
-    row.sub      += n(svc.subCost);
-    row.fuel     += n(svc.fuelCost);
-    row.bulkSalt += n(svc.bulkSaltCost);
-    row.iceMelter += n(svc.iceMelterCost);
-    row.calcium  += n(svc.calciumCost);
-    row.direct   += n(svc.totalDirect);
-    row.indirect += n(svc.totalIndirect);
-    siteMap.set(svc.siteName, row);
-  }
-  const siteCosts = [...siteMap.entries()]
-    .map(([name, d]) => ({ name, ...d, total: d.direct + d.indirect }))
-    .sort((a, b) => b.total - a.total);
+  // Cost-by-site from groupBy results
+  const siteCosts = siteGroups.map((g) => ({
+    name: g.siteName,
+    visits: g._count.id,
+    labor:    n(g._sum.employeeCost),
+    sub:      n(g._sum.subCost),
+    fuel:     n(g._sum.fuelCost),
+    bulkSalt: n(g._sum.bulkSaltCost),
+    iceMelter:n(g._sum.iceMelterCost),
+    calcium:  n(g._sum.calciumCost),
+    direct:   n(g._sum.totalDirect),
+    indirect: n(g._sum.totalIndirect),
+    total:    n(g._sum.totalDirect) + n(g._sum.totalIndirect),
+  }));
 
   const siteGrand = siteCosts.reduce(
     (acc, s) => ({
@@ -172,6 +173,9 @@ async function SnowSeasonDetail({ season }: { season: string }) {
     }),
     { visits: 0, labor: 0, sub: 0, fuel: 0, bulkSalt: 0, iceMelter: 0, calcium: 0, direct: 0, indirect: 0, total: 0 }
   );
+
+  const totalPages = Math.ceil(totalVisits / VISITS_PER_PAGE);
+  const storms = allStorms;
 
   return (
     <div className="space-y-6">
@@ -315,12 +319,12 @@ async function SnowSeasonDetail({ season }: { season: string }) {
         </Section>
       )}
 
-      {/* All Site Visits */}
-      {siteServices.length > 0 && (
-        <Section title={`All Site Visits (${siteServices.length.toLocaleString()})`}>
-          <div className="overflow-x-auto -mx-4 sm:mx-0 max-h-[600px] overflow-y-auto">
+      {/* All Site Visits — paginated */}
+      {totalVisits > 0 && (
+        <Section title={`All Site Visits (${totalVisits.toLocaleString()})`}>
+          <div className="overflow-x-auto -mx-4 sm:mx-0">
             <table className="w-full text-sm">
-              <thead className="sticky top-0 bg-card z-10">
+              <thead>
                 <tr className="border-b border-border text-left">
                   <th className="pb-2 pr-3 font-medium text-muted-foreground whitespace-nowrap">Date</th>
                   <th className="pb-2 pr-3 font-medium text-muted-foreground min-w-[140px]">Site</th>
@@ -333,7 +337,7 @@ async function SnowSeasonDetail({ season }: { season: string }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/50">
-                {siteServices.map((svc, i) => (
+                {visits.map((svc, i) => (
                   <tr key={i} className="hover:bg-secondary/20 transition-colors">
                     <td className="py-1.5 pr-3 text-muted-foreground whitespace-nowrap text-xs">
                       {svc.startTime.toLocaleDateString("en-US", { timeZone: "UTC", month: "short", day: "numeric" })}
@@ -350,6 +354,18 @@ async function SnowSeasonDetail({ season }: { season: string }) {
               </tbody>
             </table>
           </div>
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between pt-3 border-t border-border mt-2">
+              <p className="text-xs text-muted-foreground">
+                Showing {((page - 1) * VISITS_PER_PAGE) + 1}–{Math.min(page * VISITS_PER_PAGE, totalVisits)} of {totalVisits.toLocaleString()}
+              </p>
+              <PageNumbersLink
+                currentPage={page}
+                totalPages={totalPages}
+                pageUrl={(p) => `/portal/reports/snow/${season}?spage=${p}`}
+              />
+            </div>
+          )}
         </Section>
       )}
     </div>
