@@ -26,6 +26,7 @@ import {
   Timer,
   CalendarClock,
   Tractor,
+  FileBarChart,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -55,6 +56,7 @@ const NAV_SECTIONS: NavSection[] = [
   {
     items: [
       { href: "/portal", label: "Dashboard", icon: LayoutDashboard },
+      { href: "/portal/reports", label: "Reports", icon: FileBarChart },
     ],
   },
   {
