@@ -392,14 +392,22 @@ async function LandscapeDetail({ tab, year, lpage }: { tab: string; year: number
   const [aggregate, catGroups, custGroups, jobs, totalJobs, m0, m1, m2] = await Promise.all([
     prisma.workOrder.aggregate({
       where,
-      _sum: { invoiceAmount: true, profit: true, totalManHours: true },
+      _sum: {
+        invoiceAmount: true, profit: true, totalManHours: true,
+        estHours: true, estCrewTotal: true,
+        actualHours: true, crewTotal: true,
+      },
       _count: { id: true },
     }),
     prisma.workOrder.groupBy({
       by: ["jobCategory"],
       where,
       _count: { id: true },
-      _sum: { invoiceAmount: true, profit: true },
+      _sum: {
+        invoiceAmount: true, profit: true, totalManHours: true,
+        estHours: true, estCrewTotal: true,
+        actualHours: true, crewTotal: true,
+      },
       orderBy: { _sum: { invoiceAmount: "desc" } },
     }),
     prisma.workOrder.groupBy({
@@ -452,8 +460,19 @@ async function LandscapeDetail({ tab, year, lpage }: { tab: string; year: number
     jobs: g._count.id,
     revenue: n(g._sum.invoiceAmount),
     profit: n(g._sum.profit),
+    estHours: n(g._sum.estHours),
+    actualHours: n(g._sum.actualHours),
+    estCrew: n(g._sum.estCrewTotal),
+    actualCrew: n(g._sum.crewTotal),
   }));
   const maxCatRevenue = Math.max(...categories.map((c) => c.revenue), 0);
+
+  // Est vs Actual
+  const estHoursTotal = n(aggregate._sum.estHours);
+  const actualHoursTotal = n(aggregate._sum.actualHours);
+  const estCrewTotal = n(aggregate._sum.estCrewTotal);
+  const actualCrewTotal = n(aggregate._sum.crewTotal);
+  const hasEstData = estHoursTotal > 0 || estCrewTotal > 0;
 
   const monthBreakdown = [m0, m1, m2].map((m, i) => ({
     label: labels[i],
@@ -593,6 +612,121 @@ async function LandscapeDetail({ tab, year, lpage }: { tab: string; year: number
         </div>
       </Section>
 
+      {/* Est vs Actual */}
+      {hasEstData && (
+        <Section title="Estimate vs Actual">
+          {/* Summary comparison cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+            {estHoursTotal > 0 && (
+              <>
+                <CompareCard label="Est Hours" value={`${estHoursTotal.toFixed(0)}h`} />
+                <CompareCard label="Actual Hours" value={`${actualHoursTotal.toFixed(0)}h`} />
+                <CompareCard
+                  label="Hours Variance"
+                  value={`${actualHoursTotal > estHoursTotal ? "+" : ""}${(actualHoursTotal - estHoursTotal).toFixed(0)}h`}
+                  over={actualHoursTotal > estHoursTotal}
+                  under={actualHoursTotal < estHoursTotal}
+                />
+              </>
+            )}
+            {estCrewTotal > 0 && (
+              <>
+                <CompareCard label="Est Crew Cost" value={formatCurrency(estCrewTotal)} />
+                <CompareCard label="Actual Crew Cost" value={formatCurrency(actualCrewTotal)} />
+                <CompareCard
+                  label="Crew Variance"
+                  value={`${actualCrewTotal > estCrewTotal ? "+" : ""}${formatCurrency(actualCrewTotal - estCrewTotal)}`}
+                  over={actualCrewTotal > estCrewTotal}
+                  under={actualCrewTotal < estCrewTotal}
+                />
+              </>
+            )}
+          </div>
+
+          {/* Comparison bar charts */}
+          <div className="space-y-5">
+            {estHoursTotal > 0 && (
+              <div className="space-y-3">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Hours</p>
+                <CompareBar label="Estimated" value={estHoursTotal} display={`${estHoursTotal.toFixed(0)}h`} max={Math.max(estHoursTotal, actualHoursTotal)} color="bg-secondary-foreground/20" />
+                <CompareBar label="Actual" value={actualHoursTotal} display={`${actualHoursTotal.toFixed(0)}h`} max={Math.max(estHoursTotal, actualHoursTotal)} color={actualHoursTotal > estHoursTotal ? "bg-rose-500" : "bg-green-500"} />
+              </div>
+            )}
+            {estCrewTotal > 0 && (
+              <div className="space-y-3">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Crew Cost</p>
+                <CompareBar label="Estimated" value={estCrewTotal} display={formatCurrency(estCrewTotal)} max={Math.max(estCrewTotal, actualCrewTotal)} color="bg-secondary-foreground/20" />
+                <CompareBar label="Actual" value={actualCrewTotal} display={formatCurrency(actualCrewTotal)} max={Math.max(estCrewTotal, actualCrewTotal)} color={actualCrewTotal > estCrewTotal ? "bg-rose-500" : "bg-green-500"} />
+              </div>
+            )}
+          </div>
+
+          {/* Per-category comparison table */}
+          {categories.some((c) => c.estHours > 0 || c.estCrew > 0) && (
+            <div className="mt-5 border-t border-border pt-4 overflow-x-auto -mx-4 sm:mx-0">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border text-left">
+                    <th className="pb-2 pr-3 font-medium text-muted-foreground">Category</th>
+                    {categories.some((c) => c.estHours > 0) && (
+                      <>
+                        <th className="pb-2 pr-3 font-medium text-muted-foreground text-right whitespace-nowrap">Est Hrs</th>
+                        <th className="pb-2 pr-3 font-medium text-muted-foreground text-right whitespace-nowrap">Act Hrs</th>
+                        <th className="pb-2 pr-3 font-medium text-muted-foreground text-right whitespace-nowrap">Var</th>
+                      </>
+                    )}
+                    {categories.some((c) => c.estCrew > 0) && (
+                      <>
+                        <th className="pb-2 pr-3 font-medium text-muted-foreground text-right whitespace-nowrap hidden sm:table-cell">Est Crew</th>
+                        <th className="pb-2 pr-3 font-medium text-muted-foreground text-right whitespace-nowrap hidden sm:table-cell">Act Crew</th>
+                        <th className="pb-2 font-medium text-muted-foreground text-right whitespace-nowrap hidden sm:table-cell">Var</th>
+                      </>
+                    )}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/50">
+                  {categories.filter((c) => c.estHours > 0 || c.estCrew > 0).map((c) => {
+                    const hrsDiff = c.actualHours - c.estHours;
+                    const crewDiff = c.actualCrew - c.estCrew;
+                    return (
+                      <tr key={c.cat} className="hover:bg-secondary/20 transition-colors">
+                        <td className="py-2 pr-3 font-medium text-foreground">{catLabel(c.cat)}</td>
+                        {categories.some((x) => x.estHours > 0) && (
+                          <>
+                            <td className="py-2 pr-3 text-right tabular-nums text-muted-foreground">{c.estHours > 0 ? `${c.estHours.toFixed(0)}h` : "—"}</td>
+                            <td className="py-2 pr-3 text-right tabular-nums">{c.actualHours > 0 ? `${c.actualHours.toFixed(0)}h` : "—"}</td>
+                            <td className="py-2 pr-3 text-right tabular-nums">
+                              {c.estHours > 0 && c.actualHours > 0 ? (
+                                <span className={hrsDiff > 0 ? "text-rose-500" : "text-green-600"}>
+                                  {hrsDiff > 0 ? "+" : ""}{hrsDiff.toFixed(0)}h
+                                </span>
+                              ) : "—"}
+                            </td>
+                          </>
+                        )}
+                        {categories.some((x) => x.estCrew > 0) && (
+                          <>
+                            <td className="py-2 pr-3 text-right tabular-nums text-muted-foreground hidden sm:table-cell">{c.estCrew > 0 ? formatCurrency(c.estCrew) : "—"}</td>
+                            <td className="py-2 pr-3 text-right tabular-nums hidden sm:table-cell">{c.actualCrew > 0 ? formatCurrency(c.actualCrew) : "—"}</td>
+                            <td className="py-2 text-right tabular-nums hidden sm:table-cell">
+                              {c.estCrew > 0 && c.actualCrew > 0 ? (
+                                <span className={crewDiff > 0 ? "text-rose-500" : "text-green-600"}>
+                                  {crewDiff > 0 ? "+" : ""}{formatCurrency(crewDiff)}
+                                </span>
+                              ) : "—"}
+                            </td>
+                          </>
+                        )}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Section>
+      )}
+
       {/* Top Customers */}
       {topCustomers.length > 0 && (
         <Section title="Top Customers">
@@ -703,6 +837,34 @@ function Section({ title, children }: { title: string; children: React.ReactNode
       <h2 className="font-display font-semibold text-sm text-foreground">{title}</h2>
       {children}
     </Card>
+  );
+}
+
+function CompareCard({ label, value, over, under }: { label: string; value: string; over?: boolean; under?: boolean }) {
+  return (
+    <div className="border border-border rounded-lg p-3">
+      <div className="text-xs text-muted-foreground mb-0.5">{label}</div>
+      <div className={`text-base font-semibold tabular-nums ${over ? "text-rose-500" : under ? "text-green-600" : "text-foreground"}`}>
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function CompareBar({ label, value, display, max, color }: { label: string; value: number; display: string; max: number; color: string }) {
+  const pct = max > 0 ? (value / max) * 100 : 0;
+  return (
+    <div className="flex items-center gap-3">
+      <span className="text-xs text-muted-foreground w-20 shrink-0">{label}</span>
+      <div className="flex-1 h-5 bg-secondary rounded overflow-hidden">
+        <div
+          className={`h-full ${color} rounded flex items-center justify-end pr-2 transition-all`}
+          style={{ width: `${Math.max(pct, 2)}%` }}
+        >
+          <span className="text-xs font-medium text-foreground/80 whitespace-nowrap">{display}</span>
+        </div>
+      </div>
+    </div>
   );
 }
 
