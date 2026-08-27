@@ -345,6 +345,7 @@ async function LandscapeDetail({ tab, year, lpage }: { tab: string; year: number
         invoiceAmount: true, profit: true, totalManHours: true,
         estHours: true, estCrewTotal: true,
         actualHours: true, crewTotal: true,
+        totalDirectExpense: true, totalIndirectExpense: true,
       },
       _count: { id: true },
     }),
@@ -402,6 +403,8 @@ async function LandscapeDetail({ tab, year, lpage }: { tab: string; year: number
     revenue: n(aggregate._sum.invoiceAmount),
     profit: n(aggregate._sum.profit),
     hours: n(aggregate._sum.totalManHours),
+    direct: n(aggregate._sum.totalDirectExpense),
+    indirect: n(aggregate._sum.totalIndirectExpense),
   };
 
   const categories = catGroups.map((g) => ({
@@ -445,12 +448,14 @@ async function LandscapeDetail({ tab, year, lpage }: { tab: string; year: number
       <BackHeader href={`/portal/reports?tab=${tab}`} title={`${seasonLabel} ${year}`} />
 
       {/* Summary */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3">
         <StatCard label="Jobs" value={totals.jobs.toLocaleString()} />
         <StatCard label="Revenue" value={formatCurrency(totals.revenue)} highlight />
         <StatCard label="Profit" value={totals.profit ? formatCurrency(totals.profit) : "—"} />
         <StatCard label="Margin" value={totals.profit && totals.revenue ? pct(totals.profit, totals.revenue) : "—"} />
         <StatCard label="Man Hours" value={totals.hours > 0 ? `${totals.hours.toFixed(0)}h` : "—"} />
+        <StatCard label="Direct Cost" value={totals.direct ? formatCurrency(totals.direct) : "—"} />
+        <StatCard label="Indirect Cost" value={totals.indirect ? formatCurrency(totals.indirect) : "—"} />
       </div>
 
       <div className="grid lg:grid-cols-2 gap-5">
