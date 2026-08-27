@@ -7,6 +7,8 @@ import { formatCurrency, formatDate } from "@/lib/format";
 import { ArrowLeft, Download } from "lucide-react";
 import { Decimal } from "@prisma/client/runtime/library";
 import { PageNumbersLink } from "@/components/portal/PageNumbers";
+import { SnowSiteTable } from "@/components/portal/SnowSiteTable";
+import type { SiteCost } from "@/components/portal/SnowSiteTable";
 
 const VISITS_PER_PAGE = 50;
 const JOBS_PER_PAGE = 25;
@@ -163,18 +165,6 @@ async function SnowSeasonDetail({ season, spage }: { season: string; spage?: str
     total:    n(g._sum.totalDirect) + n(g._sum.totalIndirect),
   }));
 
-  const siteGrand = siteCosts.reduce(
-    (acc, s) => ({
-      visits: acc.visits + s.visits, labor: acc.labor + s.labor,
-      sub: acc.sub + s.sub, fuel: acc.fuel + s.fuel,
-      bulkSalt: acc.bulkSalt + s.bulkSalt, iceMelter: acc.iceMelter + s.iceMelter,
-      calcium: acc.calcium + s.calcium,
-      direct: acc.direct + s.direct, indirect: acc.indirect + s.indirect,
-      total: acc.total + s.total,
-    }),
-    { visits: 0, labor: 0, sub: 0, fuel: 0, bulkSalt: 0, iceMelter: 0, calcium: 0, direct: 0, indirect: 0, total: 0 }
-  );
-
   const totalPages = Math.ceil(totalVisits / VISITS_PER_PAGE);
   const storms = allStorms;
 
@@ -272,51 +262,10 @@ async function SnowSeasonDetail({ season, spage }: { season: string; spage?: str
         </div>
       </Section>
 
-      {/* Cost by Site — full season */}
+      {/* Cost by Site — searchable, clickable slide-out */}
       {siteCosts.length > 0 && (
         <Section title={`Cost by Site — ${siteCosts.length} sites`}>
-          <div className="overflow-x-auto -mx-4 sm:mx-0">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border text-left">
-                  <th className="pb-2 pr-3 font-medium text-muted-foreground min-w-[160px]">Site</th>
-                  <th className="pb-2 pr-3 font-medium text-muted-foreground text-right whitespace-nowrap">Visits</th>
-                  <th className="pb-2 pr-3 font-medium text-muted-foreground text-right whitespace-nowrap hidden md:table-cell">Labor</th>
-                  <th className="pb-2 pr-3 font-medium text-muted-foreground text-right whitespace-nowrap hidden md:table-cell">Sub</th>
-                  <th className="pb-2 pr-3 font-medium text-muted-foreground text-right whitespace-nowrap hidden lg:table-cell">Fuel</th>
-                  <th className="pb-2 pr-3 font-medium text-muted-foreground text-right whitespace-nowrap hidden lg:table-cell">Materials</th>
-                  <th className="pb-2 pr-3 font-medium text-muted-foreground text-right whitespace-nowrap hidden sm:table-cell">Direct</th>
-                  <th className="pb-2 font-medium text-muted-foreground text-right whitespace-nowrap">Total</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/50">
-                {siteCosts.map((s) => (
-                  <tr key={s.name} className="hover:bg-secondary/20 transition-colors">
-                    <td className="py-2 pr-3 font-medium text-foreground text-sm">{s.name}</td>
-                    <td className="py-2 pr-3 text-right text-muted-foreground">{s.visits}</td>
-                    <td className="py-2 pr-3 text-right tabular-nums hidden md:table-cell">{formatCurrency(s.labor)}</td>
-                    <td className="py-2 pr-3 text-right tabular-nums hidden md:table-cell">{formatCurrency(s.sub)}</td>
-                    <td className="py-2 pr-3 text-right tabular-nums hidden lg:table-cell">{formatCurrency(s.fuel)}</td>
-                    <td className="py-2 pr-3 text-right tabular-nums hidden lg:table-cell">{formatCurrency(s.bulkSalt + s.iceMelter + s.calcium)}</td>
-                    <td className="py-2 pr-3 text-right tabular-nums hidden sm:table-cell">{formatCurrency(s.direct)}</td>
-                    <td className="py-2 text-right tabular-nums font-medium">{formatCurrency(s.total)}</td>
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr className="border-t border-border font-semibold bg-secondary/30">
-                  <td className="pt-2.5 pr-3 text-foreground">Total</td>
-                  <td className="pt-2.5 pr-3 text-right text-muted-foreground">{siteGrand.visits}</td>
-                  <td className="pt-2.5 pr-3 text-right tabular-nums hidden md:table-cell">{formatCurrency(siteGrand.labor)}</td>
-                  <td className="pt-2.5 pr-3 text-right tabular-nums hidden md:table-cell">{formatCurrency(siteGrand.sub)}</td>
-                  <td className="pt-2.5 pr-3 text-right tabular-nums hidden lg:table-cell">{formatCurrency(siteGrand.fuel)}</td>
-                  <td className="pt-2.5 pr-3 text-right tabular-nums hidden lg:table-cell">{formatCurrency(siteGrand.bulkSalt + siteGrand.iceMelter + siteGrand.calcium)}</td>
-                  <td className="pt-2.5 pr-3 text-right tabular-nums hidden sm:table-cell">{formatCurrency(siteGrand.direct)}</td>
-                  <td className="pt-2.5 text-right tabular-nums">{formatCurrency(siteGrand.total)}</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
+          <SnowSiteTable siteCosts={siteCosts as SiteCost[]} season={season} />
         </Section>
       )}
 
