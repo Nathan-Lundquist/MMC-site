@@ -32,6 +32,7 @@ model Employee {
   crewDetails           CrewDetail[]
   additionalCrewDetails AdditionalWorkCrewDetail[]
   punchRecords          PunchRecord[]
+  receipts              Receipt[]
 
   @@map("employees")
 }
@@ -149,6 +150,7 @@ model WorkOrder {
   timeEntries         TimeEntry[]
   payments            Payment[]
   photos              Photo[]
+  receipts            Receipt[]
   machines            Machine[]
   crewDetails         CrewDetail[]
   debris              Debris[]
@@ -204,6 +206,29 @@ model Photo {
   uploadedAt  DateTime  @default(now()) @map("uploaded_at")
 
   @@map("photos")
+}
+
+// ── Receipts (Field Expenses) ─────────────────────────────
+
+enum ReceiptType {
+  MATERIALS
+  FUEL
+  DUMP_FEE
+  OTHER
+}
+
+model Receipt {
+  id           String      @id @default(cuid())
+  workOrderId  String      @map("wo_id")
+  workOrder    WorkOrder   @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  uploadedById String      @map("uploaded_by_id")
+  uploadedBy   Employee    @relation(fields: [uploadedById], references: [id])
+  url          String
+  type         ReceiptType
+  amount       Decimal     @db.Decimal(10, 2)
+  createdAt    DateTime    @default(now()) @map("created_at")
+
+  @@map("receipts")
 }
 
 // ── Machines ──────────────────────────────────────────────
