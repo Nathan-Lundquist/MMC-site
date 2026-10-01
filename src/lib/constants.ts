@@ -40,3 +40,17 @@ export const STATUSES = [
 
 /** Maximum file upload size in bytes (10 MB) */
 export const MAX_UPLOAD_SIZE = 10 * 1024 * 1024;
+
+export const RECEIPT_TYPES = [
+  { value: "MATERIALS", label: "Materials" },
+  { value: "FUEL", label: "Fuel" },
+  { value: "DUMP_FEE", label: "Dump Fee" },
+  { value: "OTHER", label: "Other" },
+];
+
+export const RECEIPT_TYPE_COLORS: Record<string, string> = {
+  MATERIALS: "bg-blue-100 text-blue-800",
+  FUEL: "bg-amber-100 text-amber-800",
+  DUMP_FEE: "bg-purple-100 text-purple-800",
+  OTHER: "bg-secondary text-secondary-foreground",
+};
