@@ -1,10 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { put } from "@vercel/blob";
+import { put, del } from "@vercel/blob";
+import { fileTypeFromBuffer } from "file-type";
 import { Prisma, ReceiptType } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/api-auth";
 import { MAX_UPLOAD_SIZE, RECEIPT_TYPES } from "@/lib/constants";
 import { toReceiptDTO } from "@/lib/receipts";
+
+// Assumption (named per review): only CANCELLED work orders reject new receipts,
+// matching the one existing "closed state" precedent in this codebase
+// (src/app/api/jobs/bulk-costing/route.ts uses `status: { not: "CANCELLED" }`).
+// INVOICED/PAID jobs still accept receipts since late expense reconciliation
+// is a normal flow; revisit if the business wants a stricter cutoff.
+const BLOCKED_RECEIPT_STATUSES = new Set(["CANCELLED"]);
 
 export const maxDuration = 60;
 
@@ -29,6 +37,12 @@ export async function POST(
   if (!workOrder) {
     return NextResponse.json({ error: "Work order not found" }, { status: 404 });
   }
+  if (BLOCKED_RECEIPT_STATUSES.has(workOrder.status)) {
+    return NextResponse.json(
+      { error: "Cannot add receipts to a cancelled work order" },
+      { status: 400 }
+    );
+  }
 
   const file = formData.get("file") as File | null;
   const type = formData.get("type") as string | null;
@@ -49,6 +63,14 @@ export async function POST(
       { status: 400 }
     );
   }
+  const fileBuffer = Buffer.from(await file.arrayBuffer());
+  const detectedType = await fileTypeFromBuffer(fileBuffer);
+  if (!detectedType || !ACCEPTED_MIME_TYPES.has(detectedType.mime)) {
+    return NextResponse.json(
+      { error: "Only JPEG, PNG, or HEIC images are accepted" },
+      { status: 400 }
+    );
+  }
   if (!type || !VALID_RECEIPT_TYPES.has(type)) {
     return NextResponse.json({ error: "Invalid receipt type" }, { status: 400 });
   }
@@ -60,21 +82,33 @@ export async function POST(
     );
   }
 
-  const blob = await put(`receipts/${workOrderId}/${Date.now()}_${file.name}`, file, {
-    access: "public",
-    contentType: file.type,
-  });
+  let blobUrl: string | undefined;
+  try {
+    const blob = await put(`receipts/${workOrderId}/${Date.now()}_${file.name}`, fileBuffer, {
+      access: "public",
+      contentType: detectedType.mime,
+    });
+    blobUrl = blob.url;
 
-  const receipt = await prisma.receipt.create({
-    data: {
-      workOrderId,
-      uploadedById: session.user.id,
-      url: blob.url,
-      type: type as ReceiptType,
-      amount: new Prisma.Decimal(amount),
-    },
-    include: { uploadedBy: { select: { name: true } } },
-  });
+    const receipt = await prisma.receipt.create({
+      data: {
+        workOrderId,
+        uploadedById: session.user.id,
+        url: blob.url,
+        type: type as ReceiptType,
+        amount: new Prisma.Decimal(amount),
+      },
+      include: { uploadedBy: { select: { name: true } } },
+    });
 
-  return NextResponse.json(toReceiptDTO(receipt), { status: 201 });
+    return NextResponse.json(toReceiptDTO(receipt), { status: 201 });
+  } catch (err) {
+    console.error("Receipt upload failed:", err);
+    if (blobUrl) {
+      await del(blobUrl).catch((delErr) => {
+        console.error("Failed to clean up orphaned receipt blob:", blobUrl, delErr);
+      });
+    }
+    return NextResponse.json({ error: "Failed to upload receipt" }, { status: 500 });
+  }
 }
