@@ -54,3 +54,6 @@ export const RECEIPT_TYPE_COLORS: Record<string, string> = {
   DUMP_FEE: "bg-purple-100 text-purple-800",
   OTHER: "bg-secondary text-secondary-foreground",
 };
+
+/** Roles allowed to delete a receipt (shared by the API route and the client UI) */
+export const RECEIPT_DELETE_ROLES = ["ADMIN", "MANAGER"] as const;

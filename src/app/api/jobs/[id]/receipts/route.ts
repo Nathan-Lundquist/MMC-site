@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/api-auth";
-import { MAX_UPLOAD_SIZE } from "@/lib/constants";
+import { MAX_UPLOAD_SIZE, RECEIPT_TYPES } from "@/lib/constants";
+import { toReceiptDTO } from "@/lib/receipts";
 
 export const maxDuration = 60;
 
-const RECEIPT_TYPES = new Set(["MATERIALS", "FUEL", "DUMP_FEE", "OTHER"]);
+const VALID_RECEIPT_TYPES = new Set(RECEIPT_TYPES.map((t) => t.value));
 const ACCEPTED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/heic"]);
 
 // POST /api/jobs/[id]/receipts — upload a receipt photo + expense metadata
@@ -19,12 +20,14 @@ export async function POST(
 
   const { id: workOrderId } = await params;
 
-  const workOrder = await prisma.workOrder.findUnique({ where: { id: workOrderId } });
+  const [workOrder, formData] = await Promise.all([
+    prisma.workOrder.findUnique({ where: { id: workOrderId } }),
+    req.formData(),
+  ]);
   if (!workOrder) {
     return NextResponse.json({ error: "Work order not found" }, { status: 404 });
   }
 
-  const formData = await req.formData();
   const file = formData.get("file") as File | null;
   const type = formData.get("type") as string | null;
   const amountRaw = formData.get("amount") as string | null;
@@ -44,7 +47,7 @@ export async function POST(
       { status: 400 }
     );
   }
-  if (!type || !RECEIPT_TYPES.has(type)) {
+  if (!type || !VALID_RECEIPT_TYPES.has(type)) {
     return NextResponse.json({ error: "Invalid receipt type" }, { status: 400 });
   }
   const amount = amountRaw ? Number(amountRaw) : NaN;
@@ -68,15 +71,5 @@ export async function POST(
     include: { uploadedBy: { select: { name: true } } },
   });
 
-  return NextResponse.json(
-    {
-      id: receipt.id,
-      url: receipt.url,
-      type: receipt.type,
-      amount: Number(receipt.amount),
-      uploadedBy: receipt.uploadedBy.name,
-      createdAt: receipt.createdAt.toISOString(),
-    },
-    { status: 201 }
-  );
+  return NextResponse.json(toReceiptDTO(receipt), { status: 201 });
 }

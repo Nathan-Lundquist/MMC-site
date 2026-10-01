@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { del } from "@vercel/blob";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/api-auth";
+import { RECEIPT_DELETE_ROLES } from "@/lib/constants";
 
 // DELETE /api/receipts/[id] — remove a receipt (ADMIN/MANAGER only)
 export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error: authError } = await requireAuth(["ADMIN", "MANAGER"]);
+  const { error: authError } = await requireAuth([...RECEIPT_DELETE_ROLES]);
   if (authError) return authError;
 
   const { id } = await params;

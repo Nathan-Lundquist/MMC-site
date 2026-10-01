@@ -20,8 +20,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Receipt as ReceiptIcon, Camera, Trash2, AlertCircle } from "lucide-react";
-import { formatCurrency, formatDate } from "@/lib/format";
-import { RECEIPT_TYPES, RECEIPT_TYPE_COLORS } from "@/lib/constants";
+import { formatCurrency, formatDate, formatStatus } from "@/lib/format";
+import { RECEIPT_TYPES, RECEIPT_TYPE_COLORS, RECEIPT_DELETE_ROLES } from "@/lib/constants";
 
 type ReceiptItem = {
   id: string;
@@ -50,8 +50,9 @@ export default function ReceiptsSection({
   const [error, setError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const canDelete = userRole === "ADMIN" || userRole === "MANAGER";
+  const canDelete = (RECEIPT_DELETE_ROLES as readonly string[]).includes(userRole);
   const total = receipts.reduce((sum, r) => sum + r.amount, 0);
+  const isValid = Boolean(file) && Boolean(amount) && Number(amount) > 0;
 
   const resetForm = useCallback(() => {
     setFile(null);
@@ -62,7 +63,7 @@ export default function ReceiptsSection({
   }, []);
 
   const handleSubmit = useCallback(async () => {
-    if (!file || !amount || Number(amount) <= 0) return;
+    if (!isValid || !file) return;
     setError("");
     setLoading(true);
     try {
@@ -88,7 +89,7 @@ export default function ReceiptsSection({
     } finally {
       setLoading(false);
     }
-  }, [file, type, amount, workOrderId, resetForm]);
+  }, [file, type, amount, isValid, workOrderId, resetForm]);
 
   const handleDelete = useCallback(async (id: string) => {
     if (!window.confirm("Delete this receipt?")) return;
@@ -155,7 +156,7 @@ export default function ReceiptsSection({
                       RECEIPT_TYPE_COLORS[r.type] || RECEIPT_TYPE_COLORS.OTHER
                     }`}
                   >
-                    {r.type.replace("_", " ")}
+                    {formatStatus(r.type)}
                   </span>
                   <span className="font-medium text-sm">{formatCurrency(r.amount)}</span>
                 </div>
@@ -229,7 +230,7 @@ export default function ReceiptsSection({
           <SheetFooter>
             <Button
               onClick={handleSubmit}
-              disabled={loading || !file || !amount || Number(amount) <= 0}
+              disabled={loading || !isValid}
               className="w-full"
             >
               {loading ? "Uploading…" : "Submit"}

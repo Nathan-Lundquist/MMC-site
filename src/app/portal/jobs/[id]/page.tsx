@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, DollarSign, Pencil } from "lucide-react";
 import ReceiptsSection from "@/components/portal/ReceiptsSection";
+import { toReceiptDTO } from "@/lib/receipts";
 
 export default async function JobDetailPage({
   params,
@@ -13,45 +14,40 @@ export default async function JobDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const session = await auth();
 
-  const wo = await prisma.workOrder.findUnique({
-    where: { id },
-    include: {
-      customer: true,
-      foreman: true,
-      timeEntries: { orderBy: { startTime: "asc" } },
-      crewDetails: { include: { employee: true }, orderBy: { date: "asc" } },
-      payments: { orderBy: { date: "asc" } },
-      machines: true,
-      debris: { orderBy: { date: "asc" } },
-      weeding: { orderBy: { date: "asc" } },
-      hourlyWork: { orderBy: { date: "asc" } },
-      materials: true,
-      outsourcedMaterials: true,
-      additionalWork: {
-        include: {
-          crewDetails: { include: { employee: true } },
-          materials: true,
+  const [session, wo] = await Promise.all([
+    auth(),
+    prisma.workOrder.findUnique({
+      where: { id },
+      include: {
+        customer: true,
+        foreman: true,
+        timeEntries: { orderBy: { startTime: "asc" } },
+        crewDetails: { include: { employee: true }, orderBy: { date: "asc" } },
+        payments: { orderBy: { date: "asc" } },
+        machines: true,
+        debris: { orderBy: { date: "asc" } },
+        weeding: { orderBy: { date: "asc" } },
+        hourlyWork: { orderBy: { date: "asc" } },
+        materials: true,
+        outsourcedMaterials: true,
+        additionalWork: {
+          include: {
+            crewDetails: { include: { employee: true } },
+            materials: true,
+          },
+        },
+        receipts: {
+          include: { uploadedBy: { select: { name: true } } },
+          orderBy: { createdAt: "desc" },
         },
       },
-      receipts: {
-        include: { uploadedBy: { select: { name: true } } },
-        orderBy: { createdAt: "desc" },
-      },
-    },
-  });
+    }),
+  ]);
 
   if (!wo) return notFound();
 
-  const receipts = wo.receipts.map((r) => ({
-    id: r.id,
-    url: r.url,
-    type: r.type,
-    amount: Number(r.amount),
-    uploadedBy: r.uploadedBy.name,
-    createdAt: r.createdAt.toISOString(),
-  }));
+  const receipts = wo.receipts.map(toReceiptDTO);
 
   const statusColors: Record<string, string> = {
     DRAFT: "bg-secondary text-secondary-foreground",
