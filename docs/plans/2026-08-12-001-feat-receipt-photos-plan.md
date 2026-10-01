@@ -1,7 +1,7 @@
 ---
 title: "feat: Add receipt photo capture to job detail page"
 date: 2026-08-12
-status: active
+status: completed
 origin: docs/brainstorms/2026-08-12-receipt-photos-requirements.md
 depth: standard
 ---
