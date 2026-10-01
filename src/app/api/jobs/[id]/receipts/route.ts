@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { put } from "@vercel/blob";
+import { Prisma, ReceiptType } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/api-auth";
 import { MAX_UPLOAD_SIZE, RECEIPT_TYPES } from "@/lib/constants";
@@ -9,6 +10,7 @@ export const maxDuration = 60;
 
 const VALID_RECEIPT_TYPES = new Set(RECEIPT_TYPES.map((t) => t.value));
 const ACCEPTED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/heic"]);
+const MAX_RECEIPT_AMOUNT = 99999999.99; // matches Receipt.amount Decimal(10,2) column
 
 // POST /api/jobs/[id]/receipts — upload a receipt photo + expense metadata
 export async function POST(
@@ -51,8 +53,11 @@ export async function POST(
     return NextResponse.json({ error: "Invalid receipt type" }, { status: 400 });
   }
   const amount = amountRaw ? Number(amountRaw) : NaN;
-  if (!Number.isFinite(amount) || amount <= 0) {
-    return NextResponse.json({ error: "Amount must be a positive number" }, { status: 400 });
+  if (!Number.isFinite(amount) || amount <= 0 || amount > MAX_RECEIPT_AMOUNT) {
+    return NextResponse.json(
+      { error: `Amount must be between $0.01 and $${MAX_RECEIPT_AMOUNT.toLocaleString()}` },
+      { status: 400 }
+    );
   }
 
   const blob = await put(`receipts/${workOrderId}/${Date.now()}_${file.name}`, file, {
@@ -65,8 +70,8 @@ export async function POST(
       workOrderId,
       uploadedById: session.user.id,
       url: blob.url,
-      type: type as "MATERIALS" | "FUEL" | "DUMP_FEE" | "OTHER",
-      amount,
+      type: type as ReceiptType,
+      amount: new Prisma.Decimal(amount),
     },
     include: { uploadedBy: { select: { name: true } } },
   });

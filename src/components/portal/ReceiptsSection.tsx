@@ -20,8 +20,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Receipt as ReceiptIcon, Camera, Trash2, AlertCircle } from "lucide-react";
-import { formatCurrency, formatDate, formatStatus } from "@/lib/format";
+import { formatCurrency, formatDate } from "@/lib/format";
 import { RECEIPT_TYPES, RECEIPT_TYPE_COLORS, RECEIPT_DELETE_ROLES } from "@/lib/constants";
+
+function receiptTypeLabel(type: string) {
+  return RECEIPT_TYPES.find((t) => t.value === type)?.label ?? type;
+}
 
 type ReceiptItem = {
   id: string;
@@ -48,6 +52,7 @@ export default function ReceiptsSection({
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [deleteError, setDeleteError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const canDelete = (RECEIPT_DELETE_ROLES as readonly string[]).includes(userRole);
@@ -63,7 +68,7 @@ export default function ReceiptsSection({
   }, []);
 
   const handleSubmit = useCallback(async () => {
-    if (!isValid || !file) return;
+    if (loading || !isValid || !file) return;
     setError("");
     setLoading(true);
     try {
@@ -89,16 +94,21 @@ export default function ReceiptsSection({
     } finally {
       setLoading(false);
     }
-  }, [file, type, amount, isValid, workOrderId, resetForm]);
+  }, [loading, file, type, amount, isValid, workOrderId, resetForm]);
 
   const handleDelete = useCallback(async (id: string) => {
     if (!window.confirm("Delete this receipt?")) return;
+    setDeleteError("");
     try {
       const res = await fetch(`/api/receipts/${id}`, { method: "DELETE" });
-      if (!res.ok) return;
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setDeleteError(data?.error || "Failed to delete receipt");
+        return;
+      }
       setReceipts((r) => r.filter((item) => item.id !== id));
     } catch {
-      // leave the card in place on network failure
+      setDeleteError("Network error");
     }
   }, []);
 
@@ -129,6 +139,12 @@ export default function ReceiptsSection({
         </div>
       </div>
 
+      {deleteError && (
+        <div className="flex items-center gap-2 text-destructive text-sm mb-2">
+          <AlertCircle size={14} /> {deleteError}
+        </div>
+      )}
+
       {receipts.length === 0 ? (
         <div className="flex items-center gap-2 text-sm text-muted-foreground py-6 justify-center">
           <ReceiptIcon className="w-4 h-4" />
@@ -156,7 +172,7 @@ export default function ReceiptsSection({
                       RECEIPT_TYPE_COLORS[r.type] || RECEIPT_TYPE_COLORS.OTHER
                     }`}
                   >
-                    {formatStatus(r.type)}
+                    {receiptTypeLabel(r.type)}
                   </span>
                   <span className="font-medium text-sm">{formatCurrency(r.amount)}</span>
                 </div>
