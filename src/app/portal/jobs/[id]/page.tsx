@@ -1,9 +1,11 @@
 import { prisma } from "@/lib/db";
+import { auth } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, DollarSign, Pencil } from "lucide-react";
+import ReceiptsSection from "@/components/portal/ReceiptsSection";
 
 export default async function JobDetailPage({
   params,
@@ -11,6 +13,7 @@ export default async function JobDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const session = await auth();
 
   const wo = await prisma.workOrder.findUnique({
     where: { id },
@@ -32,10 +35,23 @@ export default async function JobDetailPage({
           materials: true,
         },
       },
+      receipts: {
+        include: { uploadedBy: { select: { name: true } } },
+        orderBy: { createdAt: "desc" },
+      },
     },
   });
 
   if (!wo) return notFound();
+
+  const receipts = wo.receipts.map((r) => ({
+    id: r.id,
+    url: r.url,
+    type: r.type,
+    amount: Number(r.amount),
+    uploadedBy: r.uploadedBy.name,
+    createdAt: r.createdAt.toISOString(),
+  }));
 
   const statusColors: Record<string, string> = {
     DRAFT: "bg-secondary text-secondary-foreground",
@@ -417,6 +433,13 @@ export default async function JobDetailPage({
           </div>
         </Card>
       )}
+
+      {/* Receipts */}
+      <ReceiptsSection
+        workOrderId={wo.id}
+        initialReceipts={receipts}
+        userRole={session!.user.role}
+      />
     </div>
   );
 }
