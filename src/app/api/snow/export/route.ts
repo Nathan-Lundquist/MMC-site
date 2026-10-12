@@ -1,7 +1,49 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api-auth";
 import { prisma } from "@/lib/db";
-import * as XLSX from "xlsx";
+import * as XLSX from "xlsx-js-style";
+
+const HEADER_STYLE = {
+  font: { bold: true, color: { rgb: "FFFFFF" } },
+  fill: { fgColor: { rgb: "1F5C33" } },
+  alignment: { horizontal: "center", vertical: "center" },
+  border: {
+    bottom: { style: "thin", color: { rgb: "000000" } },
+  },
+} as const;
+
+const TOTAL_STYLE = {
+  font: { bold: true },
+  fill: { fgColor: { rgb: "E8F0EA" } },
+  border: {
+    top: { style: "thin", color: { rgb: "000000" } },
+  },
+} as const;
+
+const CURRENCY_FMT = '"$"#,##0.00';
+
+function styleHeaderRow(ws: XLSX.WorkSheet, colCount: number) {
+  for (let c = 0; c < colCount; c++) {
+    const ref = XLSX.utils.encode_cell({ r: 0, c });
+    if (ws[ref]) ws[ref].s = HEADER_STYLE;
+  }
+}
+
+function styleTotalRow(ws: XLSX.WorkSheet, rowIndex: number, colCount: number) {
+  for (let c = 0; c < colCount; c++) {
+    const ref = XLSX.utils.encode_cell({ r: rowIndex, c });
+    if (ws[ref]) ws[ref].s = { ...TOTAL_STYLE, ...(ws[ref].s ?? {}) };
+  }
+}
+
+function formatCurrencyCols(ws: XLSX.WorkSheet, colIndexes: number[], rowCount: number) {
+  for (let r = 1; r <= rowCount; r++) {
+    for (const c of colIndexes) {
+      const ref = XLSX.utils.encode_cell({ r, c });
+      if (ws[ref]) ws[ref].z = CURRENCY_FMT;
+    }
+  }
+}
 
 function seasonKey(date: Date): string {
   const y = date.getUTCFullYear();
@@ -97,6 +139,9 @@ export async function GET(req: NextRequest) {
     { wch: 55 }, { wch: 14 }, { wch: 30 }, { wch: 8 }, { wch: 10 },
     { wch: 12 }, { wch: 12 }, { wch: 10 }, { wch: 12 }, { wch: 12 }, { wch: 12 },
   ];
+  styleHeaderRow(ws1, s1Header.length);
+  formatCurrencyCols(ws1, [5, 6, 7, 8, 9, 10], s1Rows.length);
+  styleTotalRow(ws1, s1Rows.length, s1Header.length);
   XLSX.utils.book_append_sheet(wb, ws1, "Storm Summary");
 
   // ── Sheet 2: Site Services Detail ──────────────────────────────────────
@@ -133,6 +178,8 @@ export async function GET(req: NextRequest) {
     { wch: 10 }, { wch: 12 }, { wch: 10 }, { wch: 10 }, { wch: 10 },
     { wch: 12 }, { wch: 12 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 30 },
   ];
+  styleHeaderRow(ws2, s2Header.length);
+  formatCurrencyCols(ws2, [15, 16, 17, 18, 19, 20, 21, 22], s2Rows.length);
   XLSX.utils.book_append_sheet(wb, ws2, "Site Services Detail");
 
   // ── Sheet 3: Cost by Site ──────────────────────────────────────────────
@@ -189,6 +236,9 @@ export async function GET(req: NextRequest) {
     { wch: 30 }, { wch: 7 }, { wch: 12 }, { wch: 12 }, { wch: 10 },
     { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 },
   ];
+  styleHeaderRow(ws3, s3Header.length);
+  formatCurrencyCols(ws3, [2, 3, 4, 5, 6, 7, 8, 9, 10], s3Rows.length);
+  styleTotalRow(ws3, s3Rows.length, s3Header.length);
   XLSX.utils.book_append_sheet(wb, ws3, "Cost by Site");
 
   const buf = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/api-auth";
 import { buildNestedCreateData, createAdditionalWork } from "@/lib/work-order-data";
 import { workOrderBodySchema } from "@/lib/schemas";
+import { toReceiptDTO } from "@/lib/receipts";
 
 export async function GET(
   _req: NextRequest,
@@ -33,6 +34,10 @@ export async function GET(
             materials: true,
           },
         },
+        receipts: {
+          include: { uploadedBy: { select: { name: true } } },
+          orderBy: { createdAt: "desc" },
+        },
       },
     });
 
@@ -40,7 +45,7 @@ export async function GET(
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    return NextResponse.json(wo);
+    return NextResponse.json({ ...wo, receipts: wo.receipts.map(toReceiptDTO) });
   } catch (err) {
     console.error("GET job failed:", err);
     return NextResponse.json({ error: "Failed to fetch job" }, { status: 500 });

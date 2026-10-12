@@ -1,9 +1,12 @@
 import { prisma } from "@/lib/db";
+import { auth } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, DollarSign, Pencil } from "lucide-react";
+import ReceiptsSection from "@/components/portal/ReceiptsSection";
+import { toReceiptDTO } from "@/lib/receipts";
 
 export default async function JobDetailPage({
   params,
@@ -12,30 +15,39 @@ export default async function JobDetailPage({
 }) {
   const { id } = await params;
 
-  const wo = await prisma.workOrder.findUnique({
-    where: { id },
-    include: {
-      customer: true,
-      foreman: true,
-      timeEntries: { orderBy: { startTime: "asc" } },
-      crewDetails: { include: { employee: true }, orderBy: { date: "asc" } },
-      payments: { orderBy: { date: "asc" } },
-      machines: true,
-      debris: { orderBy: { date: "asc" } },
-      weeding: { orderBy: { date: "asc" } },
-      hourlyWork: { orderBy: { date: "asc" } },
-      materials: true,
-      outsourcedMaterials: true,
-      additionalWork: {
-        include: {
-          crewDetails: { include: { employee: true } },
-          materials: true,
+  const [session, wo] = await Promise.all([
+    auth(),
+    prisma.workOrder.findUnique({
+      where: { id },
+      include: {
+        customer: true,
+        foreman: true,
+        timeEntries: { orderBy: { startTime: "asc" } },
+        crewDetails: { include: { employee: true }, orderBy: { date: "asc" } },
+        payments: { orderBy: { date: "asc" } },
+        machines: true,
+        debris: { orderBy: { date: "asc" } },
+        weeding: { orderBy: { date: "asc" } },
+        hourlyWork: { orderBy: { date: "asc" } },
+        materials: true,
+        outsourcedMaterials: true,
+        additionalWork: {
+          include: {
+            crewDetails: { include: { employee: true } },
+            materials: true,
+          },
+        },
+        receipts: {
+          include: { uploadedBy: { select: { name: true } } },
+          orderBy: { createdAt: "desc" },
         },
       },
-    },
-  });
+    }),
+  ]);
 
   if (!wo) return notFound();
+
+  const receipts = wo.receipts.map(toReceiptDTO);
 
   const statusColors: Record<string, string> = {
     DRAFT: "bg-secondary text-secondary-foreground",
@@ -417,6 +429,13 @@ export default async function JobDetailPage({
           </div>
         </Card>
       )}
+
+      {/* Receipts */}
+      <ReceiptsSection
+        workOrderId={wo.id}
+        initialReceipts={receipts}
+        userRole={session!.user.role}
+      />
     </div>
   );
 }
