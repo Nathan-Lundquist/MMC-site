@@ -1,3 +1,5 @@
+export type Option = { id: string; name: string };
+
 export type BoardJob = {
   id: string;
   workOrderNumber: string;

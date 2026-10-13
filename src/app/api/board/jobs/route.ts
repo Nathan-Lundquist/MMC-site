@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/api-auth";
 import { getBoardJobs, toBoardJobDTO } from "@/lib/board";
 import { createWorkOrderWithNumber } from "@/lib/work-order-number";
+import { BOARD_MOVE_ROLES } from "@/lib/constants";
 
 const quickCreateSchema = z.object({
   customerId: z.string().min(1, "Customer is required"),
@@ -17,12 +18,17 @@ export async function GET() {
   const { error } = await requireAuth();
   if (error) return error;
 
-  return NextResponse.json(await getBoardJobs());
+  try {
+    return NextResponse.json(await getBoardJobs());
+  } catch (err) {
+    console.error("Board jobs fetch failed:", err);
+    return NextResponse.json({ error: "Failed to fetch jobs" }, { status: 500 });
+  }
 }
 
 // POST /api/board/jobs — quick-create a job directly from the board
 export async function POST(req: NextRequest) {
-  const { error } = await requireAuth();
+  const { error } = await requireAuth([...BOARD_MOVE_ROLES]);
   if (error) return error;
 
   let raw: unknown;
@@ -41,12 +47,12 @@ export async function POST(req: NextRequest) {
   }
   const data = result.data;
 
-  const customer = await prisma.customer.findUnique({ where: { id: data.customerId } });
-  if (!customer) {
-    return NextResponse.json({ error: "Customer not found" }, { status: 404 });
-  }
-
   try {
+    const customer = await prisma.customer.findUnique({ where: { id: data.customerId } });
+    if (!customer) {
+      return NextResponse.json({ error: "Customer not found" }, { status: 404 });
+    }
+
     const job = await createWorkOrderWithNumber((workOrderNumber) =>
       prisma.workOrder.create({
         data: {

@@ -11,9 +11,7 @@ import {
 } from "@/components/ui/sheet";
 import { Field, MobileSelect, MobileInput } from "@/components/portal/work-order-form/form-ui";
 import { AlertCircle } from "lucide-react";
-import type { BoardJob } from "./types";
-
-type Option = { id: string; name: string };
+import type { BoardJob, Option } from "./types";
 
 export default function NewJobSheet({
   open,

@@ -12,16 +12,18 @@ export async function createWorkOrderWithNumber<T>(
   create: (workOrderNumber: string) => Promise<T>
 ): Promise<T> {
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-    const lastCW = await prisma.workOrder.findFirst({
+    // Compare suffixes numerically rather than ordering the string column: "CW-9999" sorts
+    // after "CW-10000" lexicographically, which would otherwise regenerate the same number
+    // forever once the sequence passes 4 digits.
+    const existingCW = await prisma.workOrder.findMany({
       where: { workOrderNumber: { startsWith: "CW-" } },
-      orderBy: { workOrderNumber: "desc" },
       select: { workOrderNumber: true },
     });
 
     let nextNum = 1;
-    if (lastCW) {
-      const num = parseInt(lastCW.workOrderNumber.replace("CW-", ""), 10);
-      if (!isNaN(num)) nextNum = num + 1;
+    for (const { workOrderNumber } of existingCW) {
+      const num = parseInt(workOrderNumber.replace("CW-", ""), 10);
+      if (!isNaN(num) && num + 1 > nextNum) nextNum = num + 1;
     }
     const woNumber = `CW-${String(nextNum).padStart(4, "0")}`;
 

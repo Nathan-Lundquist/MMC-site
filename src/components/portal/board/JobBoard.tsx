@@ -7,14 +7,12 @@ import { AlertCircle, Plus, RefreshCw } from "lucide-react";
 import { BOARD_COLUMNS, BOARD_MOVE_ROLES } from "@/lib/constants";
 import JobCard from "./JobCard";
 import NewJobSheet from "./NewJobSheet";
-import type { BoardJob } from "./types";
+import type { BoardJob, Option } from "./types";
 
 const POLL_INTERVAL_MS = 60_000;
 const POLL_FAILURE_THRESHOLD = 3;
 type Status = (typeof BOARD_COLUMNS)[number]["status"];
 const STATUS_ORDER: Status[] = BOARD_COLUMNS.map((c) => c.status);
-
-type Option = { id: string; name: string };
 
 export default function JobBoard({
   initialJobs,
@@ -95,6 +93,7 @@ export default function JobBoard({
       } catch {
         showNotice("Network error — the board will refresh shortly.");
         setJobs((prev) => prev.map((j) => (j.id === jobId ? { ...j, status: fromStatus } : j)));
+        refresh();
       } finally {
         setPendingIds((prev) => {
           const next = new Set(prev);
@@ -190,7 +189,7 @@ export default function JobBoard({
                           key={job.id}
                           draggableId={job.id}
                           index={index}
-                          isDragDisabled={!canMove}
+                          isDragDisabled={!canMove || pendingIds.has(job.id)}
                         >
                           {(dragProvided) => (
                             <div ref={dragProvided.innerRef} {...dragProvided.draggableProps}>
