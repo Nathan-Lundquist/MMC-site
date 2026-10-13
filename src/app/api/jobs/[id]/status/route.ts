@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/api-auth";
-import { BOARD_MOVE_ROLES } from "@/lib/constants";
+import { BOARD_MOVE_ROLES, BOARD_COLUMNS } from "@/lib/constants";
 
-const BOARD_STATUSES = new Set(["DRAFT", "IN_PROGRESS", "COMPLETED"]);
+const BOARD_STATUSES: Set<string> = new Set(BOARD_COLUMNS.map((c) => c.status));
 
 // PATCH /api/jobs/[id]/status — board-driven status change (DRAFT/IN_PROGRESS/COMPLETED only)
 export async function PATCH(

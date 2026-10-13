@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { DragDropContext, Droppable, Draggable, type DropResult } from "@hello-pangea/dnd";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, Plus, RefreshCw } from "lucide-react";
@@ -40,6 +40,12 @@ export default function JobBoard({
     setNotice(message);
     if (noticeTimer.current) clearTimeout(noticeTimer.current);
     noticeTimer.current = setTimeout(() => setNotice(null), 5000);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (noticeTimer.current) clearTimeout(noticeTimer.current);
+    };
   }, []);
 
   const refresh = useCallback(async () => {
@@ -109,10 +115,14 @@ export default function JobBoard({
     [moveJob]
   );
 
-  const columns = BOARD_COLUMNS.map((col) => ({
-    ...col,
-    jobs: jobs.filter((j) => j.status === col.status),
-  }));
+  const columns = useMemo(
+    () =>
+      BOARD_COLUMNS.map((col) => ({
+        ...col,
+        jobs: jobs.filter((j) => j.status === col.status),
+      })),
+    [jobs]
+  );
 
   return (
     <div className="space-y-4">
@@ -183,18 +193,13 @@ export default function JobBoard({
                           isDragDisabled={!canMove}
                         >
                           {(dragProvided) => (
-                            <div
-                              ref={dragProvided.innerRef}
-                              {...dragProvided.draggableProps}
-                            >
+                            <div ref={dragProvided.innerRef} {...dragProvided.draggableProps}>
                               <JobCard
                                 job={job}
                                 canMove={canMove}
                                 isPending={pendingIds.has(job.id)}
                                 canRevert={STATUS_ORDER.indexOf(job.status) > 0}
-                                canAdvance={
-                                  STATUS_ORDER.indexOf(job.status) < STATUS_ORDER.length - 1
-                                }
+                                canAdvance={STATUS_ORDER.indexOf(job.status) < STATUS_ORDER.length - 1}
                                 onAdvance={() => {
                                   const i = STATUS_ORDER.indexOf(job.status);
                                   moveJob(job.id, job.status, STATUS_ORDER[i + 1]);
