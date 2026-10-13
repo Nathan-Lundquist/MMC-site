@@ -31,6 +31,7 @@ export default function JobBoard({
   const [sheetOpen, setSheetOpen] = useState(false);
   const [pollFailures, setPollFailures] = useState(0);
   const noticeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingIdsRef = useRef(pendingIds);
 
   const canMove = (BOARD_MOVE_ROLES as readonly string[]).includes(userRole);
 
@@ -46,12 +47,24 @@ export default function JobBoard({
     };
   }, []);
 
+  useEffect(() => {
+    pendingIdsRef.current = pendingIds;
+  }, [pendingIds]);
+
   const refresh = useCallback(async () => {
     try {
       const res = await fetch("/api/board/jobs");
       if (!res.ok) throw new Error("refresh failed");
       const data: BoardJob[] = await res.json();
-      setJobs(data);
+      // Keep the optimistic local state for any job with a move still in flight — otherwise a
+      // poll/focus refresh landing mid-move overwrites it with the pre-move server state and
+      // the card visibly snaps back before the PATCH response arrives.
+      setJobs((prev) => {
+        const pending = pendingIdsRef.current;
+        if (pending.size === 0) return data;
+        const pendingById = new Map(prev.filter((j) => pending.has(j.id)).map((j) => [j.id, j]));
+        return data.map((j) => pendingById.get(j.id) ?? j);
+      });
       setPollFailures(0);
     } catch {
       setPollFailures((n) => n + 1);
