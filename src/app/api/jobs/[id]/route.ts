@@ -104,14 +104,10 @@ export async function PUT(
 
     const pct = pctComplete;
 
-    // Preserve INVOICED/PAID status set by costing — only auto-set for non-financial statuses
-    const FINANCIAL_STATUSES: string[] = ["INVOICED", "PAID"];
-    let status = existing.status;
-    if (!FINANCIAL_STATUSES.includes(existing.status)) {
-      if (pct >= 100) status = "COMPLETED" as typeof status;
-      else if (pct > 0) status = "IN_PROGRESS" as typeof status;
-      else status = "DRAFT" as typeof status;
-    }
+    // Status is owned exclusively by the board's status endpoint (src/app/api/jobs/[id]/status/route.ts).
+    // This route never derives or changes it — percentCompleted is a pure progress number with no
+    // status side effect, so a full-form save can't silently revert a board-driven status change.
+    const status = existing.status;
 
     const workOrder = await prisma.$transaction(async (tx) => {
       // Delete all child records — we'll re-create them from the form data

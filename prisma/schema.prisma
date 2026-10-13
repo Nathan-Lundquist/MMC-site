@@ -104,6 +104,7 @@ model WorkOrder {
   notes            String?
   materialsNotUsed String?         @map("materials_not_used")
   status           WorkOrderStatus @default(DRAFT)
+  boardStatusChangedAt DateTime?   @map("board_status_changed_at")
 
   // ── Job Costing: Estimates ──
   invoiceNumber      String?   @map("invoice_number")
