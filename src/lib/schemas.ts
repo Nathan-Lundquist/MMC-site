@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { JobCategory } from "@prisma/client";
 
 const timeEntrySchema = z.object({
   startTime: z.string(),
@@ -96,6 +97,7 @@ const additionalOutsourcedSchema = z.object({
 export const workOrderBodySchema = z.object({
   customerId: z.string().min(1, "Customer is required"),
   jobType: z.string().optional().default(""),
+  jobCategory: z.nativeEnum(JobCategory, { message: "Job category is required" }),
   foremanId: z.string().optional().default(""),
   startDate: z.string().nullable().optional(),
   endDate: z.string().nullable().optional(),
