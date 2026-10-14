@@ -84,6 +84,7 @@ export interface WorkOrderInitialData {
   id: string;
   customerId: string;
   jobType: string;
+  jobCategory: string;
   foremanId: string | null;
   woNumber: string;
   pctComplete: string;

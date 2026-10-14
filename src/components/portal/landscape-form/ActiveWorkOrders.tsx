@@ -12,6 +12,12 @@ import {
 } from "@/components/portal/work-order-form/form-ui";
 import { JOB_CATEGORIES } from "@/lib/job-categories";
 
+// Season-scoped: picking Fall/Spring Clean Up here would make the job
+// immediately vanish from this view (it belongs under Clean Ups instead).
+const SPRING_SUMMER_CATEGORIES = JOB_CATEGORIES.filter(
+  (c) => c.value !== "FALL_CLEANUP" && c.value !== "SPRING_CLEANUP"
+);
+
 interface WorkOrderItem {
   id: string;
   workOrderNumber: string;
@@ -47,12 +53,13 @@ export function ActiveWorkOrders({
 
   // Quick create form state
   const [customerId, setCustomerId] = useState("");
+  const [jobCategory, setJobCategory] = useState("");
   const [jobType, setJobType] = useState("");
   const [notes, setNotes] = useState("");
 
   async function handleCreate() {
-    if (!customerId || !jobType) {
-      setError("Customer and job type are required");
+    if (!customerId || !jobCategory || !jobType) {
+      setError("Customer, category, and description are required");
       return;
     }
 
@@ -63,7 +70,7 @@ export function ActiveWorkOrders({
       const res = await fetch("/api/landscape/work-orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ customerId, jobType, notes }),
+        body: JSON.stringify({ customerId, jobCategory, jobType, notes }),
       });
 
       if (!res.ok) {
@@ -87,6 +94,7 @@ export function ActiveWorkOrders({
 
       // Reset form
       setCustomerId("");
+      setJobCategory("");
       setJobType("");
       setNotes("");
       setShowCreate(false);
@@ -124,15 +132,22 @@ export function ActiveWorkOrders({
               ))}
             </MobileSelect>
           </Field>
-          <Field label="Job Type">
-            <MobileSelect value={jobType} onChange={setJobType}>
-              <option value="">Select job type...</option>
-              {JOB_CATEGORIES.map((cat) => (
+          <Field label="Category">
+            <MobileSelect value={jobCategory} onChange={setJobCategory}>
+              <option value="">Select category...</option>
+              {SPRING_SUMMER_CATEGORIES.map((cat) => (
                 <option key={cat.value} value={cat.value}>
                   {cat.label}
                 </option>
               ))}
             </MobileSelect>
+          </Field>
+          <Field label="Description">
+            <MobileInput
+              placeholder="e.g. Lawn Cut, Fall Cleanup"
+              value={jobType}
+              onChange={(e) => setJobType(e.target.value)}
+            />
           </Field>
           <Field label="Notes (optional)">
             <MobileInput

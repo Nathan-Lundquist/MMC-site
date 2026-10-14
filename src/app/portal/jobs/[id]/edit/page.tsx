@@ -87,6 +87,7 @@ export default async function EditJobPage({
   const initialData: WorkOrderInitialData = {
     id: wo.id,
     customerId: wo.customerId,
+    jobCategory: wo.jobCategory,
     jobType: wo.jobType,
     foremanId: wo.foremanId,
     woNumber: wo.workOrderNumber,

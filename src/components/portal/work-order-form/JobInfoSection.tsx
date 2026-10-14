@@ -2,12 +2,15 @@
 
 import { Card } from "@/components/ui/card";
 import { MobileSelect, MobileInput, Field } from "./form-ui";
+import { JOB_CATEGORIES } from "@/lib/job-categories";
 
 interface Props {
   customers: { id: string; name: string }[];
   employees: { id: string; name: string }[];
   customerId: string;
   setCustomerId: (v: string) => void;
+  jobCategory: string;
+  setJobCategory: (v: string) => void;
   jobType: string;
   setJobType: (v: string) => void;
   foremanId: string;
@@ -25,6 +28,8 @@ export function JobInfoSection({
   employees,
   customerId,
   setCustomerId,
+  jobCategory,
+  setJobCategory,
   jobType,
   setJobType,
   foremanId,
@@ -44,6 +49,15 @@ export function JobInfoSection({
             <option value="">Select customer...</option>
             {customers.map((c) => (
               <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </MobileSelect>
+        </Field>
+
+        <Field label="Category *">
+          <MobileSelect value={jobCategory} onChange={setJobCategory}>
+            <option value="">Select category...</option>
+            {JOB_CATEGORIES.map((cat) => (
+              <option key={cat.value} value={cat.value}>{cat.label}</option>
             ))}
           </MobileSelect>
         </Field>
