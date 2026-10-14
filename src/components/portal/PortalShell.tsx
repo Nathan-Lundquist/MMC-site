@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
+import { confirmDiscardUnsavedChanges } from "@/lib/unsaved-changes-guard";
 import {
   LayoutDashboard,
   ClipboardList,
@@ -188,7 +189,13 @@ export function PortalShell({
                       <Link
                         key={item.href}
                         href={item.href}
-                        onClick={() => setSidebarOpen(false)}
+                        onClick={(e) => {
+                          if (!confirmDiscardUnsavedChanges()) {
+                            e.preventDefault();
+                            return;
+                          }
+                          setSidebarOpen(false);
+                        }}
                         className={cn(
                           "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                           active

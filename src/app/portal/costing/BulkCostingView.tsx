@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { JOB_CATEGORY_FILTER_OPTIONS } from "@/lib/job-categories";
+import { registerUnsavedChangesGuard } from "@/lib/unsaved-changes-guard";
 import { CostingTabs } from "./CostingTabs";
 
 /* ─────────────────────────────────────────────────────────
@@ -240,6 +241,29 @@ export function BulkCostingView() {
   }, [edits, originals]);
 
   const dirtyCount = dirtyRows.size;
+
+  // Protects navigation away from this page while edits are unsaved --
+  // covers sidebar links (PortalShell checks this guard before navigating)
+  // and tab close/reload/direct URL nav (beforeunload). Browser back/forward
+  // is not covered -- Next.js App Router has no official navigation-block
+  // hook for it.
+  useEffect(() => {
+    registerUnsavedChangesGuard(() =>
+      dirtyCount === 0 ||
+      confirm("You have unsaved changes. Discard them and leave this page?")
+    );
+    return () => registerUnsavedChangesGuard(null);
+  }, [dirtyCount]);
+
+  useEffect(() => {
+    function handleBeforeUnload(e: BeforeUnloadEvent) {
+      if (dirtyCount > 0) {
+        e.preventDefault();
+      }
+    }
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [dirtyCount]);
 
   // ── Computed values per row ──
   function getRowComputedValues(woId: string) {
