@@ -1,7 +1,7 @@
 ---
 title: "feat: Portal sidebar reorg — season-aligned sections + job-category fix"
 type: feat
-status: active
+status: completed
 date: 2026-10-14
 origin: docs/brainstorms/2026-10-14-portal-sidebar-reorg-requirements.md
 ---
