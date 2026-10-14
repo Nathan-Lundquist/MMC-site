@@ -10,6 +10,11 @@ const nextConfig: NextConfig = {
         destination: '/portal/landscape/log',
         permanent: false,
       },
+      {
+        source: '/portal/costing/bulk',
+        destination: '/portal/costing?tab=bulk',
+        permanent: false,
+      },
     ];
   },
 };

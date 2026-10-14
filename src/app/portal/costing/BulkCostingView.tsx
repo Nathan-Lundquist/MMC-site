@@ -11,12 +11,12 @@ import {
   ChevronsRight,
   Loader2,
   Save,
-  ArrowLeft,
   Filter,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { JOB_CATEGORIES as BASE_JOB_CATEGORIES } from "@/lib/job-categories";
+import { CostingTabs } from "./CostingTabs";
 
 /* ─────────────────────────────────────────────────────────
    Types
@@ -129,7 +129,7 @@ function categoryLabel(cat: string): string {
    Component
    ───────────────────────────────────────────────────────── */
 
-export default function BulkCostingPage() {
+export function BulkCostingView() {
   // ── State ──
   const [data, setData] = useState<ApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -351,23 +351,24 @@ export default function BulkCostingPage() {
 
   return (
     <div className="space-y-4">
+      <CostingTabs
+        active="bulk"
+        guard={() =>
+          dirtyCount === 0 ||
+          confirm("You have unsaved changes. Discard them and switch tabs?")
+        }
+      />
+
       {/* ── Header ── */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3">
-          <Link href="/portal/costing">
-            <Button variant="ghost" size="icon" className="shrink-0">
-              <ArrowLeft className="w-4 h-4" />
-            </Button>
-          </Link>
-          <div>
-            <h1 className="font-display text-xl font-bold text-foreground">
-              Bulk Job Costing
-            </h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              {totalCount.toLocaleString()} job{totalCount !== 1 && "s"}
-              {uncostedOnly && " without costing data"}
-            </p>
-          </div>
+        <div>
+          <h1 className="font-display text-xl font-bold text-foreground">
+            Bulk Job Costing
+          </h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {totalCount.toLocaleString()} job{totalCount !== 1 && "s"}
+            {uncostedOnly && " without costing data"}
+          </p>
         </div>
 
         <div className="flex items-center gap-3">
