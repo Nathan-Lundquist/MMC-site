@@ -2,36 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Loader2, Plus, PenLine, ChevronRight } from "lucide-react";
-import {
-  MobileSelect,
-  MobileInput,
-  Field,
-} from "@/components/portal/work-order-form/form-ui";
+import { PenLine, ChevronRight } from "lucide-react";
 import { JOB_CATEGORIES } from "@/lib/job-categories";
+import { JobQuickCreate, type WorkOrderItem, type Customer } from "./JobQuickCreate";
 
 // Season-scoped: picking Fall/Spring Clean Up here would make the job
 // immediately vanish from this view (it belongs under Clean Ups instead).
 const SPRING_SUMMER_CATEGORIES = JOB_CATEGORIES.filter(
   (c) => c.value !== "FALL_CLEANUP" && c.value !== "SPRING_CLEANUP"
 );
-
-interface WorkOrderItem {
-  id: string;
-  workOrderNumber: string;
-  jobType: string;
-  status: string;
-  customerName: string;
-  startDate: string | null;
-  logCount: number;
-}
-
-interface Customer {
-  id: string;
-  name: string;
-}
 
 const formatCategory = (cat: string) =>
   cat
@@ -47,142 +27,14 @@ export function ActiveWorkOrders({
   customers: Customer[];
 }) {
   const [workOrders, setWorkOrders] = useState(initialWOs);
-  const [showCreate, setShowCreate] = useState(false);
-  const [creating, setCreating] = useState(false);
-  const [error, setError] = useState("");
-
-  // Quick create form state
-  const [customerId, setCustomerId] = useState("");
-  const [jobCategory, setJobCategory] = useState("");
-  const [jobType, setJobType] = useState("");
-  const [notes, setNotes] = useState("");
-
-  async function handleCreate() {
-    if (!customerId || !jobCategory || !jobType) {
-      setError("Customer, category, and description are required");
-      return;
-    }
-
-    setCreating(true);
-    setError("");
-
-    try {
-      const res = await fetch("/api/landscape/work-orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ customerId, jobCategory, jobType, notes }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to create");
-      }
-
-      const wo = await res.json();
-      setWorkOrders((prev) => [
-        {
-          id: wo.id,
-          workOrderNumber: wo.workOrderNumber,
-          jobType: wo.jobType,
-          status: wo.status,
-          customerName: wo.customer.name,
-          startDate: wo.projectStartDate,
-          logCount: 0,
-        },
-        ...prev,
-      ]);
-
-      // Reset form
-      setCustomerId("");
-      setJobCategory("");
-      setJobType("");
-      setNotes("");
-      setShowCreate(false);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create");
-    } finally {
-      setCreating(false);
-    }
-  }
 
   return (
     <div className="space-y-4">
-      {/* Quick Create Toggle */}
-      {!showCreate ? (
-        <Button
-          onClick={() => setShowCreate(true)}
-          className="w-full h-12 text-base font-semibold gap-2"
-          variant="outline"
-        >
-          <Plus className="w-5 h-5" />
-          New Work Order
-        </Button>
-      ) : (
-        <Card className="p-4 space-y-3">
-          <h3 className="font-display text-sm font-semibold text-foreground">
-            Quick Create Work Order
-          </h3>
-          <Field label="Customer">
-            <MobileSelect value={customerId} onChange={setCustomerId}>
-              <option value="">Select customer...</option>
-              {customers.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </MobileSelect>
-          </Field>
-          <Field label="Category">
-            <MobileSelect value={jobCategory} onChange={setJobCategory}>
-              <option value="">Select category...</option>
-              {SPRING_SUMMER_CATEGORIES.map((cat) => (
-                <option key={cat.value} value={cat.value}>
-                  {cat.label}
-                </option>
-              ))}
-            </MobileSelect>
-          </Field>
-          <Field label="Description">
-            <MobileInput
-              placeholder="e.g. Lawn Cut, Fall Cleanup"
-              value={jobType}
-              onChange={(e) => setJobType(e.target.value)}
-            />
-          </Field>
-          <Field label="Notes (optional)">
-            <MobileInput
-              placeholder="Brief description..."
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-            />
-          </Field>
-          {error && <p className="text-sm text-destructive">{error}</p>}
-          <div className="flex gap-2">
-            <Button
-              onClick={handleCreate}
-              disabled={creating}
-              className="flex-1 h-11 gap-2"
-            >
-              {creating ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Plus className="w-4 h-4" />
-              )}
-              Create
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowCreate(false);
-                setError("");
-              }}
-              className="h-11"
-            >
-              Cancel
-            </Button>
-          </div>
-        </Card>
-      )}
+      <JobQuickCreate
+        customers={customers}
+        categoryOptions={SPRING_SUMMER_CATEGORIES}
+        onCreated={(job) => setWorkOrders((prev) => [job, ...prev])}
+      />
 
       {/* Active Work Orders List */}
       <div>
