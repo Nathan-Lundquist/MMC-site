@@ -57,3 +57,16 @@ export const RECEIPT_TYPE_COLORS: Record<string, string> = {
 
 /** Roles allowed to delete a receipt (shared by the API route and the client UI) */
 export const RECEIPT_DELETE_ROLES = ["ADMIN", "MANAGER"] as const;
+
+/** Roles allowed to move/advance a job card on the board, and to create jobs from it */
+export const BOARD_MOVE_ROLES = ["ADMIN", "MANAGER", "FOREMAN"] as const;
+
+/** Board columns, in display order, mapped to the WorkOrder statuses they represent */
+export const BOARD_COLUMNS = [
+  { status: "DRAFT", label: "To Schedule" },
+  { status: "IN_PROGRESS", label: "In Progress" },
+  { status: "COMPLETED", label: "Done" },
+] as const;
+
+/** How far back a COMPLETED job's boardStatusChangedAt can be and still show in the Done column */
+export const BOARD_DONE_WINDOW_DAYS = 30;
