@@ -34,6 +34,29 @@ export function MobileSelect({
   );
 }
 
+export function CategorySelect({
+  value,
+  onChange,
+  options,
+  placeholder = "Select category...",
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: { value: string; label: string }[];
+  placeholder?: string;
+}) {
+  return (
+    <MobileSelect value={value} onChange={onChange}>
+      <option value="">{placeholder}</option>
+      {options.map((cat) => (
+        <option key={cat.value} value={cat.value}>
+          {cat.label}
+        </option>
+      ))}
+    </MobileSelect>
+  );
+}
+
 export function MobileInput(props: React.ComponentProps<typeof Input>) {
   return (
     <Input

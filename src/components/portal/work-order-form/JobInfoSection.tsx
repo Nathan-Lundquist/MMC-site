@@ -1,7 +1,7 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import { MobileSelect, MobileInput, Field } from "./form-ui";
+import { MobileSelect, MobileInput, Field, CategorySelect } from "./form-ui";
 import { JOB_CATEGORIES } from "@/lib/job-categories";
 
 interface Props {
@@ -54,12 +54,7 @@ export function JobInfoSection({
         </Field>
 
         <Field label="Category *">
-          <MobileSelect value={jobCategory} onChange={setJobCategory}>
-            <option value="">Select category...</option>
-            {JOB_CATEGORIES.map((cat) => (
-              <option key={cat.value} value={cat.value}>{cat.label}</option>
-            ))}
-          </MobileSelect>
+          <CategorySelect value={jobCategory} onChange={setJobCategory} options={JOB_CATEGORIES} />
         </Field>
 
         <Field label="Type of Job">

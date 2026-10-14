@@ -9,7 +9,7 @@ import {
   SheetTitle,
   SheetFooter,
 } from "@/components/ui/sheet";
-import { Field, MobileSelect, MobileInput } from "@/components/portal/work-order-form/form-ui";
+import { Field, MobileSelect, MobileInput, CategorySelect } from "@/components/portal/work-order-form/form-ui";
 import { AlertCircle } from "lucide-react";
 import { JOB_CATEGORIES } from "@/lib/job-categories";
 import type { BoardJob, Option } from "./types";
@@ -95,14 +95,7 @@ export default function NewJobSheet({
             </MobileSelect>
           </Field>
           <Field label="Category">
-            <MobileSelect value={jobCategory} onChange={setJobCategory}>
-              <option value="">Select category...</option>
-              {JOB_CATEGORIES.map((cat) => (
-                <option key={cat.value} value={cat.value}>
-                  {cat.label}
-                </option>
-              ))}
-            </MobileSelect>
+            <CategorySelect value={jobCategory} onChange={setJobCategory} options={JOB_CATEGORIES} />
           </Field>
           <Field label="Description">
             <MobileInput

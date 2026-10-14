@@ -8,6 +8,7 @@ import {
   MobileSelect,
   MobileInput,
   Field,
+  CategorySelect,
 } from "@/components/portal/work-order-form/form-ui";
 
 export interface WorkOrderItem {
@@ -121,14 +122,7 @@ export function JobQuickCreate({
         </MobileSelect>
       </Field>
       <Field label="Category">
-        <MobileSelect value={jobCategory} onChange={setJobCategory}>
-          <option value="">Select category...</option>
-          {categoryOptions.map((cat) => (
-            <option key={cat.value} value={cat.value}>
-              {cat.label}
-            </option>
-          ))}
-        </MobileSelect>
+        <CategorySelect value={jobCategory} onChange={setJobCategory} options={categoryOptions} />
       </Field>
       <Field label="Description">
         <MobileInput

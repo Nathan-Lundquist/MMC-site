@@ -10,6 +10,7 @@ import {
   MobileInput,
   NowBtn,
   Field,
+  CategorySelect,
 } from "@/components/portal/work-order-form/form-ui";
 import { JOB_CATEGORIES } from "@/lib/job-categories";
 import { JobQuickCreate, type CategoryOption, type Customer } from "./JobQuickCreate";
@@ -211,14 +212,12 @@ export function CrewWorkLogForm({
         <h3 className="font-display text-sm font-semibold text-foreground">
           Work Type
         </h3>
-        <MobileSelect value={workType} onChange={setWorkType}>
-          <option value="">Select work type...</option>
-          {JOB_CATEGORIES.map((cat) => (
-            <option key={cat.value} value={cat.value}>
-              {cat.label}
-            </option>
-          ))}
-        </MobileSelect>
+        <CategorySelect
+          value={workType}
+          onChange={setWorkType}
+          options={JOB_CATEGORIES}
+          placeholder="Select work type..."
+        />
       </Card>
 
       {/* Times */}
