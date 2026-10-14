@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { PenLine, ChevronRight } from "lucide-react";
-import { CLEAN_UP_CATEGORIES, formatCategory } from "@/lib/job-categories";
+import { CLEAN_UP_CATEGORIES } from "@/lib/job-categories";
 import { JobQuickCreate, type WorkOrderItem, type Customer } from "./JobQuickCreate";
 
 export function CleanUpsWorkOrderList({
@@ -49,7 +49,7 @@ export function CleanUpsWorkOrderList({
                       </span>
                     </div>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <span>{formatCategory(wo.jobType)}</span>
+                      <span>{wo.jobType}</span>
                       <span>·</span>
                       <span
                         className={
