@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { CrewWorkLogForm } from "@/components/portal/landscape-form";
-import { SPRING_SUMMER_CATEGORIES } from "@/lib/job-categories";
+import { SPRING_SUMMER_CATEGORIES, CLEAN_UP_CATEGORY_VALUES } from "@/lib/job-categories";
 
 export default async function LandscapeLogPage({
   searchParams,
@@ -18,7 +18,7 @@ export default async function LandscapeLogPage({
     prisma.workOrder.findMany({
       where: {
         status: { in: ["DRAFT", "IN_PROGRESS"] },
-        jobCategory: { notIn: ["FALL_CLEANUP", "SPRING_CLEANUP"] },
+        jobCategory: { notIn: [...CLEAN_UP_CATEGORY_VALUES] },
       },
       orderBy: { createdAt: "desc" },
       select: {

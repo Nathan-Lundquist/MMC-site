@@ -5,12 +5,12 @@ import { requireAuth } from "@/lib/api-auth";
 import { getBoardJobs, toBoardJobDTO } from "@/lib/board";
 import { createWorkOrderWithNumber } from "@/lib/work-order-number";
 import { BOARD_MOVE_ROLES } from "@/lib/constants";
-import { JobCategory } from "@prisma/client";
+import { jobCategorySchema } from "@/lib/schemas";
 
 const quickCreateSchema = z.object({
   customerId: z.string().min(1, "Customer is required"),
   jobType: z.string().min(1, "Job type is required"),
-  jobCategory: z.nativeEnum(JobCategory, { message: "Job category is required" }),
+  jobCategory: jobCategorySchema,
   foremanId: z.string().optional(),
   projectStartDate: z.string().optional(),
 });

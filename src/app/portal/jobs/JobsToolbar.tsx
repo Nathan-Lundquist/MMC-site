@@ -4,12 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition, useRef, useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Search, X, Loader2 } from "lucide-react";
-import { JOB_CATEGORIES as BASE_JOB_CATEGORIES } from "@/lib/job-categories";
-
-const JOB_CATEGORIES = [
-  { value: "", label: "All Categories" },
-  ...BASE_JOB_CATEGORIES,
-];
+import { JOB_CATEGORY_FILTER_OPTIONS } from "@/lib/job-categories";
 
 const STATUSES = [
   { value: "", label: "All Statuses" },
@@ -116,7 +111,7 @@ export default function JobsToolbar({
           onChange={(e) => updateParams("category", e.target.value)}
           className="h-9 rounded-lg border border-input bg-background px-3 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 cursor-pointer"
         >
-          {JOB_CATEGORIES.map((cat) => (
+          {JOB_CATEGORY_FILTER_OPTIONS.map((cat) => (
             <option key={cat.value} value={cat.value}>
               {cat.label}
             </option>

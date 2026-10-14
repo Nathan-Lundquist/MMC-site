@@ -15,7 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { JOB_CATEGORIES as BASE_JOB_CATEGORIES } from "@/lib/job-categories";
+import { JOB_CATEGORY_FILTER_OPTIONS } from "@/lib/job-categories";
 import { CostingTabs } from "./CostingTabs";
 
 /* ─────────────────────────────────────────────────────────
@@ -66,11 +66,6 @@ interface EditableFields {
   totalIndirectExpense: string;
   amountPaid: string;
 }
-
-const JOB_CATEGORIES = [
-  { value: "", label: "All Categories" },
-  ...BASE_JOB_CATEGORIES,
-];
 
 const STATUSES = [
   { value: "", label: "All Statuses" },
@@ -436,7 +431,7 @@ export function BulkCostingView() {
           onChange={(e) => handleCategoryChange(e.target.value)}
           className="h-8 px-2 rounded-lg border border-border bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-brand/50"
         >
-          {JOB_CATEGORIES.map((c) => (
+          {JOB_CATEGORY_FILTER_OPTIONS.map((c) => (
             <option key={c.value} value={c.value}>
               {c.label}
             </option>

@@ -1,6 +1,6 @@
 import { JobCategory } from "@prisma/client";
 
-function formatCategory(cat: string) {
+export function formatCategory(cat: string) {
   return cat
     .split("_")
     .map((w) => w[0] + w.slice(1).toLowerCase())
@@ -11,6 +11,11 @@ export const JOB_CATEGORIES = Object.values(JobCategory).map((value) => ({
   value,
   label: formatCategory(value),
 }));
+
+export const JOB_CATEGORY_FILTER_OPTIONS = [
+  { value: "", label: "All Categories" },
+  ...JOB_CATEGORIES,
+];
 
 export const CLEAN_UP_CATEGORY_VALUES = ["FALL_CLEANUP", "SPRING_CLEANUP"] as const;
 
