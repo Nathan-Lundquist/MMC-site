@@ -1,7 +1,7 @@
 ---
 title: "feat: Active jobs Kanban board"
 date: 2026-10-13
-status: active
+status: completed
 origin: docs/brainstorms/2026-10-12-active-jobs-kanban-requirements.md
 depth: standard
 ---
