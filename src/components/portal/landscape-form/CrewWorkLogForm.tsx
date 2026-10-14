@@ -12,6 +12,7 @@ import {
   Field,
 } from "@/components/portal/work-order-form/form-ui";
 import { JOB_CATEGORIES } from "@/lib/job-categories";
+import { JobQuickCreate, type CategoryOption, type Customer } from "./JobQuickCreate";
 
 interface WorkOrderOption {
   id: string;
@@ -43,18 +44,23 @@ export function CrewWorkLogForm({
   employees,
   currentUser,
   defaultWorkOrderId,
+  customers,
+  quickCreateCategoryOptions,
 }: {
   workOrders: WorkOrderOption[];
   materials: MaterialOption[];
   employees: Employee[];
   currentUser: string;
   defaultWorkOrderId?: string;
+  customers: Customer[];
+  quickCreateCategoryOptions: CategoryOption[];
 }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
   // Work order
+  const [workOrderOptions, setWorkOrderOptions] = useState(workOrders);
   const [workOrderId, setWorkOrderId] = useState(defaultWorkOrderId || "");
 
   // Work type
@@ -167,6 +173,24 @@ export function CrewWorkLogForm({
 
   return (
     <div className="space-y-4">
+      {/* New job */}
+      <JobQuickCreate
+        customers={customers}
+        categoryOptions={quickCreateCategoryOptions}
+        onCreated={(job) => {
+          setWorkOrderOptions((prev) => [
+            {
+              id: job.id,
+              workOrderNumber: job.workOrderNumber,
+              jobType: job.jobType,
+              customerName: job.customerName,
+            },
+            ...prev,
+          ]);
+          setWorkOrderId(job.id);
+        }}
+      />
+
       {/* Work Order Selection */}
       <Card className="p-4 space-y-3">
         <h3 className="font-display text-sm font-semibold text-foreground">
@@ -174,7 +198,7 @@ export function CrewWorkLogForm({
         </h3>
         <MobileSelect value={workOrderId} onChange={setWorkOrderId}>
           <option value="">Select a work order...</option>
-          {workOrders.map((wo) => (
+          {workOrderOptions.map((wo) => (
             <option key={wo.id} value={wo.id}>
               {wo.customerName} - {wo.workOrderNumber} ({wo.jobType})
             </option>

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { CrewWorkLogForm } from "@/components/portal/landscape-form";
+import { CLEAN_UP_CATEGORIES } from "@/lib/job-categories";
 
 export default async function CleanUpsLogPage({
   searchParams,
@@ -13,7 +14,7 @@ export default async function CleanUpsLogPage({
 
   const { wo } = await searchParams;
 
-  const [workOrders, materials, employees] = await Promise.all([
+  const [workOrders, materials, employees, customers] = await Promise.all([
     prisma.workOrder.findMany({
       where: {
         status: { in: ["DRAFT", "IN_PROGRESS"] },
@@ -32,6 +33,11 @@ export default async function CleanUpsLogPage({
       orderBy: { name: "asc" },
     }),
     prisma.employee.findMany({
+      where: { active: true },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+    }),
+    prisma.customer.findMany({
       where: { active: true },
       orderBy: { name: "asc" },
       select: { id: true, name: true },
@@ -58,6 +64,8 @@ export default async function CleanUpsLogPage({
         employees={employees}
         currentUser={session.user.name || ""}
         defaultWorkOrderId={wo}
+        customers={customers}
+        quickCreateCategoryOptions={CLEAN_UP_CATEGORIES}
       />
     </div>
   );

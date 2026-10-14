@@ -4,12 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { PenLine, ChevronRight } from "lucide-react";
-import { JOB_CATEGORIES } from "@/lib/job-categories";
+import { CLEAN_UP_CATEGORIES } from "@/lib/job-categories";
 import { JobQuickCreate, type WorkOrderItem, type Customer } from "./JobQuickCreate";
-
-const CLEAN_UP_CATEGORIES = JOB_CATEGORIES.filter(
-  (c) => c.value === "FALL_CLEANUP" || c.value === "SPRING_CLEANUP"
-);
 
 const formatCategory = (cat: string) =>
   cat

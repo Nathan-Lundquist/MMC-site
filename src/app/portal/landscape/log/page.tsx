@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { CrewWorkLogForm } from "@/components/portal/landscape-form";
+import { SPRING_SUMMER_CATEGORIES } from "@/lib/job-categories";
 
 export default async function LandscapeLogPage({
   searchParams,
@@ -13,9 +14,12 @@ export default async function LandscapeLogPage({
 
   const { wo } = await searchParams;
 
-  const [workOrders, materials, employees] = await Promise.all([
+  const [workOrders, materials, employees, customers] = await Promise.all([
     prisma.workOrder.findMany({
-      where: { status: { in: ["DRAFT", "IN_PROGRESS"] } },
+      where: {
+        status: { in: ["DRAFT", "IN_PROGRESS"] },
+        jobCategory: { notIn: ["FALL_CLEANUP", "SPRING_CLEANUP"] },
+      },
       orderBy: { createdAt: "desc" },
       select: {
         id: true,
@@ -29,6 +33,11 @@ export default async function LandscapeLogPage({
       orderBy: { name: "asc" },
     }),
     prisma.employee.findMany({
+      where: { active: true },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+    }),
+    prisma.customer.findMany({
       where: { active: true },
       orderBy: { name: "asc" },
       select: { id: true, name: true },
@@ -55,6 +64,8 @@ export default async function LandscapeLogPage({
         employees={employees}
         currentUser={session.user.name || ""}
         defaultWorkOrderId={wo}
+        customers={customers}
+        quickCreateCategoryOptions={SPRING_SUMMER_CATEGORIES}
       />
     </div>
   );
