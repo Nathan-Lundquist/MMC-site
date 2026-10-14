@@ -11,6 +11,7 @@ import {
   NowBtn,
   Field,
 } from "@/components/portal/work-order-form/form-ui";
+import { JOB_CATEGORIES } from "@/lib/job-categories";
 
 interface WorkOrderOption {
   id: string;
@@ -164,25 +165,6 @@ export function CrewWorkLogForm({
     );
   }
 
-  const jobCategories = [
-    "LANDSCAPE",
-    "FALL_CLEANUP",
-    "SPRING_CLEANUP",
-    "SUBCONTRACTOR",
-    "IN_HOUSE_REPAIR",
-    "BED_MAINTENANCE",
-    "SPRINKLER",
-    "LIGHTING",
-    "HARDSCAPE",
-    "OTHER",
-  ];
-
-  const formatCategory = (cat: string) =>
-    cat
-      .split("_")
-      .map((w) => w[0] + w.slice(1).toLowerCase())
-      .join(" ");
-
   return (
     <div className="space-y-4">
       {/* Work Order Selection */}
@@ -207,9 +189,9 @@ export function CrewWorkLogForm({
         </h3>
         <MobileSelect value={workType} onChange={setWorkType}>
           <option value="">Select work type...</option>
-          {jobCategories.map((cat) => (
-            <option key={cat} value={cat}>
-              {formatCategory(cat)}
+          {JOB_CATEGORIES.map((cat) => (
+            <option key={cat.value} value={cat.value}>
+              {cat.label}
             </option>
           ))}
         </MobileSelect>

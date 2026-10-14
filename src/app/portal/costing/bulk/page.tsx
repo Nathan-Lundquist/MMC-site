@@ -16,6 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { JOB_CATEGORIES as BASE_JOB_CATEGORIES } from "@/lib/job-categories";
 
 /* ─────────────────────────────────────────────────────────
    Types
@@ -68,16 +69,7 @@ interface EditableFields {
 
 const JOB_CATEGORIES = [
   { value: "", label: "All Categories" },
-  { value: "LANDSCAPE", label: "Landscape" },
-  { value: "FALL_CLEANUP", label: "Fall Cleanup" },
-  { value: "SPRING_CLEANUP", label: "Spring Cleanup" },
-  { value: "SUBCONTRACTOR", label: "Subcontractor" },
-  { value: "IN_HOUSE_REPAIR", label: "In House Repair" },
-  { value: "BED_MAINTENANCE", label: "Bed Maintenance" },
-  { value: "SPRINKLER", label: "Sprinkler" },
-  { value: "LIGHTING", label: "Lighting" },
-  { value: "HARDSCAPE", label: "Hardscape" },
-  { value: "OTHER", label: "Other" },
+  ...BASE_JOB_CATEGORIES,
 ];
 
 const STATUSES = [

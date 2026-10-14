@@ -4,20 +4,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition, useRef, useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Search, X, Loader2 } from "lucide-react";
+import { JOB_CATEGORIES as BASE_JOB_CATEGORIES } from "@/lib/job-categories";
 
 const JOB_CATEGORIES = [
   { value: "", label: "All Categories" },
-  { value: "LANDSCAPE", label: "Landscape" },
-  { value: "FALL_CLEANUP", label: "Fall Cleanup" },
-  { value: "SPRING_CLEANUP", label: "Spring Cleanup" },
-  { value: "SUBCONTRACTOR", label: "Subcontractor" },
-  { value: "IN_HOUSE_REPAIR", label: "In-House Repair" },
-  { value: "BED_MAINTENANCE", label: "Bed Maintenance" },
-  { value: "SPRINKLER", label: "Sprinkler" },
-  { value: "LIGHTING", label: "Lighting" },
-  { value: "HARDSCAPE", label: "Hardscape" },
-  { value: "OTHER", label: "Other" },
-] as const;
+  ...BASE_JOB_CATEGORIES,
+];
 
 const STATUSES = [
   { value: "", label: "All Statuses" },

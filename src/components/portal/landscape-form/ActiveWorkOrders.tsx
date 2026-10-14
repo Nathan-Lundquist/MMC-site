@@ -10,6 +10,7 @@ import {
   MobileInput,
   Field,
 } from "@/components/portal/work-order-form/form-ui";
+import { JOB_CATEGORIES } from "@/lib/job-categories";
 
 interface WorkOrderItem {
   id: string;
@@ -25,19 +26,6 @@ interface Customer {
   id: string;
   name: string;
 }
-
-const JOB_CATEGORIES = [
-  "LANDSCAPE",
-  "FALL_CLEANUP",
-  "SPRING_CLEANUP",
-  "SUBCONTRACTOR",
-  "IN_HOUSE_REPAIR",
-  "BED_MAINTENANCE",
-  "SPRINKLER",
-  "LIGHTING",
-  "HARDSCAPE",
-  "OTHER",
-];
 
 const formatCategory = (cat: string) =>
   cat
@@ -140,8 +128,8 @@ export function ActiveWorkOrders({
             <MobileSelect value={jobType} onChange={setJobType}>
               <option value="">Select job type...</option>
               {JOB_CATEGORIES.map((cat) => (
-                <option key={cat} value={cat}>
-                  {formatCategory(cat)}
+                <option key={cat.value} value={cat.value}>
+                  {cat.label}
                 </option>
               ))}
             </MobileSelect>
