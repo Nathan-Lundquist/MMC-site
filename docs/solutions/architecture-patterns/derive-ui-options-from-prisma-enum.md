@@ -65,15 +65,9 @@ const JOB_CATEGORIES = [
 const jobCategorySchema = z.enum(["LAWN_CARE", "TREE_REMOVAL" /* ... */]);
 ```
 
-After (derived from the enum, single source of truth):
+After: see Guidance above for `JOB_CATEGORIES` itself. The derived constants that build on it:
 
 ```ts
-import { JobCategory } from "@prisma/client";
-
-export const JOB_CATEGORIES = Object.values(JobCategory).map((value) => ({
-  value,
-  label: formatCategory(value),
-}));
 export const JOB_CATEGORY_FILTER_OPTIONS = [
   { value: "", label: "All Categories" },
   ...JOB_CATEGORIES,

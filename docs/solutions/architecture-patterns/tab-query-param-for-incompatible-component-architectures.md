@@ -58,18 +58,7 @@ Before (two separate pages, no merge):
 /costing/bulk     -> client Component, useState-driven bulk editing
 ```
 
-After (merged via tab query param, early return preserves each view's architecture):
-
-```tsx
-export default async function CostingPage({ searchParams }) {
-  const params = await searchParams;
-  if (params.tab === "bulk") {
-    return <BulkCostingView />;
-  }
-  const summaryData = await runSummaryQueries(); // only runs for the default/summary tab
-  return <SummaryView data={summaryData} />;
-}
-```
+After: see Guidance above for the merged page itself (same snippet, not repeated here).
 
 Rejected alternative (not implemented): rewriting `BulkCostingView`'s `useState` filters to read/write the same URL params the summary view would use, to create one shared state model across both — rejected as a disproportionate rewrite for a requirement that was only "let users switch tabs."
 

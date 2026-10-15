@@ -64,7 +64,7 @@ A silent production-credential override during what's assumed to be safe local t
 
 ## Examples
 
-Before (what almost went wrong):
+What actually happened, trimmed to the failure signal:
 
 ```bash
 # Assumed .env's local Postgres would be used since it's dev-only config
@@ -73,15 +73,7 @@ npx next dev --port 3010
 # Root cause: server was actually connected to production Neon DB via .env.local
 ```
 
-After (the established safety ritual):
-
-```bash
-export DATABASE_URL="postgresql://mmc:mmc_dev_2025@localhost:5434/mmc?schema=public"
-export DIRECT_URL="postgresql://mmc:mmc_dev_2025@localhost:5434/mmc?schema=public"
-npx next dev --port 3010
-ss -ltnp | grep 3010                     # find the real next-server PID
-cat /proc/<pid>/environ | tr '\0' '\n' | grep DATABASE_URL   # confirm local DB is actually active
-```
+See Guidance above for the fix (explicit export + `/proc/<pid>/environ` verification) — the commands are identical, nothing more to add here.
 
 ## Related
 
