@@ -4,20 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition, useRef, useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Search, X, Loader2 } from "lucide-react";
-
-const JOB_CATEGORIES = [
-  { value: "", label: "All Categories" },
-  { value: "LANDSCAPE", label: "Landscape" },
-  { value: "FALL_CLEANUP", label: "Fall Cleanup" },
-  { value: "SPRING_CLEANUP", label: "Spring Cleanup" },
-  { value: "SUBCONTRACTOR", label: "Subcontractor" },
-  { value: "IN_HOUSE_REPAIR", label: "In-House Repair" },
-  { value: "BED_MAINTENANCE", label: "Bed Maintenance" },
-  { value: "SPRINKLER", label: "Sprinkler" },
-  { value: "LIGHTING", label: "Lighting" },
-  { value: "HARDSCAPE", label: "Hardscape" },
-  { value: "OTHER", label: "Other" },
-] as const;
+import { JOB_CATEGORY_FILTER_OPTIONS } from "@/lib/job-categories";
 
 const STATUSES = [
   { value: "", label: "All Statuses" },
@@ -124,7 +111,7 @@ export default function JobsToolbar({
           onChange={(e) => updateParams("category", e.target.value)}
           className="h-9 rounded-lg border border-input bg-background px-3 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 cursor-pointer"
         >
-          {JOB_CATEGORIES.map((cat) => (
+          {JOB_CATEGORY_FILTER_OPTIONS.map((cat) => (
             <option key={cat.value} value={cat.value}>
               {cat.label}
             </option>

@@ -3,6 +3,8 @@ import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { Prisma } from "@prisma/client";
 import { StatusBadge } from "@/components/portal/StatusBadge";
+import { CostingTabs } from "./CostingTabs";
+import { BulkCostingView } from "./BulkCostingView";
 
 /* ─────────────────────────────────────────────────────────
    Types for raw query results
@@ -120,9 +122,14 @@ const YEARS = [
 export default async function CostingPage({
   searchParams,
 }: {
-  searchParams: Promise<{ year?: string }>;
+  searchParams: Promise<{ year?: string; tab?: string }>;
 }) {
   const params = await searchParams;
+
+  if (params.tab === "bulk") {
+    return <BulkCostingView />;
+  }
+
   const selectedYear = params.year || "All Time";
   const yearFilter =
     selectedYear !== "All Time" ? parseInt(selectedYear, 10) : null;
@@ -302,6 +309,8 @@ export default async function CostingPage({
 
   return (
     <div className="space-y-8">
+      <CostingTabs active="summary" />
+
       {/* ── Header ──────────────────────────────────────── */}
       <div>
         <h1 className="font-display text-xl font-bold text-foreground">

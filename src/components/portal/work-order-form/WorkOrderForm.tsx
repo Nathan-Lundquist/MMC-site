@@ -38,6 +38,7 @@ export function WorkOrderForm({ customers, employees, initialData }: FormProps) 
   const [error, setError] = useState("");
 
   const [customerId, setCustomerId] = useState(initialData?.customerId || "");
+  const [jobCategory, setJobCategory] = useState(initialData?.jobCategory || "");
   const [jobType, setJobType] = useState(initialData?.jobType || "");
   const [foremanId, setForemanId] = useState(initialData?.foremanId || "");
   const [woNumber, setWoNumber] = useState(initialData?.woNumber || "");
@@ -70,6 +71,10 @@ export function WorkOrderForm({ customers, employees, initialData }: FormProps) 
       setError("Customer and Work Order Number are required.");
       return;
     }
+    if (!jobCategory) {
+      setError("Category is required.");
+      return;
+    }
     setError("");
     setSaving(true);
 
@@ -81,6 +86,7 @@ export function WorkOrderForm({ customers, employees, initialData }: FormProps) 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           customerId,
+          jobCategory,
           jobType: jobType || "General",
           foremanId,
           startDate: daySummary?.first || null,
@@ -142,6 +148,8 @@ export function WorkOrderForm({ customers, employees, initialData }: FormProps) 
         employees={employees}
         customerId={customerId}
         setCustomerId={setCustomerId}
+        jobCategory={jobCategory}
+        setJobCategory={setJobCategory}
         jobType={jobType}
         setJobType={setJobType}
         foremanId={foremanId}

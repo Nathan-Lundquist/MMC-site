@@ -74,6 +74,7 @@ export async function PUT(
     const {
       customerId,
       jobType,
+      jobCategory,
       foremanId,
       startDate,
       endDate,
@@ -127,6 +128,7 @@ export async function PUT(
           customerId,
           foremanId: foremanId || null,
           jobType: jobType || "General",
+          jobCategory,
           projectStartDate: startDate ? new Date(startDate) : null,
           projectEndDate: endDate ? new Date(endDate) : null,
           percentCompleted: pctComplete,

@@ -5,10 +5,12 @@ import { requireAuth } from "@/lib/api-auth";
 import { getBoardJobs, toBoardJobDTO } from "@/lib/board";
 import { createWorkOrderWithNumber } from "@/lib/work-order-number";
 import { BOARD_MOVE_ROLES } from "@/lib/constants";
+import { jobCategorySchema } from "@/lib/schemas";
 
 const quickCreateSchema = z.object({
   customerId: z.string().min(1, "Customer is required"),
   jobType: z.string().min(1, "Job type is required"),
+  jobCategory: jobCategorySchema,
   foremanId: z.string().optional(),
   projectStartDate: z.string().optional(),
 });
@@ -59,6 +61,7 @@ export async function POST(req: NextRequest) {
           workOrderNumber,
           customerId: data.customerId,
           jobType: data.jobType,
+          jobCategory: data.jobCategory,
           foremanId: data.foremanId || null,
           projectStartDate: data.projectStartDate ? new Date(data.projectStartDate) : null,
           status: "DRAFT",

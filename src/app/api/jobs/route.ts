@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
     const {
       customerId,
       jobType,
+      jobCategory,
       foremanId,
       startDate,
       endDate,
@@ -50,6 +51,7 @@ export async function POST(req: NextRequest) {
           customerId,
           foremanId: foremanId || null,
           jobType: jobType || "Fall Clean Up",
+          jobCategory,
           projectStartDate: startDate ? new Date(startDate) : null,
           projectEndDate: endDate ? new Date(endDate) : null,
           percentCompleted: pctComplete,

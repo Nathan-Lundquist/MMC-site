@@ -1,15 +1,19 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { ActiveWorkOrders } from "@/components/portal/landscape-form";
+import { CleanUpsWorkOrderList } from "@/components/portal/landscape-form";
+import { CLEAN_UP_CATEGORY_VALUES } from "@/lib/job-categories";
 
-export default async function LandscapePage() {
+export default async function CleanUpsPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
 
   const [workOrders, customers] = await Promise.all([
     prisma.workOrder.findMany({
-      where: { status: { in: ["DRAFT", "IN_PROGRESS"] } },
+      where: {
+        status: { in: ["DRAFT", "IN_PROGRESS"] },
+        jobCategory: { in: [...CLEAN_UP_CATEGORY_VALUES] },
+      },
       orderBy: { createdAt: "desc" },
       select: {
         id: true,
@@ -33,9 +37,9 @@ export default async function LandscapePage() {
   return (
     <div className="max-w-lg mx-auto pb-24 sm:pb-6">
       <h1 className="font-display text-xl font-bold text-foreground mb-4">
-        Landscape Work
+        Clean Ups
       </h1>
-      <ActiveWorkOrders
+      <CleanUpsWorkOrderList
         workOrders={workOrders.map((wo) => ({
           id: wo.id,
           workOrderNumber: wo.workOrderNumber,

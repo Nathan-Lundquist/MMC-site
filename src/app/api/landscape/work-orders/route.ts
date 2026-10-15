@@ -3,10 +3,12 @@ import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/api-auth";
 import { createWorkOrderWithNumber } from "@/lib/work-order-number";
 import { z } from "zod";
+import { jobCategorySchema } from "@/lib/schemas";
 
 const quickCreateSchema = z.object({
   customerId: z.string().min(1, "Customer is required"),
   jobType: z.string().min(1, "Job type is required"),
+  jobCategory: jobCategorySchema,
   notes: z.string().optional().default(""),
 });
 
@@ -32,6 +34,7 @@ export async function POST(req: NextRequest) {
           workOrderNumber,
           customerId: data.customerId,
           jobType: data.jobType,
+          jobCategory: data.jobCategory,
           notes: data.notes || null,
           status: "IN_PROGRESS",
           projectStartDate: new Date(),

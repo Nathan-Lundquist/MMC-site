@@ -9,8 +9,9 @@ import {
   SheetTitle,
   SheetFooter,
 } from "@/components/ui/sheet";
-import { Field, MobileSelect, MobileInput } from "@/components/portal/work-order-form/form-ui";
+import { Field, MobileSelect, MobileInput, CategorySelect } from "@/components/portal/work-order-form/form-ui";
 import { AlertCircle } from "lucide-react";
+import { JOB_CATEGORIES } from "@/lib/job-categories";
 import type { BoardJob, Option } from "./types";
 
 export default function NewJobSheet({
@@ -27,16 +28,18 @@ export default function NewJobSheet({
   onCreated: (job: BoardJob) => void;
 }) {
   const [customerId, setCustomerId] = useState("");
+  const [jobCategory, setJobCategory] = useState("");
   const [jobType, setJobType] = useState("");
   const [foremanId, setForemanId] = useState("");
   const [projectStartDate, setProjectStartDate] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const isValid = Boolean(customerId) && Boolean(jobType.trim());
+  const isValid = Boolean(customerId) && Boolean(jobCategory) && Boolean(jobType.trim());
 
   function resetForm() {
     setCustomerId("");
+    setJobCategory("");
     setJobType("");
     setForemanId("");
     setProjectStartDate("");
@@ -53,6 +56,7 @@ export default function NewJobSheet({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           customerId,
+          jobCategory,
           jobType: jobType.trim(),
           foremanId: foremanId || undefined,
           projectStartDate: projectStartDate || undefined,
@@ -90,7 +94,10 @@ export default function NewJobSheet({
               ))}
             </MobileSelect>
           </Field>
-          <Field label="Job Type">
+          <Field label="Category">
+            <CategorySelect value={jobCategory} onChange={setJobCategory} options={JOB_CATEGORIES} />
+          </Field>
+          <Field label="Description">
             <MobileInput
               placeholder="e.g. Lawn Cut, Fall Cleanup"
               value={jobType}

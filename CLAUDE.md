@@ -97,3 +97,9 @@ npx prisma migrate dev  # Run migrations
 - Work types: landscaping, sprinkler, lighting, bed maintenance, debris removal
 - Materials tracked separately for MCC-owned vs outsourced (supplier + cost)
 - Marketing site not yet deployed — currently localhost only
+
+---
+
+## DOCUMENTED SOLUTIONS
+
+`docs/solutions/` — documented solutions to past problems (bugs, architecture patterns, workflow gotchas), organized by category with YAML frontmatter (`module`, `tags`, `problem_type`). Relevant when implementing or debugging in documented areas.

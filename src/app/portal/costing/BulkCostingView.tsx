@@ -11,11 +11,13 @@ import {
   ChevronsRight,
   Loader2,
   Save,
-  ArrowLeft,
   Filter,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { JOB_CATEGORY_FILTER_OPTIONS } from "@/lib/job-categories";
+import { registerUnsavedChangesGuard } from "@/lib/unsaved-changes-guard";
+import { CostingTabs } from "./CostingTabs";
 
 /* ─────────────────────────────────────────────────────────
    Types
@@ -65,20 +67,6 @@ interface EditableFields {
   totalIndirectExpense: string;
   amountPaid: string;
 }
-
-const JOB_CATEGORIES = [
-  { value: "", label: "All Categories" },
-  { value: "LANDSCAPE", label: "Landscape" },
-  { value: "FALL_CLEANUP", label: "Fall Cleanup" },
-  { value: "SPRING_CLEANUP", label: "Spring Cleanup" },
-  { value: "SUBCONTRACTOR", label: "Subcontractor" },
-  { value: "IN_HOUSE_REPAIR", label: "In House Repair" },
-  { value: "BED_MAINTENANCE", label: "Bed Maintenance" },
-  { value: "SPRINKLER", label: "Sprinkler" },
-  { value: "LIGHTING", label: "Lighting" },
-  { value: "HARDSCAPE", label: "Hardscape" },
-  { value: "OTHER", label: "Other" },
-];
 
 const STATUSES = [
   { value: "", label: "All Statuses" },
@@ -137,7 +125,7 @@ function categoryLabel(cat: string): string {
    Component
    ───────────────────────────────────────────────────────── */
 
-export default function BulkCostingPage() {
+export function BulkCostingView() {
   // ── State ──
   const [data, setData] = useState<ApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -254,6 +242,29 @@ export default function BulkCostingPage() {
 
   const dirtyCount = dirtyRows.size;
 
+  // Protects navigation away from this page while edits are unsaved --
+  // covers sidebar links (PortalShell checks this guard before navigating)
+  // and tab close/reload/direct URL nav (beforeunload). Browser back/forward
+  // is not covered -- Next.js App Router has no official navigation-block
+  // hook for it.
+  useEffect(() => {
+    registerUnsavedChangesGuard(() =>
+      dirtyCount === 0 ||
+      confirm("You have unsaved changes. Discard them and leave this page?")
+    );
+    return () => registerUnsavedChangesGuard(null);
+  }, [dirtyCount]);
+
+  useEffect(() => {
+    function handleBeforeUnload(e: BeforeUnloadEvent) {
+      if (dirtyCount > 0) {
+        e.preventDefault();
+      }
+    }
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [dirtyCount]);
+
   // ── Computed values per row ──
   function getRowComputedValues(woId: string) {
     const invoiceAmount = toNum(getFieldValue(woId, "invoiceAmount"));
@@ -359,23 +370,24 @@ export default function BulkCostingPage() {
 
   return (
     <div className="space-y-4">
+      <CostingTabs
+        active="bulk"
+        guard={() =>
+          dirtyCount === 0 ||
+          confirm("You have unsaved changes. Discard them and switch tabs?")
+        }
+      />
+
       {/* ── Header ── */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3">
-          <Link href="/portal/costing">
-            <Button variant="ghost" size="icon" className="shrink-0">
-              <ArrowLeft className="w-4 h-4" />
-            </Button>
-          </Link>
-          <div>
-            <h1 className="font-display text-xl font-bold text-foreground">
-              Bulk Job Costing
-            </h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              {totalCount.toLocaleString()} job{totalCount !== 1 && "s"}
-              {uncostedOnly && " without costing data"}
-            </p>
-          </div>
+        <div>
+          <h1 className="font-display text-xl font-bold text-foreground">
+            Bulk Job Costing
+          </h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {totalCount.toLocaleString()} job{totalCount !== 1 && "s"}
+            {uncostedOnly && " without costing data"}
+          </p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -443,7 +455,7 @@ export default function BulkCostingPage() {
           onChange={(e) => handleCategoryChange(e.target.value)}
           className="h-8 px-2 rounded-lg border border-border bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-brand/50"
         >
-          {JOB_CATEGORIES.map((c) => (
+          {JOB_CATEGORY_FILTER_OPTIONS.map((c) => (
             <option key={c.value} value={c.value}>
               {c.label}
             </option>
