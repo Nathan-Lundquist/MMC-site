@@ -46,7 +46,7 @@ export default function Resources() {
           <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {resources.map(r => (
               <StaggerItem key={r.title}>
-                <div className="bg-card rounded-2xl border border-border p-8 lg:p-12 h-full">
+                <div className="bg-card rounded-lg border border-border p-8 lg:p-12 h-full">
                   <div className="w-14 h-14 rounded-full bg-brand flex items-center justify-center mb-6">
                     <r.icon size={22} className="text-white" strokeWidth={1.5} />
                   </div>

@@ -117,7 +117,7 @@ export default async function BlogPost({ params }: Props) {
           </div>
 
           {/* Title */}
-          <h1 className="font-display text-3xl lg:text-4xl tracking-tight mb-10 leading-tight">
+          <h1 className="font-display text-4xl lg:text-5xl tracking-tight mb-10 leading-tight">
             {post.title}
           </h1>
 
@@ -148,7 +148,7 @@ export default async function BlogPost({ params }: Props) {
                 img: ({ src, alt }) => {
                   const imgSrc = typeof src === 'string' ? src : '';
                   return (
-                    <span className="block my-8 rounded-2xl overflow-hidden">
+                    <span className="block my-8 rounded-lg overflow-hidden">
                       <Image
                         src={imgSrc}
                         alt={alt || ''}
@@ -167,13 +167,13 @@ export default async function BlogPost({ params }: Props) {
 
           {/* Back to Blog */}
           <div className="mt-16 pt-8 border-t border-border flex items-center justify-between">
-            <Button asChild variant="outline">
+            <Button asChild variant="outline" className="rounded-lg">
               <Link href="/blog">
                 <ArrowLeft size={14} />
                 All Articles
               </Link>
             </Button>
-            <Button asChild>
+            <Button asChild className="rounded-lg">
               <Link href="/quote">
                 Get a Free Estimate
                 <ArrowRight size={14} />

@@ -48,7 +48,7 @@ export default function Portfolio() {
               <button
                 key={item.image + i}
                 type="button"
-                className="group relative overflow-hidden cursor-pointer rounded-2xl text-left"
+                className="group relative overflow-hidden cursor-pointer rounded-lg text-left"
                 onClick={() => setLightboxSrc(item.image)}
                 aria-label={`View ${item.title}`}
               >
@@ -61,7 +61,7 @@ export default function Portfolio() {
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   />
                 </div>
-                <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/60 flex items-end p-6 transition-all duration-300 rounded-2xl">
+                <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/60 flex items-end p-6 transition-all duration-300 rounded-lg">
                   <div className="translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
                     <p className="text-white text-sm font-semibold">{item.title}</p>
                   </div>
@@ -85,7 +85,7 @@ export default function Portfolio() {
             </button>
           </DialogClose>
           {lightboxSrc && (
-            <Image src={lightboxSrc} alt="Portfolio" width={1200} height={800} className="max-h-[85vh] w-auto mx-auto rounded-2xl" />
+            <Image src={lightboxSrc} alt="Portfolio" width={1200} height={800} className="max-h-[85vh] w-auto mx-auto rounded-lg" />
           )}
         </DialogContent>
       </Dialog>

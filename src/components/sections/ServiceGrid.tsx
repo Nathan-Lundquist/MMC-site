@@ -23,7 +23,7 @@ export default function ServiceGrid() {
 
   return (
     <section className="py-20 lg:py-28 bg-secondary relative overflow-hidden">
-      <div className="absolute top-0 left-0 right-0 divider-organic" />
+      <div className="absolute top-0 left-0 right-0 h-px bg-border" />
 
       <div className="mx-auto max-w-7xl px-6">
         {/* Section header */}
@@ -33,7 +33,7 @@ export default function ServiceGrid() {
               <span className="w-12 h-px bg-brand" />
               Our Services
             </p>
-            <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl text-foreground leading-[1]">
+            <h2 className="font-display text-5xl sm:text-6xl lg:text-7xl text-foreground leading-[1]">
               Crafted services for
               <br />
               every outdoor need
@@ -54,7 +54,7 @@ export default function ServiceGrid() {
               <StaggerItem key={service.slug}>
                 <Link
                   href={`/services/${service.slug}`}
-                  className="group block bg-card rounded-2xl h-full border border-border card-hover relative overflow-hidden"
+                  className="group block bg-card rounded-lg h-full border border-border card-hover relative overflow-hidden"
                 >
                   {/* Image */}
                   <div className="relative aspect-[16/10] overflow-hidden">
@@ -89,7 +89,7 @@ export default function ServiceGrid() {
 
         {/* View all */}
         <AnimateOnScroll className="mt-14 text-center">
-          <Button asChild variant="outline-brand">
+          <Button asChild variant="outline-brand" className="rounded-lg">
             <Link href="/services/hardscape">
               Explore All Services
               <ArrowRight size={16} />

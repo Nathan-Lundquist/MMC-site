@@ -39,7 +39,7 @@ export default function BlogListing() {
               <span className="w-12 h-px bg-brand" />
               Latest Articles
             </p>
-            <h2 className="font-display text-3xl lg:text-4xl tracking-tight">
+            <h2 className="font-display text-4xl lg:text-5xl tracking-tight">
               Expert advice for your{' '}
               <span className="text-brand italic">landscape</span>
             </h2>
@@ -51,7 +51,7 @@ export default function BlogListing() {
               <Link
                 key={post.slug}
                 href={`/blog/${post.slug}`}
-                className="group bg-card rounded-2xl overflow-hidden border border-border hover:shadow-lg transition-all duration-300"
+                className="group bg-card rounded-lg overflow-hidden border border-border hover:shadow-lg transition-all duration-300"
               >
                 {/* Image */}
                 <div className="relative aspect-[16/10] overflow-hidden">

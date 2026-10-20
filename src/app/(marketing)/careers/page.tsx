@@ -77,14 +77,14 @@ export default function Careers() {
                   <span className="w-12 h-px bg-brand" />
                   Why Work With Us
                 </p>
-                <h2 className="font-display text-3xl lg:text-4xl tracking-tight mb-6">
+                <h2 className="font-display text-4xl lg:text-5xl tracking-tight mb-6">
                   25+ years of <span className="text-brand italic">excellence</span>
                 </h2>
                 <p className="text-muted-foreground leading-relaxed">
                   We&apos;re more than a landscaping company — we&apos;re a team that takes pride in transforming outdoor spaces. Since our founding, we&apos;ve built a reputation for quality, reliability, and treating team members like family.
                 </p>
               </div>
-              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden">
+              <div className="relative aspect-[4/3] rounded-lg overflow-hidden">
                 <Image src="/images/site/outdoor-kitchen-2.jpg" alt="Custom paver patio with pergola by MCC crew" fill className="object-cover" sizes="(max-width: 1024px) 100vw, 50vw" />
               </div>
             </div>
@@ -94,7 +94,7 @@ export default function Careers() {
           <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-16">
             {benefits.map(b => (
               <StaggerItem key={b.title}>
-                <div className="bg-secondary rounded-2xl p-8 h-full">
+                <div className="bg-secondary rounded-lg p-8 h-full">
                   <div className="w-14 h-14 rounded-full border-2 border-brand/20 flex items-center justify-center mb-6">
                     <b.icon size={22} className="text-brand" strokeWidth={1.5} />
                   </div>
@@ -115,7 +115,7 @@ export default function Careers() {
               <span className="w-12 h-px bg-brand" />
               Open Positions
             </p>
-            <h2 className="font-display text-4xl lg:text-5xl tracking-tight">
+            <h2 className="font-display text-5xl lg:text-6xl tracking-tight">
               Current <span className="text-brand italic">opportunities</span>
             </h2>
           </AnimateOnScroll>
@@ -123,10 +123,10 @@ export default function Careers() {
           <StaggerContainer className="flex flex-col gap-4 max-w-3xl">
             {jobs.map(job => (
               <StaggerItem key={job.title}>
-                <div className="bg-card rounded-2xl border border-border p-8 lg:p-10">
+                <div className="bg-card rounded-lg border border-border p-8 lg:p-10">
                   <div className="flex items-start justify-between gap-4 mb-4">
                     <h3 className="font-display text-xl text-foreground">{job.title}</h3>
-                    <Button asChild variant="outline-brand" size="sm" className="hidden sm:inline-flex">
+                    <Button asChild variant="outline-brand" size="sm" className="hidden sm:inline-flex rounded-lg">
                       <Link href="/contact">
                         Apply <ArrowRight size={12} />
                       </Link>
@@ -145,7 +145,7 @@ export default function Careers() {
                       </li>
                     ))}
                   </ul>
-                  <Button asChild size="sm" className="mt-6 sm:hidden">
+                  <Button asChild size="sm" className="mt-6 sm:hidden rounded-lg">
                     <Link href="/contact">Apply Now</Link>
                   </Button>
                 </div>

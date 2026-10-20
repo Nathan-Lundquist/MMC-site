@@ -68,7 +68,7 @@ export default function Testimonials() {
           <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {testimonials.map((t, i) => (
               <StaggerItem key={i}>
-                <div className="bg-card rounded-2xl border border-border p-8 lg:p-12 h-full flex flex-col">
+                <div className="bg-card rounded-lg border border-border p-8 lg:p-12 h-full flex flex-col">
                   <div className="flex gap-1 mb-6">
                     {Array.from({ length: 5 }).map((_, j) => (
                       <Star key={j} size={16} className={j < t.rating ? 'text-brand fill-brand' : 'text-border'} />

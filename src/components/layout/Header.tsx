@@ -105,7 +105,7 @@ export default function Header() {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 4, scale: 0.97 }}
                   transition={{ duration: 0.15, ease: 'easeOut' }}
-                  className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[400px] bg-background/98 backdrop-blur-xl border border-border rounded-2xl shadow-xl shadow-foreground/[0.07] p-3 grid grid-cols-2 gap-0.5"
+                  className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[400px] bg-background/98 backdrop-blur-xl border border-border rounded-lg shadow-xl shadow-foreground/[0.07] p-3 grid grid-cols-2 gap-0.5"
                 >
                   {/* Arrow pointer */}
                   <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-background border-l border-t border-border rotate-45 rounded-sm" />
@@ -113,7 +113,7 @@ export default function Header() {
                     <Link
                       key={s.slug}
                       href={`/services/${s.slug}`}
-                      className="flex items-center justify-between px-3 py-2.5 rounded-xl text-[13px] font-medium text-foreground/60 hover:text-foreground hover:bg-foreground/[0.05] transition-all duration-150 group"
+                      className="flex items-center justify-between px-3 py-2.5 rounded-lg text-[13px] font-medium text-foreground/60 hover:text-foreground hover:bg-foreground/[0.05] transition-all duration-150 group"
                     >
                       {s.label}
                       <ArrowUpRight size={11} className="opacity-0 group-hover:opacity-40 transition-opacity duration-150 shrink-0 ml-1" />
@@ -139,7 +139,7 @@ export default function Header() {
           >
             Login
           </Link>
-          <Button asChild size="sm" className="rounded-full px-5">
+          <Button asChild size="sm" className="rounded-lg px-5">
             <Link href="/quote">Get a Quote</Link>
           </Button>
         </div>
@@ -198,7 +198,7 @@ export default function Header() {
               </nav>
 
               <div className="px-6 py-8 border-t border-border">
-                <Button asChild size="lg" className="w-full mb-4 rounded-full">
+                <Button asChild size="lg" className="w-full mb-4 rounded-lg">
                   <Link href="/quote">Get a Free Quote</Link>
                 </Button>
                 <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">

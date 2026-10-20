@@ -134,13 +134,13 @@ export default function Contact() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
             {/* Form */}
             <AnimateOnScroll className="lg:col-span-7">
-              <div className="bg-card rounded-2xl border border-border p-8 lg:p-12">
+              <div className="bg-card rounded-lg border border-border p-8 lg:p-12">
                 {submitted ? (
                   <div className="flex flex-col items-center justify-center py-16 text-center">
                     <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mb-6">
                       <CheckCircle className="w-8 h-8 text-green-600" />
                     </div>
-                    <h3 className="font-display text-2xl tracking-tight mb-3">Message Sent</h3>
+                    <h3 className="font-display text-3xl tracking-tight mb-3">Message Sent</h3>
                     <p className="text-sm text-muted-foreground max-w-sm">
                       Thank you for reaching out. We&apos;ll get back to you within one business day.
                     </p>
@@ -157,7 +157,7 @@ export default function Contact() {
                       <span className="w-12 h-px bg-brand" />
                       Message
                     </p>
-                    <h3 className="font-display text-2xl tracking-tight mb-2">Send us a message</h3>
+                    <h3 className="font-display text-3xl tracking-tight mb-2">Send us a message</h3>
                     <p className="text-sm text-muted-foreground mb-8">We&apos;ll get back to you within one business day.</p>
 
                     <form onSubmit={handleSubmit}>
@@ -169,7 +169,7 @@ export default function Contact() {
                             type="text"
                             placeholder="Your full name"
                             required
-                            className={`rounded-xl ${fieldErrors.name ? 'border-red-500' : ''}`}
+                            className={`rounded-lg ${fieldErrors.name ? 'border-red-500' : ''}`}
                             value={formData.name}
                             onChange={e => handleChange('name', e.target.value)}
                           />
@@ -182,7 +182,7 @@ export default function Contact() {
                             type="email"
                             placeholder="you@example.com"
                             required
-                            className={`rounded-xl ${fieldErrors.email ? 'border-red-500' : ''}`}
+                            className={`rounded-lg ${fieldErrors.email ? 'border-red-500' : ''}`}
                             value={formData.email}
                             onChange={e => handleChange('email', e.target.value)}
                           />
@@ -196,7 +196,7 @@ export default function Contact() {
                             id="phone"
                             type="tel"
                             placeholder="(248) 000-0000"
-                            className={`rounded-xl ${fieldErrors.phone ? 'border-red-500' : ''}`}
+                            className={`rounded-lg ${fieldErrors.phone ? 'border-red-500' : ''}`}
                             value={formData.phone}
                             onChange={e => handleChange('phone', e.target.value)}
                           />
@@ -209,7 +209,7 @@ export default function Contact() {
                             type="text"
                             placeholder="How can we help?"
                             required
-                            className={`rounded-xl ${fieldErrors.subject ? 'border-red-500' : ''}`}
+                            className={`rounded-lg ${fieldErrors.subject ? 'border-red-500' : ''}`}
                             value={formData.subject}
                             onChange={e => handleChange('subject', e.target.value)}
                           />
@@ -222,7 +222,7 @@ export default function Contact() {
                           id="message"
                           placeholder="Tell us about your project..."
                           required
-                          className={`min-h-[160px] rounded-xl ${fieldErrors.message ? 'border-red-500' : ''}`}
+                          className={`min-h-[160px] rounded-lg ${fieldErrors.message ? 'border-red-500' : ''}`}
                           value={formData.message}
                           onChange={e => handleChange('message', e.target.value)}
                         />
@@ -230,12 +230,12 @@ export default function Contact() {
                       </div>
 
                       {submitError && (
-                        <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+                        <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
                           {submitError}
                         </div>
                       )}
 
-                      <Button type="submit" size="lg" disabled={isSubmitting}>
+                      <Button type="submit" size="lg" disabled={isSubmitting} className="rounded-lg">
                         {isSubmitting ? (
                           <>
                             <Loader2 className="w-4 h-4 animate-spin mr-2" />
@@ -291,7 +291,7 @@ export default function Contact() {
       {/* Map */}
       <section>
         <div className="mx-auto max-w-7xl px-6 pb-12">
-          <div className="rounded-2xl overflow-hidden">
+          <div className="rounded-lg overflow-hidden">
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2937.5!2d-83.1338!3d42.6584!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8824e9c1f2d3b4e5%3A0x0!2s2632+S+Rochester+Rd%2C+Rochester+Hills%2C+MI+48307!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2sus"
               width="100%"

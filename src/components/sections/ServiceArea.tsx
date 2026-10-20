@@ -15,14 +15,14 @@ const areas = [
 export default function ServiceArea() {
   return (
     <section className="py-20 lg:py-28 bg-secondary relative overflow-hidden">
-      <div className="absolute top-0 left-0 right-0 divider-organic" />
+      <div className="absolute top-0 left-0 right-0 h-px bg-border" />
 
       <div className="mx-auto max-w-7xl px-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* Image with parallax */}
           <div className="relative">
             <RevealOnScroll direction="left">
-              <div className="rounded-3xl overflow-hidden">
+              <div className="rounded-lg overflow-hidden">
                 <div className="relative aspect-[4/3]">
                   <Image
                     src="/images/site/front-yard.jpg"
@@ -37,7 +37,7 @@ export default function ServiceArea() {
 
             {/* Floating badge */}
             <AnimateOnScroll delay={0.3} variant="scale" className="absolute -bottom-4 -right-4 lg:-bottom-5 lg:-right-5 z-10">
-              <div className="bg-foreground rounded-2xl p-5 shadow-xl flex items-center gap-3">
+              <div className="bg-foreground rounded-lg p-5 shadow-xl flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-brand flex items-center justify-center">
                   <MapPin size={18} className="text-white" />
                 </div>
@@ -55,7 +55,7 @@ export default function ServiceArea() {
               <span className="w-12 h-px bg-brand" />
               Service Area
             </p>
-            <h3 className="font-display text-3xl lg:text-4xl xl:text-5xl text-foreground mb-5 leading-[1.05]">
+            <h3 className="font-display text-4xl lg:text-5xl xl:text-6xl text-foreground mb-5 leading-[1.05]">
               Oakland &amp; Macomb Counties
             </h3>
             <p className="text-muted-foreground mb-10 leading-relaxed text-[15px] max-w-md">
@@ -71,7 +71,7 @@ export default function ServiceArea() {
               ))}
             </div>
 
-            <Button asChild>
+            <Button asChild className="rounded-lg">
               <Link href="/contact">
                 Get in Touch
                 <ArrowRight size={16} />
