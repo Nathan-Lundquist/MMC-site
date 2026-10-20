@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
-import PageHero from '@/components/layout/PageHero';
+import Hero from '@/components/layout/Hero';
 import CTABanner from '@/components/sections/CTABanner';
 import AnimateOnScroll, { StaggerContainer, StaggerItem } from '@/components/ui/AnimateOnScroll';
 import { Shield, Users, Heart } from 'lucide-react';
@@ -25,9 +25,8 @@ const team = [
 export default function About() {
   return (
     <>
-      <PageHero
+      <Hero
         title="About Us"
-        subtitle=""
         backgroundImage="/images/site/paver-patio.jpg"
         breadcrumbs={[{ label: 'Home', to: '/' }, { label: 'About' }]}
       />

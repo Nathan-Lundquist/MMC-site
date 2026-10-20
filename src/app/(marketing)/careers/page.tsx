@@ -3,7 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, DollarSign, Sun, TrendingUp, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import PageHero from '@/components/layout/PageHero';
+import Hero from '@/components/layout/Hero';
 import CTABanner from '@/components/sections/CTABanner';
 import AnimateOnScroll, { StaggerContainer, StaggerItem } from '@/components/ui/AnimateOnScroll';
 
@@ -61,9 +61,8 @@ const benefits = [
 export default function Careers() {
   return (
     <>
-      <PageHero
+      <Hero
         title="Careers"
-        subtitle=""
         backgroundImage="/images/site/outdoor-kitchen-2.jpg"
         breadcrumbs={[{ label: 'Home', to: '/' }, { label: 'Careers' }]}
       />

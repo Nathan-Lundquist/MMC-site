@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import PageHero from '@/components/layout/PageHero';
+import Hero from '@/components/layout/Hero';
 import CTABanner from '@/components/sections/CTABanner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -73,7 +73,7 @@ export default async function BlogPost({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <PageHero
+      <Hero
         title="Blog"
         subtitle={post.title}
         backgroundImage={post.image}

@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import PageHero from '@/components/layout/PageHero';
+import Hero from '@/components/layout/Hero';
 import CTABanner from '@/components/sections/CTABanner';
 import AnimateOnScroll, { StaggerContainer, StaggerItem } from '@/components/ui/AnimateOnScroll';
 import { getServiceBySlug, servicesData } from '@/data/services';
@@ -125,7 +125,7 @@ export default async function ServiceDetail({ params }: ServicePageProps) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(buildFAQJsonLd(hardscapeFAQs)) }}
         />
       )}
-      <PageHero
+      <Hero
         title={service.shortTitle}
         subtitle={service.heroSubtitle}
         backgroundImage={service.heroImage}

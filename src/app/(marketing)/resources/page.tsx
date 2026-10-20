@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Gift, CreditCard, BadgeDollarSign, HelpCircle } from 'lucide-react';
-import PageHero from '@/components/layout/PageHero';
+import Hero from '@/components/layout/Hero';
 import CTABanner from '@/components/sections/CTABanner';
 import { StaggerContainer, StaggerItem } from '@/components/ui/AnimateOnScroll';
 
@@ -35,9 +35,8 @@ const resources = [
 export default function Resources() {
   return (
     <>
-      <PageHero
+      <Hero
         title="Resources"
-        subtitle=""
         backgroundImage="/images/site/lighting-fountain.jpg"
         breadcrumbs={[{ label: 'Home', to: '/' }, { label: 'Resources' }]}
       />

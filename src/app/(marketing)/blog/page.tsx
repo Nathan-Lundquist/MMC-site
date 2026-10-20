@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
-import PageHero from '@/components/layout/PageHero';
+import Hero from '@/components/layout/Hero';
 import CTABanner from '@/components/sections/CTABanner';
 import { Badge } from '@/components/ui/badge';
 import { getAllPosts } from '@/data/blog';
@@ -23,7 +23,7 @@ export default function BlogListing() {
 
   return (
     <>
-      <PageHero
+      <Hero
         title="Blog"
         subtitle="Tips and guides for Michigan homeowners"
         backgroundImage="/images/site/paver-entryway.jpg"

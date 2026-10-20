@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Star } from 'lucide-react';
-import PageHero from '@/components/layout/PageHero';
+import Hero from '@/components/layout/Hero';
 import CTABanner from '@/components/sections/CTABanner';
 import { StaggerContainer, StaggerItem } from '@/components/ui/AnimateOnScroll';
 import { testimonials } from '@/data/testimonials';
@@ -57,9 +57,8 @@ export default function Testimonials() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(reviewJsonLd) }}
       />
-      <PageHero
+      <Hero
         title="Reviews"
-        subtitle=""
         backgroundImage="/images/site/limestone-wall.jpg"
         breadcrumbs={[{ label: 'Home', to: '/' }, { label: 'Testimonials' }]}
       />

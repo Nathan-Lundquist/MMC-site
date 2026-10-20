@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import PageHero from '@/components/layout/PageHero';
+import Hero from '@/components/layout/Hero';
 import AnimateOnScroll from '@/components/ui/AnimateOnScroll';
 import { companyInfo } from '@/data/navigation';
 
@@ -91,11 +91,10 @@ export default function Quote() {
 
   return (
     <>
-      <PageHero
+      <Hero
         title="Free Quote"
-        subtitle=""
         backgroundImage="/images/site/patio-garden.jpg"
-        breadcrumbs={[{ label: 'Home', to: '/' }, { label: 'Free Quote' }]}
+        height="reduced"
       />
 
       <section className="py-24 lg:py-32">

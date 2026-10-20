@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import PageHero from '@/components/layout/PageHero';
+import Hero from '@/components/layout/Hero';
 import CTABanner from '@/components/sections/CTABanner';
 import AnimateOnScroll from '@/components/ui/AnimateOnScroll';
 import { companyInfo } from '@/data/navigation';
@@ -123,11 +123,10 @@ export default function Contact() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(contactPageJsonLd) }}
       />
-      <PageHero
+      <Hero
         title="Contact"
-        subtitle=""
         backgroundImage="/images/site/front-yard.jpg"
-        breadcrumbs={[{ label: 'Home', to: '/' }, { label: 'Contact' }]}
+        height="reduced"
       />
 
       <section className="py-24 lg:py-32">

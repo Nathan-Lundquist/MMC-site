@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { X } from 'lucide-react';
 import { Dialog, DialogContent, DialogClose, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import PageHero from '@/components/layout/PageHero';
+import Hero from '@/components/layout/Hero';
 import CTABanner from '@/components/sections/CTABanner';
 import AnimateOnScroll from '@/components/ui/AnimateOnScroll';
 import { portfolioItems, portfolioCategories, portfolioCategoryLabels } from '@/data/portfolio';
@@ -17,10 +17,9 @@ export default function Portfolio() {
 
   return (
     <>
-      <PageHero
+      <Hero
         title="Our Work"
-        subtitle=""
-        backgroundImage="/images/site/pool-deck.jpg"
+        backgroundImage="/images/site/pool-aerial.jpg"
         breadcrumbs={[{ label: 'Home', to: '/' }, { label: 'Portfolio' }]}
       />
 
