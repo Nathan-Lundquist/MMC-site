@@ -17,8 +17,9 @@ export default function Header() {
   const pathname = usePathname();
   const scrolled = scrollY > 20;
 
-  const hasDarkHero = pathname !== '/';
-  const lightText = hasDarkHero && !scrolled;
+  // Every marketing page now opens with the shared dark-overlay Hero (U3),
+  // so light header text applies uniformly pre-scroll, with no route exception.
+  const lightText = !scrolled;
 
   useEffect(() => {
     setMobileOpen(false);
