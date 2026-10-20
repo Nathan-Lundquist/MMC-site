@@ -1,7 +1,7 @@
 ---
 title: "feat: Marketing site corporate redesign"
 type: feat
-status: active
+status: completed
 date: 2026-10-16
 origin: docs/brainstorms/2026-10-16-marketing-site-corporate-redesign-requirements.md
 ---
