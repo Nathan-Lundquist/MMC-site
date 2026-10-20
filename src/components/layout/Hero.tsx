@@ -150,7 +150,7 @@ export default function Hero({
       >
         {!isReduced && breadcrumbs && breadcrumbs.length > 0 && (
           <motion.nav aria-label="Breadcrumb" {...fadeUp(0.1)} className="mb-8">
-            <ol className="flex items-center gap-2 text-xs text-white/50">
+            <ol className="flex items-center gap-2 text-xs text-white/70">
               {breadcrumbs.map((crumb, i) => (
                 <li key={i} className="flex items-center gap-2">
                   {i > 0 && (
@@ -159,11 +159,11 @@ export default function Hero({
                     </span>
                   )}
                   {crumb.to ? (
-                    <Link href={crumb.to} className="transition-colors hover:text-white/60">
+                    <Link href={crumb.to} className="transition-colors hover:text-white">
                       {crumb.label}
                     </Link>
                   ) : (
-                    <span className="text-white/55" aria-current="page">
+                    <span className="text-white/70" aria-current="page">
                       {crumb.label}
                     </span>
                   )}
@@ -184,7 +184,7 @@ export default function Hero({
 
         <motion.h1
           {...fadeUp(0.3)}
-          className="font-display text-6xl leading-[0.9] tracking-tight text-white sm:text-7xl md:text-8xl lg:text-9xl xl:text-[10rem]"
+          className="font-display text-5xl leading-[0.9] tracking-tight text-white break-words sm:text-7xl md:text-8xl lg:text-9xl xl:text-[10rem]"
         >
           {title}
         </motion.h1>
