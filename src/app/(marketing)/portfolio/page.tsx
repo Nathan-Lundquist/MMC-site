@@ -19,7 +19,7 @@ export default function Portfolio() {
     <>
       <Hero
         title="Our Work"
-        backgroundImage="/images/site/pool-aerial.jpg"
+        backgroundImage="/images/site/pool-deck.jpg"
         breadcrumbs={[{ label: 'Home', to: '/' }, { label: 'Portfolio' }]}
       />
 

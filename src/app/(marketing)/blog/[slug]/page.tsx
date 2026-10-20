@@ -21,6 +21,12 @@ export function generateStaticParams() {
 
 type Props = { params: Promise<{ slug: string }> };
 
+// Frontmatter `image` isn't schema-validated, so a post can theoretically omit
+// it — Hero itself degrades gracefully to a solid background in that case,
+// and OpenGraph/JSON-LD need the same fallback rather than emitting a broken
+// image URL.
+const FALLBACK_OG_IMAGE = '/images/site/hero.jpg';
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const post = getPostBySlug(slug);
@@ -35,7 +41,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: 'article',
       publishedTime: post.date,
       authors: [post.author],
-      images: [{ url: post.image }],
+      images: [{ url: post.image || FALLBACK_OG_IMAGE }],
     },
   };
 }
@@ -52,7 +58,7 @@ export default async function BlogPost({ params }: Props) {
     '@type': 'Article',
     headline: post.title,
     description: post.description,
-    image: `${companyInfo.url}${post.image}`,
+    image: `${companyInfo.url}${post.image || FALLBACK_OG_IMAGE}`,
     datePublished: post.date,
     author: {
       '@type': 'Person',
