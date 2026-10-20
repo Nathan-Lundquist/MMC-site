@@ -6,6 +6,7 @@ import { ArrowRight, ArrowUpRight, Flower2, Blocks, Lightbulb, Waves, TreePine, 
 import { servicesData } from '@/data/services';
 import { Button } from '@/components/ui/button';
 import AnimateOnScroll, { StaggerContainer, StaggerItem, RevealOnScroll } from '@/components/ui/AnimateOnScroll';
+import { Separator } from '@/components/ui/separator';
 
 const featured = ['hardscape', 'landscape', 'turf', 'outdoor-lighting', 'pool-spa', 'forestry'];
 
@@ -23,7 +24,7 @@ export default function ServiceGrid() {
 
   return (
     <section className="py-20 lg:py-28 bg-secondary relative overflow-hidden">
-      <div className="absolute top-0 left-0 right-0 h-px bg-border" />
+      <Separator className="absolute top-0" />
 
       <div className="mx-auto max-w-7xl px-6">
         {/* Section header */}

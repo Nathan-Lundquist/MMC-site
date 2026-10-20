@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Logo from '@/components/ui/Logo';
+import { Separator } from '@/components/ui/separator';
 import { services, quickLinks, companyInfo } from '@/data/navigation';
 
 export default function Footer() {
@@ -17,7 +18,7 @@ export default function Footer() {
           </p>
         </div>
 
-        <div className="h-px bg-white/10 mb-16" />
+        <Separator className="bg-white/10 mb-16" />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8">
           {/* Hours + Contact */}

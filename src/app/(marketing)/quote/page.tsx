@@ -137,7 +137,7 @@ export default function Quote() {
                             type="text"
                             placeholder="First name"
                             required
-                            className={`rounded-lg ${fieldErrors.firstName ? 'border-red-500' : ''}`}
+                            className={fieldErrors.firstName ? 'border-red-500' : ''}
                             value={formData.firstName}
                             onChange={e => handleChange('firstName', e.target.value)}
                           />
@@ -150,7 +150,7 @@ export default function Quote() {
                             type="text"
                             placeholder="Last name"
                             required
-                            className={`rounded-lg ${fieldErrors.lastName ? 'border-red-500' : ''}`}
+                            className={fieldErrors.lastName ? 'border-red-500' : ''}
                             value={formData.lastName}
                             onChange={e => handleChange('lastName', e.target.value)}
                           />
@@ -165,7 +165,7 @@ export default function Quote() {
                             type="email"
                             placeholder="you@example.com"
                             required
-                            className={`rounded-lg ${fieldErrors.email ? 'border-red-500' : ''}`}
+                            className={fieldErrors.email ? 'border-red-500' : ''}
                             value={formData.email}
                             onChange={e => handleChange('email', e.target.value)}
                           />
@@ -178,7 +178,7 @@ export default function Quote() {
                             type="tel"
                             placeholder="(248) 000-0000"
                             required
-                            className={`rounded-lg ${fieldErrors.phone ? 'border-red-500' : ''}`}
+                            className={fieldErrors.phone ? 'border-red-500' : ''}
                             value={formData.phone}
                             onChange={e => handleChange('phone', e.target.value)}
                           />
@@ -192,7 +192,7 @@ export default function Quote() {
                           type="text"
                           placeholder="Street address, city, state, zip"
                           required
-                          className={`rounded-lg ${fieldErrors.address ? 'border-red-500' : ''}`}
+                          className={fieldErrors.address ? 'border-red-500' : ''}
                           value={formData.address}
                           onChange={e => handleChange('address', e.target.value)}
                         />
@@ -226,7 +226,7 @@ export default function Quote() {
                           id="project-desc"
                           placeholder="Describe your project, goals, timeline..."
                           required
-                          className={`min-h-[140px] rounded-lg ${fieldErrors.description ? 'border-red-500' : ''}`}
+                          className={`min-h-[140px] ${fieldErrors.description ? 'border-red-500' : ''}`}
                           value={formData.description}
                           onChange={e => handleChange('description', e.target.value)}
                         />

@@ -74,16 +74,22 @@ export default function Hero({
   const { mounted, prefersReducedMotion } = useReducedMotionSafe();
   const isReduced = height === "reduced";
 
-  const fadeUp = (delay: number) => ({
-    initial: { opacity: 0, y: 30 } as const,
+  // Generic entrance-animation gate: every animated element in this component
+  // shares the same mounted/reduced-motion dance, just with a different
+  // from/to shape (vertical fade for text, horizontal scale for the accent bar).
+  const enter = <T extends Record<string, number>>(
+    delay: number,
+    from: T,
+    to: T,
+    duration = 0.9
+  ) => ({
+    initial: from,
     animate: mounted
-      ? {
-          opacity: 1,
-          y: 0,
-          transition: prefersReducedMotion ? { duration: 0 } : { duration: 0.9, delay, ease },
-        }
+      ? { ...to, transition: prefersReducedMotion ? { duration: 0 } : { duration, delay, ease } }
       : undefined,
   });
+
+  const fadeUp = (delay: number) => enter(delay, { opacity: 0, y: 30 }, { opacity: 1, y: 0 });
 
   return (
     <section
@@ -196,9 +202,7 @@ export default function Hero({
         )}
 
         <motion.div
-          initial={{ scaleX: 0 }}
-          animate={mounted ? { scaleX: 1 } : undefined}
-          transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.8, delay: 0.55, ease }}
+          {...enter(0.55, { scaleX: 0 }, { scaleX: 1 }, 0.8)}
           className="mt-8 h-1 w-16 origin-left bg-brand"
         />
 

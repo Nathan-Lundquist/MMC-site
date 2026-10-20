@@ -124,12 +124,21 @@ export function Parallax({
   className?: string;
   speed?: number;
 }) {
+  // Scroll-linked parallax (content moving at a different rate than the scroll
+  // itself) is exactly the kind of motion WCAG 2.3.3 flags for vestibular
+  // discomfort, so it respects prefers-reduced-motion too, not just the
+  // autoplaying entrance animations above. No hydration risk here — `speed`
+  // is read directly from `prefersReducedMotion` on every render rather than
+  // gated behind `mounted`, since `useTransform`'s output has no concept of a
+  // one-time "trigger" to withhold (unlike `whileInView`/`animate` above).
+  const { prefersReducedMotion } = useReducedMotionSafe();
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ['start end', 'end start'],
   });
-  const y = useTransform(scrollYProgress, [0, 1], [speed * -80, speed * 80]);
+  const effectiveSpeed = prefersReducedMotion ? 0 : speed;
+  const y = useTransform(scrollYProgress, [0, 1], [effectiveSpeed * -80, effectiveSpeed * 80]);
 
   return (
     <div ref={ref} className={className} style={{ overflow: 'hidden' }}>
@@ -148,6 +157,10 @@ export function RevealOnScroll({
   className?: string;
   direction?: 'up' | 'left' | 'right';
 }) {
+  // Same mounted/reduced-motion gate as `AnimateOnScroll` above — see its doc
+  // comment for why `whileInView` must be withheld until `mounted` rather than
+  // always supplied with only `transition` varying.
+  const { mounted, prefersReducedMotion } = useReducedMotionSafe();
   const clipMap = {
     up: { hidden: 'inset(100% 0 0 0)', visible: 'inset(0 0 0 0)' },
     left: { hidden: 'inset(0 100% 0 0)', visible: 'inset(0 0 0 0)' },
@@ -159,9 +172,9 @@ export function RevealOnScroll({
     <motion.div
       className={className}
       initial={{ clipPath: clip.hidden, opacity: 0 }}
-      whileInView={{ clipPath: clip.visible, opacity: 1 }}
+      whileInView={mounted ? { clipPath: clip.visible, opacity: 1 } : undefined}
       viewport={{ once: true, margin: '80px' }}
-      transition={{ duration: 1.1, ease: ease }}
+      transition={prefersReducedMotion ? { duration: 0 } : { duration: 1.1, ease: ease }}
     >
       {children}
     </motion.div>

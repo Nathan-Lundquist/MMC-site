@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { MapPin, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AnimateOnScroll, { RevealOnScroll } from '@/components/ui/AnimateOnScroll';
+import { Separator } from '@/components/ui/separator';
 
 const areas = [
   'Rochester Hills', 'Troy', 'Shelby Twp', 'Sterling Heights',
@@ -15,7 +16,7 @@ const areas = [
 export default function ServiceArea() {
   return (
     <section className="py-20 lg:py-28 bg-secondary relative overflow-hidden">
-      <div className="absolute top-0 left-0 right-0 h-px bg-border" />
+      <Separator className="absolute top-0" />
 
       <div className="mx-auto max-w-7xl px-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">

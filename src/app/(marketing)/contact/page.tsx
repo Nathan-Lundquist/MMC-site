@@ -169,7 +169,7 @@ export default function Contact() {
                             type="text"
                             placeholder="Your full name"
                             required
-                            className={`rounded-lg ${fieldErrors.name ? 'border-red-500' : ''}`}
+                            className={fieldErrors.name ? 'border-red-500' : ''}
                             value={formData.name}
                             onChange={e => handleChange('name', e.target.value)}
                           />
@@ -182,7 +182,7 @@ export default function Contact() {
                             type="email"
                             placeholder="you@example.com"
                             required
-                            className={`rounded-lg ${fieldErrors.email ? 'border-red-500' : ''}`}
+                            className={fieldErrors.email ? 'border-red-500' : ''}
                             value={formData.email}
                             onChange={e => handleChange('email', e.target.value)}
                           />
@@ -196,7 +196,7 @@ export default function Contact() {
                             id="phone"
                             type="tel"
                             placeholder="(248) 000-0000"
-                            className={`rounded-lg ${fieldErrors.phone ? 'border-red-500' : ''}`}
+                            className={fieldErrors.phone ? 'border-red-500' : ''}
                             value={formData.phone}
                             onChange={e => handleChange('phone', e.target.value)}
                           />
@@ -209,7 +209,7 @@ export default function Contact() {
                             type="text"
                             placeholder="How can we help?"
                             required
-                            className={`rounded-lg ${fieldErrors.subject ? 'border-red-500' : ''}`}
+                            className={fieldErrors.subject ? 'border-red-500' : ''}
                             value={formData.subject}
                             onChange={e => handleChange('subject', e.target.value)}
                           />
@@ -222,7 +222,7 @@ export default function Contact() {
                           id="message"
                           placeholder="Tell us about your project..."
                           required
-                          className={`min-h-[160px] rounded-lg ${fieldErrors.message ? 'border-red-500' : ''}`}
+                          className={`min-h-[160px] ${fieldErrors.message ? 'border-red-500' : ''}`}
                           value={formData.message}
                           onChange={e => handleChange('message', e.target.value)}
                         />
