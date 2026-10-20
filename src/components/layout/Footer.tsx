@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Logo from '@/components/ui/Logo';
+import { Separator } from '@/components/ui/separator';
 import { services, quickLinks, companyInfo } from '@/data/navigation';
 
 export default function Footer() {
@@ -10,14 +11,14 @@ export default function Footer() {
         {/* Top — brand statement */}
         <div className="mb-16 lg:mb-20">
           <Logo className="text-white mb-8" />
-          <p className="font-display text-3xl lg:text-4xl text-white/80 max-w-lg leading-[1.15]">
+          <p className="font-display text-4xl lg:text-5xl text-white/80 max-w-lg leading-[1.15]">
             Dream it. Design it.
             <br />
             Build it. <span className="text-brand italic">Enjoy it.</span>
           </p>
         </div>
 
-        <div className="divider-organic mb-16" />
+        <Separator className="bg-white/10 mb-16" />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8">
           {/* Hours + Contact */}

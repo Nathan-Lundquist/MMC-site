@@ -1,4 +1,4 @@
-import HeroSection from '@/components/sections/HeroSection';
+import Hero from '@/components/layout/Hero';
 import StatsBar from '@/components/sections/StatsBar';
 import ServiceGrid from '@/components/sections/ServiceGrid';
 import WhyChooseUs from '@/components/sections/WhyChooseUs';
@@ -78,7 +78,16 @@ export default function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }}
       />
-      <HeroSection />
+      <Hero
+        title="Hardscaping & landscapes built to last"
+        subtitle="Full-service design, construction, and year-round care. Serving Oakland & Macomb counties with premium craftsmanship."
+        eyebrow="Est. 2000 · Rochester Hills"
+        backgroundImage="/images/site/hero-night.jpg"
+        ctas={[
+          { label: 'Free Estimate', href: '/quote', variant: 'default' },
+          { label: companyInfo.phone, href: companyInfo.phoneHref, variant: 'outline-white' },
+        ]}
+      />
       <StatsBar />
       <ServiceGrid />
       <WhyChooseUs />

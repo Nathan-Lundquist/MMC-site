@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import PageHero from '@/components/layout/PageHero';
+import Hero from '@/components/layout/Hero';
 import CTABanner from '@/components/sections/CTABanner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -21,6 +21,12 @@ export function generateStaticParams() {
 
 type Props = { params: Promise<{ slug: string }> };
 
+// Frontmatter `image` isn't schema-validated, so a post can theoretically omit
+// it — Hero itself degrades gracefully to a solid background in that case,
+// and OpenGraph/JSON-LD need the same fallback rather than emitting a broken
+// image URL.
+const FALLBACK_OG_IMAGE = '/images/site/hero.jpg';
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const post = getPostBySlug(slug);
@@ -35,7 +41,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: 'article',
       publishedTime: post.date,
       authors: [post.author],
-      images: [{ url: post.image }],
+      images: [{ url: post.image || FALLBACK_OG_IMAGE }],
     },
   };
 }
@@ -52,7 +58,7 @@ export default async function BlogPost({ params }: Props) {
     '@type': 'Article',
     headline: post.title,
     description: post.description,
-    image: `${companyInfo.url}${post.image}`,
+    image: `${companyInfo.url}${post.image || FALLBACK_OG_IMAGE}`,
     datePublished: post.date,
     author: {
       '@type': 'Person',
@@ -73,7 +79,7 @@ export default async function BlogPost({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <PageHero
+      <Hero
         title="Blog"
         subtitle={post.title}
         backgroundImage={post.image}
@@ -117,7 +123,7 @@ export default async function BlogPost({ params }: Props) {
           </div>
 
           {/* Title */}
-          <h1 className="font-display text-3xl lg:text-4xl tracking-tight mb-10 leading-tight">
+          <h1 className="font-display text-4xl lg:text-5xl tracking-tight mb-10 leading-tight">
             {post.title}
           </h1>
 
@@ -148,7 +154,7 @@ export default async function BlogPost({ params }: Props) {
                 img: ({ src, alt }) => {
                   const imgSrc = typeof src === 'string' ? src : '';
                   return (
-                    <span className="block my-8 rounded-2xl overflow-hidden">
+                    <span className="block my-8 rounded-lg overflow-hidden">
                       <Image
                         src={imgSrc}
                         alt={alt || ''}
@@ -167,13 +173,13 @@ export default async function BlogPost({ params }: Props) {
 
           {/* Back to Blog */}
           <div className="mt-16 pt-8 border-t border-border flex items-center justify-between">
-            <Button asChild variant="outline">
+            <Button asChild variant="outline" className="rounded-lg">
               <Link href="/blog">
                 <ArrowLeft size={14} />
                 All Articles
               </Link>
             </Button>
-            <Button asChild>
+            <Button asChild className="rounded-lg">
               <Link href="/quote">
                 Get a Free Estimate
                 <ArrowRight size={14} />

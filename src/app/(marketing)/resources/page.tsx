@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Gift, CreditCard, BadgeDollarSign, HelpCircle } from 'lucide-react';
-import PageHero from '@/components/layout/PageHero';
+import Hero from '@/components/layout/Hero';
 import CTABanner from '@/components/sections/CTABanner';
 import { StaggerContainer, StaggerItem } from '@/components/ui/AnimateOnScroll';
 
@@ -35,9 +35,8 @@ const resources = [
 export default function Resources() {
   return (
     <>
-      <PageHero
+      <Hero
         title="Resources"
-        subtitle=""
         backgroundImage="/images/site/lighting-fountain.jpg"
         breadcrumbs={[{ label: 'Home', to: '/' }, { label: 'Resources' }]}
       />
@@ -47,7 +46,7 @@ export default function Resources() {
           <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {resources.map(r => (
               <StaggerItem key={r.title}>
-                <div className="bg-card rounded-2xl border border-border p-8 lg:p-12 h-full">
+                <div className="bg-card rounded-lg border border-border p-8 lg:p-12 h-full">
                   <div className="w-14 h-14 rounded-full bg-brand flex items-center justify-center mb-6">
                     <r.icon size={22} className="text-white" strokeWidth={1.5} />
                   </div>

@@ -48,10 +48,10 @@ function AnimatedNumber({ target, suffix }: { target: number; suffix: string }) 
 
   return (
     <div ref={ref} className="font-display tabular-nums">
-      <span className="text-5xl sm:text-6xl lg:text-7xl tracking-tight leading-none">
+      <span className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl tracking-tight leading-none">
         {count.toLocaleString()}
       </span>
-      {suffix && <span className="text-brand text-5xl sm:text-6xl lg:text-7xl">{suffix}</span>}
+      {suffix && <span className="text-brand text-5xl sm:text-6xl lg:text-7xl xl:text-8xl">{suffix}</span>}
     </div>
   );
 }
