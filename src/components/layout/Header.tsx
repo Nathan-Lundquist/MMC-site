@@ -9,11 +9,16 @@ import { Button } from '@/components/ui/button';
 import Logo from '@/components/ui/Logo';
 import { services, companyInfo } from '@/data/navigation';
 import { useScrollPosition } from '@/hooks/useScrollPosition';
+import { useReducedMotionSafe } from '@/hooks/useReducedMotionSafe';
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
   const scrollY = useScrollPosition();
+  // The mobile menu only ever renders after a click (`mobileOpen` starts `false` and is
+  // never true during SSR/hydration), so there's no hydration-mismatch risk here — the
+  // "safe" hook is used anyway for one consistent reduced-motion pattern across the app.
+  const { prefersReducedMotion } = useReducedMotionSafe();
   const pathname = usePathname();
   const scrolled = scrollY > 20;
 
@@ -164,7 +169,7 @@ export default function Header() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
             className="lg:hidden fixed inset-0 top-0 bg-background z-40"
           >
             <div className="flex flex-col h-full pt-20">

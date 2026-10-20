@@ -2,10 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import type { VariantProps } from "class-variance-authority";
 import { Button, type buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useReducedMotionSafe } from "@/hooks/useReducedMotionSafe";
 
 const ease = [0.33, 1, 0.68, 1] as const;
 
@@ -63,17 +64,25 @@ export default function Hero({
   height = "full",
   ctas,
 }: HeroProps) {
-  const prefersReducedMotion = useReducedMotion();
+  // `useReducedMotionSafe` (not Framer Motion's `useReducedMotion` directly) is required
+  // here: the raw hook resolves the media query synchronously on the client's very first
+  // render, which differs from the server's render and throws a hydration-mismatch
+  // warning whenever reduced motion is on. See the hook's own doc comment for details —
+  // in short, `animate` must stay withheld (`undefined`) until `mounted` is `true`, so
+  // the entrance animation is only ever triggered once, already carrying the correct
+  // (possibly zero-duration) transition, per R10.
+  const { mounted, prefersReducedMotion } = useReducedMotionSafe();
   const isReduced = height === "reduced";
 
-  // Entrance animation, staggered by delay. When the user prefers reduced motion,
-  // `initial: false` skips the mount animation entirely and the element renders
-  // directly in its `animate` state — no transition plays, per R10.
   const fadeUp = (delay: number) => ({
-    initial: prefersReducedMotion ? false : ({ opacity: 0, y: 30 } as const),
-    animate: prefersReducedMotion
-      ? { opacity: 1, y: 0 }
-      : { opacity: 1, y: 0, transition: { duration: 0.9, delay, ease } },
+    initial: { opacity: 0, y: 30 } as const,
+    animate: mounted
+      ? {
+          opacity: 1,
+          y: 0,
+          transition: prefersReducedMotion ? { duration: 0 } : { duration: 0.9, delay, ease },
+        }
+      : undefined,
   });
 
   return (
@@ -187,8 +196,8 @@ export default function Hero({
         )}
 
         <motion.div
-          initial={prefersReducedMotion ? false : { scaleX: 0 }}
-          animate={{ scaleX: 1 }}
+          initial={{ scaleX: 0 }}
+          animate={mounted ? { scaleX: 1 } : undefined}
           transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.8, delay: 0.55, ease }}
           className="mt-8 h-1 w-16 origin-left bg-brand"
         />
