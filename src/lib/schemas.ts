@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { JobCategory } from "@prisma/client";
+import { JobCategory, ChangeRequestStatus } from "@prisma/client";
 
 const timeEntrySchema = z.object({
   startTime: z.string(),
@@ -200,4 +200,17 @@ export const landscapeMaterialUpdateSchema = z.object({
   name: z.string().min(1).max(200).optional(),
   unit: z.string().max(50).optional(),
   active: z.boolean().optional(),
+});
+
+// --- Change request schemas ---
+
+export const changeRequestCreateSchema = z.object({
+  note: z.string().trim().min(1, "Note is required").max(2000),
+  page: z.string().trim().min(1, "Page is required").max(300),
+});
+
+export const changeRequestStatusSchema = z.object({
+  status: z.nativeEnum(ChangeRequestStatus, {
+    message: "Status must be OPEN or DONE",
+  }),
 });
