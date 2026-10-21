@@ -22,9 +22,21 @@ export function ChangeRequestWidget() {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const inFlightRef = useRef(false);
+  // Pathname at the moment the widget opened, not the live value — the widget
+  // stays mounted across client-side navigation, so reading usePathname() at
+  // submit time would tag the note with wherever the user navigated to next,
+  // not the page they were looking at when they started composing it.
+  const capturedPathRef = useRef(pathname);
 
   useEffect(() => {
-    if (open) textareaRef.current?.focus();
+    if (open) {
+      capturedPathRef.current = pathname;
+      textareaRef.current?.focus();
+    }
+    // Only re-capture when the widget transitions open; `pathname` itself must
+    // not be a dependency here, or navigating while open would re-capture it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   useEffect(() => {
@@ -50,7 +62,10 @@ export function ChangeRequestWidget() {
     trimmed.length > 0 && trimmed.length <= MAX_CHANGE_REQUEST_NOTE_LENGTH && !submitting;
 
   async function handleSubmit() {
-    if (!canSubmit) return;
+    // Synchronous guard against a double-click/double-tap landing before the
+    // `submitting`-state-driven disabled prop has re-rendered.
+    if (!canSubmit || inFlightRef.current) return;
+    inFlightRef.current = true;
 
     if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     setFeedback(null);
@@ -60,7 +75,7 @@ export function ChangeRequestWidget() {
       const res = await fetch("/api/change-requests", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ note: trimmed, page: pathname }),
+        body: JSON.stringify({ note: trimmed, page: capturedPathRef.current }),
       });
 
       if (!res.ok) {
@@ -74,6 +89,7 @@ export function ChangeRequestWidget() {
       setFeedback({ type: "error", text: "Couldn't save that — try again." });
     } finally {
       setSubmitting(false);
+      inFlightRef.current = false;
     }
   }
 

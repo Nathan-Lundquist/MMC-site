@@ -59,13 +59,24 @@ export async function POST(req: NextRequest) {
         subject: `Change Request: ${page.slice(0, 80)}`,
         html,
       });
+    } catch (err) {
+      console.error("Failed to send change-request notification email", {
+        changeRequestId: changeRequest.id,
+        error: err instanceof Error ? err.message : err,
+      });
+      return;
+    }
 
+    // Separate try/catch: a failure here means the email *did* send, so it
+    // shouldn't be logged or surfaced as a notification failure — only the
+    // "notifiedAt" bookkeeping didn't land.
+    try {
       await prisma.changeRequest.update({
         where: { id: changeRequest.id },
         data: { notifiedAt: new Date() },
       });
     } catch (err) {
-      console.error("Failed to send change-request notification email", {
+      console.error("Change-request email sent but notifiedAt update failed", {
         changeRequestId: changeRequest.id,
         error: err instanceof Error ? err.message : err,
       });

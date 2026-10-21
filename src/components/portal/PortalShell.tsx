@@ -33,7 +33,7 @@ import {
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChangeRequestWidget } from "@/components/portal/ChangeRequestWidget";
-import { CHANGE_REQUEST_ROLES } from "@/lib/constants";
+import { CHANGE_REQUEST_ROLES, MANAGER_VISIBLE_ROLES } from "@/lib/constants";
 
 interface PortalUser {
   id: string;
@@ -75,7 +75,7 @@ const NAV_SECTIONS: NavSection[] = [
       { href: "/portal/customers", label: "All Customers", icon: Users },
       { href: "/portal/breakdown", label: "Breakdown", icon: BarChart3 },
       { href: "/portal/costing", label: "Costing", icon: DollarSign },
-      { href: "/portal/landscape/settings", label: "Landscape Settings", icon: Settings, allowedRoles: ["ADMIN", "MANAGER"] },
+      { href: "/portal/landscape/settings", label: "Landscape Settings", icon: Settings, allowedRoles: MANAGER_VISIBLE_ROLES },
     ],
   },
   {
@@ -90,19 +90,19 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: "/portal/snow", label: "Storms", icon: CloudSnow },
       { href: "/portal/snow/log", label: "Log Visit", icon: ClipboardPlus },
-      { href: "/portal/snow/settings", label: "Snow Settings", icon: Settings, allowedRoles: ["ADMIN", "MANAGER"] },
+      { href: "/portal/snow/settings", label: "Snow Settings", icon: Settings, allowedRoles: MANAGER_VISIBLE_ROLES },
     ],
   },
   {
     heading: "Time",
     items: [
       { href: "/portal/time", label: "My Clock", icon: Timer, exact: true },
-      { href: "/portal/time/log", label: "Time Log", icon: CalendarClock, allowedRoles: ["ADMIN", "MANAGER"] },
+      { href: "/portal/time/log", label: "Time Log", icon: CalendarClock, allowedRoles: MANAGER_VISIBLE_ROLES },
     ],
   },
   {
     heading: "Admin",
-    allowedRoles: ["ADMIN", "MANAGER"],
+    allowedRoles: MANAGER_VISIBLE_ROLES,
     items: [
       { href: "/portal/machines", label: "Maintenance", icon: Tractor },
       { href: "/portal/employees", label: "All Employees", icon: UserCog },

@@ -1,25 +1,24 @@
 "use client";
 
 import { useState } from "react";
+import type { ChangeRequestStatus } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/portal/StatusBadge";
 import { Loader2 } from "lucide-react";
-
-type Status = "OPEN" | "DONE";
 
 export function ChangeRequestStatusToggle({
   id,
   initialStatus,
 }: {
   id: string;
-  initialStatus: Status;
+  initialStatus: ChangeRequestStatus;
 }) {
-  const [status, setStatus] = useState<Status>(initialStatus);
+  const [status, setStatus] = useState<ChangeRequestStatus>(initialStatus);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState(false);
 
   async function toggle() {
-    const next: Status = status === "OPEN" ? "DONE" : "OPEN";
+    const next: ChangeRequestStatus = status === "OPEN" ? "DONE" : "OPEN";
     const previous = status;
 
     setStatus(next);
