@@ -28,9 +28,11 @@ import {
   FileBarChart,
   Kanban,
   Leaf,
+  MessageSquarePlus,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { ChangeRequestWidget } from "@/components/portal/ChangeRequestWidget";
 
 interface PortalUser {
   id: string;
@@ -44,6 +46,8 @@ interface NavItem {
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   adminOnly?: boolean;
+  /** Stricter than adminOnly — ADMIN role only, excludes MANAGER. */
+  strictAdminOnly?: boolean;
   exact?: boolean;
 }
 
@@ -101,6 +105,7 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: "/portal/machines", label: "Maintenance", icon: Tractor },
       { href: "/portal/employees", label: "All Employees", icon: UserCog },
+      { href: "/portal/change-requests", label: "Change Requests", icon: MessageSquarePlus, strictAdminOnly: true },
       { href: "/portal/upload", label: "Upload Data", icon: Upload },
       { href: "/portal/admin", label: "Current Admin", icon: Shield },
       { href: "/portal/settings", label: "Settings", icon: Settings },
@@ -181,6 +186,7 @@ export function PortalShell({
                 <div className="space-y-0.5">
                   {section.items.map((item) => {
                     if (item.adminOnly && !["ADMIN", "MANAGER"].includes(user.role)) return null;
+                    if (item.strictAdminOnly && user.role !== "ADMIN") return null;
                     const active =
                       item.href === "/portal" || item.exact
                         ? pathname === item.href
@@ -260,6 +266,8 @@ export function PortalShell({
         {/* Page content */}
         <main className="p-4 lg:p-6 max-w-6xl">{children}</main>
       </div>
+
+      {user.role === "ADMIN" && <ChangeRequestWidget />}
     </div>
   );
 }
