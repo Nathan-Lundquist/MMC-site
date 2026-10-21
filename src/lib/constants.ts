@@ -5,6 +5,8 @@ export const STATUS_COLORS: Record<string, string> = {
   INVOICED: "bg-brand/10 text-brand",
   PAID: "bg-emerald-100 text-emerald-800",
   CANCELLED: "bg-destructive/10 text-destructive",
+  OPEN: "bg-amber-100 text-amber-800",
+  DONE: "bg-emerald-100 text-emerald-800",
 };
 
 export const JOB_CATEGORIES = [
