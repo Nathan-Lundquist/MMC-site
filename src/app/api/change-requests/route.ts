@@ -1,15 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/api-auth";
-import { sendMail } from "@/lib/mail";
+import { sendMail, escapeHtml as esc } from "@/lib/mail";
 import { changeRequestCreateSchema } from "@/lib/schemas";
-
-const esc = (s: string) =>
-  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+import { CHANGE_REQUEST_ROLES } from "@/lib/constants";
 
 // POST /api/change-requests — ADMIN submits a page-tagged change request
 export async function POST(req: NextRequest) {
-  const { session, error } = await requireAuth(["ADMIN"]);
+  const { session, error } = await requireAuth([...CHANGE_REQUEST_ROLES]);
   if (error) return error;
 
   const body = await req.json();
@@ -34,9 +32,18 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  // Best-effort email notification — never blocks or fails the response above.
-  const notifyEmail = process.env.CHANGE_REQUEST_NOTIFY_EMAIL;
-  if (notifyEmail) {
+  // Best-effort email notification, deferred until after the response is sent —
+  // never blocks or fails the create above, and doesn't add mail-provider
+  // latency to every submission.
+  after(async () => {
+    const notifyEmail = process.env.CHANGE_REQUEST_NOTIFY_EMAIL;
+    if (!notifyEmail) {
+      console.error("CHANGE_REQUEST_NOTIFY_EMAIL is not set — skipping notification", {
+        changeRequestId: changeRequest.id,
+      });
+      return;
+    }
+
     try {
       const html = `
 <h2>New Change Request</h2>
@@ -63,11 +70,7 @@ export async function POST(req: NextRequest) {
         error: err instanceof Error ? err.message : err,
       });
     }
-  } else {
-    console.error("CHANGE_REQUEST_NOTIFY_EMAIL is not set — skipping notification", {
-      changeRequestId: changeRequest.id,
-    });
-  }
+  });
 
   return NextResponse.json(changeRequest, { status: 201 });
 }

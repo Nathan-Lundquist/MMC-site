@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { JobCategory, ChangeRequestStatus } from "@prisma/client";
+import { MAX_CHANGE_REQUEST_NOTE_LENGTH } from "@/lib/constants";
 
 const timeEntrySchema = z.object({
   startTime: z.string(),
@@ -205,7 +206,7 @@ export const landscapeMaterialUpdateSchema = z.object({
 // --- Change request schemas ---
 
 export const changeRequestCreateSchema = z.object({
-  note: z.string().trim().min(1, "Note is required").max(2000),
+  note: z.string().trim().min(1, "Note is required").max(MAX_CHANGE_REQUEST_NOTE_LENGTH),
   page: z.string().trim().min(1, "Page is required").max(300),
 });
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sendMail } from "@/lib/mail";
+import { sendMail, escapeHtml as esc } from "@/lib/mail";
 
 const RATE_LIMIT_WINDOW = 900_000; // 15 minutes
 const RATE_LIMIT_MAX = 3;
@@ -82,8 +82,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, errors }, { status: 422 });
   }
 
-  const esc = (s: string) =>
-    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   const descriptionHtml = esc(description).replace(/\n/g, "<br>");
   const fullName = `${firstName} ${lastName}`;
   const serviceLabel = SERVICE_LABELS[serviceType] ?? serviceType;

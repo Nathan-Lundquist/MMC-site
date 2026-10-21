@@ -1,3 +1,7 @@
+/** Escape user-supplied text before interpolating it into an HTML email body. */
+export const escapeHtml = (s: string) =>
+  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
 const TENANT_ID = process.env.AZURE_TENANT_ID!;
 const CLIENT_ID = process.env.AZURE_CLIENT_ID!;
 const CLIENT_SECRET = process.env.AZURE_CLIENT_SECRET!;

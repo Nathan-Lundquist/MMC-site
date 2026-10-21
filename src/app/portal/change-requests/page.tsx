@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { Card } from "@/components/ui/card";
 import { ChangeRequestStatusToggle } from "@/components/portal/change-requests/ChangeRequestStatusToggle";
 import { MessageSquarePlus, MailWarning } from "lucide-react";
+import { CHANGE_REQUEST_ROLES } from "@/lib/constants";
 
 function formatTimestamp(date: Date) {
   return date.toLocaleString("en-US", {
@@ -16,7 +17,7 @@ function formatTimestamp(date: Date) {
 
 export default async function ChangeRequestsPage() {
   const session = await auth();
-  if (session?.user.role !== "ADMIN") {
+  if (!(CHANGE_REQUEST_ROLES as readonly string[]).includes(session?.user.role ?? "")) {
     redirect("/portal");
   }
 
@@ -25,8 +26,11 @@ export default async function ChangeRequestsPage() {
     orderBy: { createdAt: "desc" },
   });
 
-  const open = requests.filter((r) => r.status === "OPEN");
-  const done = requests.filter((r) => r.status === "DONE");
+  const open: typeof requests = [];
+  const done: typeof requests = [];
+  for (const r of requests) {
+    (r.status === "OPEN" ? open : done).push(r);
+  }
 
   function renderRow(r: (typeof requests)[number]) {
     return (

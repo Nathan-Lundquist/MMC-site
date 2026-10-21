@@ -33,6 +33,7 @@ import {
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChangeRequestWidget } from "@/components/portal/ChangeRequestWidget";
+import { CHANGE_REQUEST_ROLES } from "@/lib/constants";
 
 interface PortalUser {
   id: string;
@@ -45,16 +46,16 @@ interface NavItem {
   href: string;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
-  adminOnly?: boolean;
-  /** Stricter than adminOnly — ADMIN role only, excludes MANAGER. */
-  strictAdminOnly?: boolean;
+  /** When set, only these roles see this item. Omit to show it to everyone. */
+  allowedRoles?: readonly string[];
   exact?: boolean;
 }
 
 interface NavSection {
   heading?: string;
   items: NavItem[];
-  adminOnly?: boolean;
+  /** When set, only these roles see this section. Omit to show it to everyone. */
+  allowedRoles?: readonly string[];
 }
 
 const NAV_SECTIONS: NavSection[] = [
@@ -74,7 +75,7 @@ const NAV_SECTIONS: NavSection[] = [
       { href: "/portal/customers", label: "All Customers", icon: Users },
       { href: "/portal/breakdown", label: "Breakdown", icon: BarChart3 },
       { href: "/portal/costing", label: "Costing", icon: DollarSign },
-      { href: "/portal/landscape/settings", label: "Landscape Settings", icon: Settings, adminOnly: true },
+      { href: "/portal/landscape/settings", label: "Landscape Settings", icon: Settings, allowedRoles: ["ADMIN", "MANAGER"] },
     ],
   },
   {
@@ -89,23 +90,23 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: "/portal/snow", label: "Storms", icon: CloudSnow },
       { href: "/portal/snow/log", label: "Log Visit", icon: ClipboardPlus },
-      { href: "/portal/snow/settings", label: "Snow Settings", icon: Settings, adminOnly: true },
+      { href: "/portal/snow/settings", label: "Snow Settings", icon: Settings, allowedRoles: ["ADMIN", "MANAGER"] },
     ],
   },
   {
     heading: "Time",
     items: [
       { href: "/portal/time", label: "My Clock", icon: Timer, exact: true },
-      { href: "/portal/time/log", label: "Time Log", icon: CalendarClock, adminOnly: true },
+      { href: "/portal/time/log", label: "Time Log", icon: CalendarClock, allowedRoles: ["ADMIN", "MANAGER"] },
     ],
   },
   {
     heading: "Admin",
-    adminOnly: true,
+    allowedRoles: ["ADMIN", "MANAGER"],
     items: [
       { href: "/portal/machines", label: "Maintenance", icon: Tractor },
       { href: "/portal/employees", label: "All Employees", icon: UserCog },
-      { href: "/portal/change-requests", label: "Change Requests", icon: MessageSquarePlus, strictAdminOnly: true },
+      { href: "/portal/change-requests", label: "Change Requests", icon: MessageSquarePlus, allowedRoles: CHANGE_REQUEST_ROLES },
       { href: "/portal/upload", label: "Upload Data", icon: Upload },
       { href: "/portal/admin", label: "Current Admin", icon: Shield },
       { href: "/portal/settings", label: "Settings", icon: Settings },
@@ -173,8 +174,7 @@ export function PortalShell({
         {/* Nav */}
         <nav className="flex-1 py-2 px-2 overflow-y-auto">
           {NAV_SECTIONS.map((section, si) => {
-            const isAdmin = section.adminOnly;
-            if (isAdmin && !["ADMIN", "MANAGER"].includes(user.role)) return null;
+            if (section.allowedRoles && !section.allowedRoles.includes(user.role)) return null;
 
             return (
               <div key={si} className={si > 0 ? "mt-4" : ""}>
@@ -185,8 +185,7 @@ export function PortalShell({
                 )}
                 <div className="space-y-0.5">
                   {section.items.map((item) => {
-                    if (item.adminOnly && !["ADMIN", "MANAGER"].includes(user.role)) return null;
-                    if (item.strictAdminOnly && user.role !== "ADMIN") return null;
+                    if (item.allowedRoles && !item.allowedRoles.includes(user.role)) return null;
                     const active =
                       item.href === "/portal" || item.exact
                         ? pathname === item.href
@@ -267,7 +266,7 @@ export function PortalShell({
         <main className="p-4 lg:p-6 max-w-6xl">{children}</main>
       </div>
 
-      {user.role === "ADMIN" && <ChangeRequestWidget />}
+      {(CHANGE_REQUEST_ROLES as readonly string[]).includes(user.role) && <ChangeRequestWidget />}
     </div>
   );
 }

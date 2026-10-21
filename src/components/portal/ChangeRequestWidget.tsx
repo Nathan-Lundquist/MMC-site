@@ -6,21 +6,22 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { MessageSquarePlus, Loader2, X } from "lucide-react";
+import { MAX_CHANGE_REQUEST_NOTE_LENGTH } from "@/lib/constants";
 
-const MAX_NOTE_LENGTH = 2000;
 const SUCCESS_DISPLAY_MS = 3000;
+
+type Feedback = { type: "success" | "error"; text: string };
 
 export function ChangeRequestWidget() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [note, setNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<Feedback | null>(null);
 
   const triggerRef = useRef<HTMLButtonElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (open) textareaRef.current?.focus();
@@ -28,7 +29,7 @@ export function ChangeRequestWidget() {
 
   useEffect(() => {
     return () => {
-      if (successTimeoutRef.current) clearTimeout(successTimeoutRef.current);
+      if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     };
   }, []);
 
@@ -45,14 +46,14 @@ export function ChangeRequestWidget() {
   }
 
   const trimmed = note.trim();
-  const canSubmit = trimmed.length > 0 && trimmed.length <= MAX_NOTE_LENGTH && !submitting;
+  const canSubmit =
+    trimmed.length > 0 && trimmed.length <= MAX_CHANGE_REQUEST_NOTE_LENGTH && !submitting;
 
   async function handleSubmit() {
     if (!canSubmit) return;
 
-    if (successTimeoutRef.current) clearTimeout(successTimeoutRef.current);
-    setSuccessMsg(null);
-    setErrorMsg(null);
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+    setFeedback(null);
     setSubmitting(true);
 
     try {
@@ -67,10 +68,10 @@ export function ChangeRequestWidget() {
       }
 
       setNote("");
-      setSuccessMsg("Saved — thanks!");
-      successTimeoutRef.current = setTimeout(() => setSuccessMsg(null), SUCCESS_DISPLAY_MS);
+      setFeedback({ type: "success", text: "Saved — thanks!" });
+      feedbackTimeoutRef.current = setTimeout(() => setFeedback(null), SUCCESS_DISPLAY_MS);
     } catch {
-      setErrorMsg("Couldn't save that — try again.");
+      setFeedback({ type: "error", text: "Couldn't save that — try again." });
     } finally {
       setSubmitting(false);
     }
@@ -100,12 +101,15 @@ export function ChangeRequestWidget() {
             onChange={(e) => setNote(e.target.value)}
             placeholder="What should change on this page?"
             className="min-h-[90px] text-sm"
-            maxLength={MAX_NOTE_LENGTH}
+            maxLength={MAX_CHANGE_REQUEST_NOTE_LENGTH}
           />
 
           <div aria-live="polite" className="min-h-[1.25rem] text-xs">
-            {successMsg && <p className="text-emerald-600">{successMsg}</p>}
-            {errorMsg && <p className="text-destructive">{errorMsg}</p>}
+            {feedback && (
+              <p className={feedback.type === "success" ? "text-emerald-600" : "text-destructive"}>
+                {feedback.text}
+              </p>
+            )}
           </div>
 
           <Button

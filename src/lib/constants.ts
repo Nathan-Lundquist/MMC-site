@@ -60,6 +60,12 @@ export const RECEIPT_TYPE_COLORS: Record<string, string> = {
 /** Roles allowed to delete a receipt (shared by the API route and the client UI) */
 export const RECEIPT_DELETE_ROLES = ["ADMIN", "MANAGER"] as const;
 
+/** Roles allowed to submit or review portal change requests (ADMIN only, deliberately excludes MANAGER) */
+export const CHANGE_REQUEST_ROLES = ["ADMIN"] as const;
+
+/** Max length for a change-request note, enforced client-side and server-side */
+export const MAX_CHANGE_REQUEST_NOTE_LENGTH = 2000;
+
 /** Roles allowed to move/advance a job card on the board, and to create jobs from it */
 export const BOARD_MOVE_ROLES = ["ADMIN", "MANAGER", "FOREMAN"] as const;
 
