@@ -1,7 +1,7 @@
 ---
 title: "Portal Change Requests"
 type: feat
-status: active
+status: completed
 date: 2026-10-21
 origin: docs/brainstorms/2026-10-21-portal-change-requests-requirements.md
 ---
