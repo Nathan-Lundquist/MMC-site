@@ -11,6 +11,7 @@ applies_when:
   - "A project has both .env (local-only config) and .env.local (or similar) coexisting, with only one meant to be active"
   - "Running any verification pass that touches the database layer, especially a post-code-review sanity check"
 tags: [nextjs, env-files, env-local, production-safety, dev-server, playwright]
+last_updated: 2026-10-22
 ---
 
 # Next.js .env.local silently overrides .env for next dev, risking production during local testing
@@ -78,3 +79,5 @@ See Guidance above for the fix (explicit export + `/proc/<pid>/environ` verifica
 ## Related
 
 - None yet — first entry in this repo's docs/solutions/.
+
+**Recurred 2026-10-22** during manual verification of the portal change-requests feature (PR #5) — same fix applied (explicit `DATABASE_URL`/`DIRECT_URL` export + `/proc/<pid>/environ` verification before running Playwright against `next dev`), no new findings. The guidance above held up unchanged.
