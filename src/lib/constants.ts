@@ -5,6 +5,8 @@ export const STATUS_COLORS: Record<string, string> = {
   INVOICED: "bg-brand/10 text-brand",
   PAID: "bg-emerald-100 text-emerald-800",
   CANCELLED: "bg-destructive/10 text-destructive",
+  OPEN: "bg-amber-100 text-amber-800",
+  DONE: "bg-emerald-100 text-emerald-800",
 };
 
 export const JOB_CATEGORIES = [
@@ -57,6 +59,15 @@ export const RECEIPT_TYPE_COLORS: Record<string, string> = {
 
 /** Roles allowed to delete a receipt (shared by the API route and the client UI) */
 export const RECEIPT_DELETE_ROLES = ["ADMIN", "MANAGER"] as const;
+
+/** Roles allowed to see admin-only portal nav items (shared across PortalShell's nav config) */
+export const MANAGER_VISIBLE_ROLES = ["ADMIN", "MANAGER"] as const;
+
+/** Roles allowed to submit or review portal change requests (ADMIN only, deliberately excludes MANAGER) */
+export const CHANGE_REQUEST_ROLES = ["ADMIN"] as const;
+
+/** Max length for a change-request note, enforced client-side and server-side */
+export const MAX_CHANGE_REQUEST_NOTE_LENGTH = 2000;
 
 /** Roles allowed to move/advance a job card on the board, and to create jobs from it */
 export const BOARD_MOVE_ROLES = ["ADMIN", "MANAGER", "FOREMAN"] as const;

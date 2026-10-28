@@ -33,6 +33,7 @@ model Employee {
   additionalCrewDetails AdditionalWorkCrewDetail[]
   punchRecords          PunchRecord[]
   receipts              Receipt[]
+  changeRequests        ChangeRequest[]
 
   @@map("employees")
 }
@@ -560,6 +561,26 @@ model PunchExtra {
   createdAt     DateTime    @default(now()) @map("created_at")
 
   @@map("punch_extras")
+}
+
+// ── Portal Change Requests ─────────────────────────────────
+
+enum ChangeRequestStatus {
+  OPEN
+  DONE
+}
+
+model ChangeRequest {
+  id         String              @id @default(cuid())
+  employeeId String              @map("employee_id")
+  employee   Employee            @relation(fields: [employeeId], references: [id])
+  note       String
+  page       String
+  status     ChangeRequestStatus @default(OPEN)
+  notifiedAt DateTime?           @map("notified_at")
+  createdAt  DateTime            @default(now()) @map("created_at")
+
+  @@map("change_requests")
 }
 
 // ── Machine Fleet / Maintenance ───────────────────────────
