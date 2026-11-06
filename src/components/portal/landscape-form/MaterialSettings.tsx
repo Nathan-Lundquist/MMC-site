@@ -21,11 +21,6 @@ interface Material {
   active: boolean;
 }
 
-const KIND_LABELS: Record<Kind, string> = {
-  IN_HOUSE: "In House",
-  OUTSOURCED: "Outsourced",
-};
-
 export function MaterialSettings({ editable = true }: { editable?: boolean }) {
   const [materials, setMaterials] = useState<Material[]>([]);
   const [loading, setLoading] = useState(true);
