@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import PageHero from '@/components/layout/PageHero';
+import Hero from '@/components/layout/Hero';
 import CTABanner from '@/components/sections/CTABanner';
 import AnimateOnScroll, { StaggerContainer, StaggerItem } from '@/components/ui/AnimateOnScroll';
 import { getServiceBySlug, servicesData } from '@/data/services';
@@ -125,7 +125,7 @@ export default async function ServiceDetail({ params }: ServicePageProps) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(buildFAQJsonLd(hardscapeFAQs)) }}
         />
       )}
-      <PageHero
+      <Hero
         title={service.shortTitle}
         subtitle={service.heroSubtitle}
         backgroundImage={service.heroImage}
@@ -146,7 +146,7 @@ export default async function ServiceDetail({ params }: ServicePageProps) {
                   <span className="w-12 h-px bg-brand" />
                   {service.introLabel}
                 </p>
-                <h2 className="font-display text-3xl lg:text-4xl tracking-tight mb-6">
+                <h2 className="font-display text-4xl lg:text-5xl tracking-tight mb-6">
                   {service.introHeading}
                 </h2>
                 <div className="space-y-4 text-muted-foreground leading-relaxed mb-10">
@@ -155,19 +155,19 @@ export default async function ServiceDetail({ params }: ServicePageProps) {
                   ))}
                 </div>
                 <div className="flex gap-3 flex-wrap">
-                  <Button asChild>
+                  <Button asChild className="rounded-lg">
                     <Link href="/quote">
                       Get a Free Estimate
                       <ArrowRight size={16} />
                     </Link>
                   </Button>
-                  <Button asChild variant="outline-brand">
+                  <Button asChild variant="outline-brand" className="rounded-lg">
                     <a href={companyInfo.phoneHref}>Call {companyInfo.phone}</a>
                   </Button>
                 </div>
               </div>
               {service.introImage && (
-                <div className="relative aspect-[3/4] rounded-2xl overflow-hidden">
+                <div className="relative aspect-[3/4] rounded-lg overflow-hidden">
                   <Image src={service.introImage} alt={service.shortTitle} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 50vw" />
                 </div>
               )}
@@ -184,7 +184,7 @@ export default async function ServiceDetail({ params }: ServicePageProps) {
               <span className="w-12 h-px bg-brand" />
               {service.servicesSectionLabel}
             </p>
-            <h2 className="font-display text-4xl lg:text-5xl tracking-tight mb-4">
+            <h2 className="font-display text-5xl lg:text-6xl tracking-tight mb-4">
               {service.servicesSectionHeading}
             </h2>
             <p className="text-muted-foreground max-w-lg">{service.servicesSectionSubtitle}</p>
@@ -193,7 +193,7 @@ export default async function ServiceDetail({ params }: ServicePageProps) {
           <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {service.serviceCards.map(card => (
               <StaggerItem key={card.title}>
-                <div className="bg-card rounded-2xl border border-border overflow-hidden h-full">
+                <div className="bg-card rounded-lg border border-border overflow-hidden h-full">
                   {card.image && (
                     <div className="relative aspect-[16/10]">
                       <Image src={card.image} alt={card.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw" />
@@ -240,14 +240,14 @@ export default async function ServiceDetail({ params }: ServicePageProps) {
                 <span className="w-12 h-px bg-brand" />
                 {service.maintenanceLabel}
               </p>
-              <h2 className="font-display text-4xl lg:text-5xl tracking-tight mb-4">{service.maintenanceHeading}</h2>
+              <h2 className="font-display text-5xl lg:text-6xl tracking-tight mb-4">{service.maintenanceHeading}</h2>
               <p className="text-muted-foreground max-w-lg">{service.maintenanceSubtitle}</p>
             </AnimateOnScroll>
 
             <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {service.maintenanceCards.map(card => (
                 <StaggerItem key={card.title}>
-                  <div className="bg-card rounded-2xl border border-border p-8 lg:p-10 h-full">
+                  <div className="bg-card rounded-lg border border-border p-8 lg:p-10 h-full">
                     <h3 className="font-display text-lg text-foreground mb-3">{card.title}</h3>
                     <p className="text-sm text-muted-foreground leading-relaxed">{card.description}</p>
                     {card.includes && card.includes.length > 0 && (
@@ -276,14 +276,14 @@ export default async function ServiceDetail({ params }: ServicePageProps) {
               <span className="w-12 h-px bg-brand" />
               {service.whyUsLabel}
             </p>
-            <h2 className="font-display text-4xl lg:text-5xl tracking-tight">{service.whyUsHeading}</h2>
+            <h2 className="font-display text-5xl lg:text-6xl tracking-tight">{service.whyUsHeading}</h2>
             <p className="text-white/60 max-w-md mt-4">{service.whyUsSubtitle}</p>
           </AnimateOnScroll>
 
           <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {service.whyUsItems.map(item => (
               <StaggerItem key={item.title}>
-                <div className="bg-white/5 rounded-2xl p-8 h-full">
+                <div className="bg-white/5 rounded-lg p-8 h-full">
                   <h4 className="font-display text-lg text-white mb-2">{item.title}</h4>
                   <p className="text-sm text-white/60 leading-relaxed">{item.description}</p>
                 </div>
@@ -308,7 +308,7 @@ export default async function ServiceDetail({ params }: ServicePageProps) {
                 <span className="w-12 h-px bg-brand" />
                 FAQ
               </p>
-              <h2 className="font-display text-4xl lg:text-5xl tracking-tight">
+              <h2 className="font-display text-5xl lg:text-6xl tracking-tight">
                 Frequently Asked <span className="text-brand italic">Questions</span>
               </h2>
             </AnimateOnScroll>
@@ -316,7 +316,7 @@ export default async function ServiceDetail({ params }: ServicePageProps) {
             <StaggerContainer className="flex flex-col gap-4 max-w-3xl">
               {hardscapeFAQs.map((faq) => (
                 <StaggerItem key={faq.question}>
-                  <div className="bg-card rounded-2xl border border-border p-8">
+                  <div className="bg-card rounded-lg border border-border p-8">
                     <h3 className="font-display text-lg text-foreground mb-3">{faq.question}</h3>
                     <p className="text-sm text-muted-foreground leading-relaxed">{faq.answer}</p>
                   </div>
@@ -335,7 +335,7 @@ export default async function ServiceDetail({ params }: ServicePageProps) {
               <span className="w-12 h-px bg-brand" />
               Explore
             </p>
-            <h2 className="font-display text-4xl lg:text-5xl tracking-tight">
+            <h2 className="font-display text-5xl lg:text-6xl tracking-tight">
               Related <span className="text-brand italic">services</span>
             </h2>
           </AnimateOnScroll>
@@ -345,7 +345,7 @@ export default async function ServiceDetail({ params }: ServicePageProps) {
               <StaggerItem key={rel.slug}>
                 <Link
                   href={`/services/${rel.slug}`}
-                  className="group block bg-card rounded-2xl border border-border overflow-hidden hover:border-brand/30 transition-colors"
+                  className="group block bg-card rounded-lg border border-border overflow-hidden hover:border-brand/30 transition-colors"
                 >
                   <div className="relative aspect-[16/10] overflow-hidden">
                     <Image src={rel.image} alt={rel.title} fill className="object-cover transition-transform duration-700 group-hover:scale-105" sizes="(max-width: 768px) 100vw, 33vw" />

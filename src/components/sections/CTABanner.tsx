@@ -38,7 +38,7 @@ export default function CTABanner({
             className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8"
           >
             <div>
-              <h2 className="font-display text-2xl lg:text-3xl text-foreground mb-2">
+              <h2 className="font-display text-3xl lg:text-4xl text-foreground mb-2">
                 {heading}
               </h2>
               <p className="text-muted-foreground text-[15px]">
@@ -46,14 +46,14 @@ export default function CTABanner({
               </p>
             </div>
             <div className="flex gap-3 flex-wrap flex-shrink-0">
-              <Button asChild size="lg">
+              <Button asChild size="lg" className="rounded-lg">
                 <Link href={primaryTo}>
                   {primaryLabel}
                   <ArrowRight size={16} />
                 </Link>
               </Button>
               {secondaryHref && (
-                <Button asChild variant="outline" size="lg">
+                <Button asChild variant="outline" size="lg" className="rounded-lg">
                   <a href={secondaryHref}>
                     <Phone size={16} />
                     {secondaryLabel}
@@ -75,7 +75,7 @@ export default function CTABanner({
           whileInView={{ opacity: 1, y: 0, scale: 1 }}
           viewport={{ once: true, margin: '80px' }}
           transition={{ duration: 0.9, ease: [0.33, 1, 0.68, 1] }}
-          className="relative bg-foreground rounded-3xl overflow-hidden"
+          className="relative bg-foreground rounded-lg overflow-hidden"
         >
           {/* Subtle brand tint */}
           <div className="absolute inset-0 bg-brand/[0.08]" />
@@ -83,21 +83,21 @@ export default function CTABanner({
           <div className="grid grid-cols-1 lg:grid-cols-2 relative">
             {/* Content */}
             <div className="p-10 lg:p-16 xl:p-20 flex flex-col justify-center">
-              <h2 className="font-display text-3xl lg:text-4xl xl:text-5xl text-white leading-[1.05] mb-5">
+              <h2 className="font-display text-4xl lg:text-5xl xl:text-6xl text-white leading-[1.05] mb-5">
                 {heading}
               </h2>
               <p className="text-white/75 leading-relaxed mb-10 max-w-md text-[15px]">
                 {subtitle}
               </p>
               <div className="flex gap-3 flex-wrap">
-                <Button asChild size="lg">
+                <Button asChild size="lg" className="rounded-lg">
                   <Link href={primaryTo}>
                     {primaryLabel}
                     <ArrowRight size={16} />
                   </Link>
                 </Button>
                 {secondaryHref && (
-                  <Button asChild variant="outline-white" size="lg">
+                  <Button asChild variant="outline-white" size="lg" className="rounded-lg">
                     <a href={secondaryHref}>
                       <Phone size={16} />
                       {secondaryLabel}

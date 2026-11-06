@@ -37,7 +37,7 @@ export default function WhyChooseUs() {
             <span className="w-12 h-px bg-brand" />
             Why Choose Us
           </p>
-          <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl text-foreground leading-[1] max-w-2xl">
+          <h2 className="font-display text-5xl sm:text-6xl lg:text-7xl text-foreground leading-[1] max-w-2xl">
             Trusted by homeowners
             <br />
             for over 25 years
@@ -49,7 +49,7 @@ export default function WhyChooseUs() {
           {/* Image with overlapping accent */}
           <div className="lg:col-span-5 relative">
             <RevealOnScroll direction="left">
-              <div className="rounded-3xl overflow-hidden">
+              <div className="rounded-lg overflow-hidden">
                 <div className="relative aspect-[3/4]">
                   <Image
                     src="/images/site/limestone-wall.jpg"
@@ -64,8 +64,8 @@ export default function WhyChooseUs() {
 
             {/* Floating accent card */}
             <AnimateOnScroll delay={0.3} variant="scale" className="absolute -bottom-6 -right-6 z-10 hidden lg:block">
-              <div className="bg-brand text-white rounded-2xl p-7 shadow-2xl shadow-brand/20">
-                <p className="font-display text-4xl leading-none">25+</p>
+              <div className="bg-brand text-white rounded-lg p-7 shadow-2xl shadow-brand/20">
+                <p className="font-display text-5xl leading-none">25+</p>
                 <p className="text-xs uppercase tracking-[0.2em] text-white/75 mt-2">Years of excellence</p>
               </div>
             </AnimateOnScroll>
@@ -76,7 +76,7 @@ export default function WhyChooseUs() {
             {items.map((item, i) => (
               <StaggerItem key={item.title}>
                 <div className="flex gap-5 items-start group">
-                  <span className="font-display text-3xl text-brand/20 leading-none pt-1 select-none">
+                  <span className="font-display text-4xl text-brand/20 leading-none pt-1 select-none">
                     {String(i + 1).padStart(2, '0')}
                   </span>
                   <div className="flex-1 pb-6 border-b border-border group-last:border-0">

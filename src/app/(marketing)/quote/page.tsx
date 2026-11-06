@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import PageHero from '@/components/layout/PageHero';
+import Hero from '@/components/layout/Hero';
 import AnimateOnScroll from '@/components/ui/AnimateOnScroll';
 import { companyInfo } from '@/data/navigation';
 
@@ -91,11 +91,10 @@ export default function Quote() {
 
   return (
     <>
-      <PageHero
+      <Hero
         title="Free Quote"
-        subtitle=""
         backgroundImage="/images/site/patio-garden.jpg"
-        breadcrumbs={[{ label: 'Home', to: '/' }, { label: 'Free Quote' }]}
+        height="reduced"
       />
 
       <section className="py-24 lg:py-32">
@@ -103,13 +102,13 @@ export default function Quote() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
             {/* Form */}
             <AnimateOnScroll className="lg:col-span-7">
-              <div className="bg-card rounded-2xl border border-border p-8 lg:p-12">
+              <div className="bg-card rounded-lg border border-border p-8 lg:p-12">
                 {submitted ? (
                   <div className="flex flex-col items-center justify-center py-16 text-center">
                     <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mb-6">
                       <CheckCircle className="w-8 h-8 text-green-600" />
                     </div>
-                    <h3 className="font-display text-2xl tracking-tight mb-3">Quote Request Sent</h3>
+                    <h3 className="font-display text-3xl tracking-tight mb-3">Quote Request Sent</h3>
                     <p className="text-sm text-muted-foreground max-w-sm">
                       Thank you! We&apos;ll review your project details and reach out within one business day with your free estimate.
                     </p>
@@ -126,7 +125,7 @@ export default function Quote() {
                       <span className="w-12 h-px bg-brand" />
                       Free Estimate
                     </p>
-                    <h3 className="font-display text-2xl tracking-tight mb-2">Tell us about your project</h3>
+                    <h3 className="font-display text-3xl tracking-tight mb-2">Tell us about your project</h3>
                     <p className="text-sm text-muted-foreground mb-8">Fields marked * are required.</p>
 
                     <form onSubmit={handleSubmit}>
@@ -138,7 +137,7 @@ export default function Quote() {
                             type="text"
                             placeholder="First name"
                             required
-                            className={`rounded-xl ${fieldErrors.firstName ? 'border-red-500' : ''}`}
+                            className={fieldErrors.firstName ? 'border-red-500' : ''}
                             value={formData.firstName}
                             onChange={e => handleChange('firstName', e.target.value)}
                           />
@@ -151,7 +150,7 @@ export default function Quote() {
                             type="text"
                             placeholder="Last name"
                             required
-                            className={`rounded-xl ${fieldErrors.lastName ? 'border-red-500' : ''}`}
+                            className={fieldErrors.lastName ? 'border-red-500' : ''}
                             value={formData.lastName}
                             onChange={e => handleChange('lastName', e.target.value)}
                           />
@@ -166,7 +165,7 @@ export default function Quote() {
                             type="email"
                             placeholder="you@example.com"
                             required
-                            className={`rounded-xl ${fieldErrors.email ? 'border-red-500' : ''}`}
+                            className={fieldErrors.email ? 'border-red-500' : ''}
                             value={formData.email}
                             onChange={e => handleChange('email', e.target.value)}
                           />
@@ -179,7 +178,7 @@ export default function Quote() {
                             type="tel"
                             placeholder="(248) 000-0000"
                             required
-                            className={`rounded-xl ${fieldErrors.phone ? 'border-red-500' : ''}`}
+                            className={fieldErrors.phone ? 'border-red-500' : ''}
                             value={formData.phone}
                             onChange={e => handleChange('phone', e.target.value)}
                           />
@@ -193,7 +192,7 @@ export default function Quote() {
                           type="text"
                           placeholder="Street address, city, state, zip"
                           required
-                          className={`rounded-xl ${fieldErrors.address ? 'border-red-500' : ''}`}
+                          className={fieldErrors.address ? 'border-red-500' : ''}
                           value={formData.address}
                           onChange={e => handleChange('address', e.target.value)}
                         />
@@ -206,7 +205,7 @@ export default function Quote() {
                           required
                           value={formData.serviceType}
                           onChange={e => handleChange('serviceType', e.target.value)}
-                          className={`w-full h-11 px-4 border bg-background text-sm text-foreground font-sans rounded-xl focus:outline-none focus:ring-2 focus:ring-ring transition-shadow ${fieldErrors.serviceType ? 'border-red-500' : 'border-input'}`}
+                          className={`w-full h-11 px-4 border bg-background text-sm text-foreground font-sans rounded-lg focus:outline-none focus:ring-2 focus:ring-ring transition-shadow ${fieldErrors.serviceType ? 'border-red-500' : 'border-input'}`}
                         >
                           <option value="" disabled>Select a service...</option>
                           <option value="turf-management">Turf Management</option>
@@ -227,7 +226,7 @@ export default function Quote() {
                           id="project-desc"
                           placeholder="Describe your project, goals, timeline..."
                           required
-                          className={`min-h-[140px] rounded-xl ${fieldErrors.description ? 'border-red-500' : ''}`}
+                          className={`min-h-[140px] ${fieldErrors.description ? 'border-red-500' : ''}`}
                           value={formData.description}
                           onChange={e => handleChange('description', e.target.value)}
                         />
@@ -256,12 +255,12 @@ export default function Quote() {
                       </fieldset>
 
                       {submitError && (
-                        <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+                        <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
                           {submitError}
                         </div>
                       )}
 
-                      <Button type="submit" size="lg" disabled={isSubmitting}>
+                      <Button type="submit" size="lg" disabled={isSubmitting} className="rounded-lg">
                         {isSubmitting ? (
                           <>
                             <Loader2 className="w-4 h-4 animate-spin mr-2" />
@@ -281,7 +280,7 @@ export default function Quote() {
             <AnimateOnScroll delay={0.1} className="lg:col-span-4 lg:col-start-9 lg:sticky lg:top-24">
               <div className="space-y-6">
                 {/* Trust signals */}
-                <div className="bg-card rounded-2xl border border-border p-8">
+                <div className="bg-card rounded-lg border border-border p-8">
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-6">Why Choose Us</p>
                   <div className="flex flex-col gap-4">
                     {trustSignals.map(s => (
@@ -296,7 +295,7 @@ export default function Quote() {
                 </div>
 
                 {/* Phone CTA */}
-                <div className="bg-foreground rounded-2xl p-8">
+                <div className="bg-foreground rounded-lg p-8">
                   <Phone size={24} className="text-brand mb-4" />
                   <p className="text-xs text-white/70 mb-2 uppercase tracking-wider">Prefer to talk?</p>
                   <a href={companyInfo.phoneHref} className="text-2xl font-bold text-white block mb-1">{companyInfo.phone}</a>

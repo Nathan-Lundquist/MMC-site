@@ -18,14 +18,14 @@ export default function TestimonialPreview() {
               <span className="w-12 h-px bg-brand" />
               Client Stories
             </p>
-            <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl text-foreground leading-[1]">
+            <h2 className="font-display text-5xl sm:text-6xl lg:text-7xl text-foreground leading-[1]">
               What our clients
               <br />
               have to say
             </h2>
           </AnimateOnScroll>
           <AnimateOnScroll delay={0.1}>
-            <Button asChild variant="outline-brand" size="sm">
+            <Button asChild variant="outline-brand" size="sm" className="rounded-lg">
               <Link href="/testimonials">
                 All Reviews
                 <ArrowRight size={14} />
@@ -37,7 +37,7 @@ export default function TestimonialPreview() {
         <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6">
           {featured.map((t, i) => (
             <StaggerItem key={i}>
-              <div className="bg-card rounded-2xl border border-border p-8 lg:p-10 h-full flex flex-col card-hover group relative overflow-hidden">
+              <div className="bg-card rounded-lg border border-border p-8 lg:p-10 h-full flex flex-col card-hover group relative overflow-hidden">
                 {/* Subtle accent on hover */}
                 <div className="absolute top-0 left-0 w-full h-1 bg-brand scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
 
