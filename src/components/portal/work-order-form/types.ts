@@ -43,6 +43,15 @@ export interface MaterialRow {
   material: string;
   qty: string;
   units: string;
+  unitPrice: string;
+}
+
+export interface MaterialCatalogItem {
+  id: string;
+  name: string;
+  unit: string;
+  kind: "IN_HOUSE" | "OUTSOURCED";
+  defaultPrice: string | number | null;
 }
 export interface OutsourcedRow {
   supplier: string;
@@ -87,6 +96,7 @@ export interface WorkOrderInitialData {
   jobCategory: string;
   foremanId: string | null;
   woNumber: string;
+  estimateNumber: string;
   pctComplete: string;
   totalHours: string;
   notes: string;
@@ -109,5 +119,6 @@ export interface WorkOrderInitialData {
 export interface FormProps {
   customers: { id: string; name: string }[];
   employees: { id: string; name: string }[];
+  materialCatalog?: MaterialCatalogItem[];
   initialData?: WorkOrderInitialData;
 }

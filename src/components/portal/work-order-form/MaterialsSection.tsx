@@ -2,7 +2,7 @@
 
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import type { MaterialRow, OutsourcedRow } from "./types";
+import type { MaterialRow, OutsourcedRow, MaterialCatalogItem } from "./types";
 import { updateRow, removeRow } from "./helpers";
 import { MobileInput, Field, SectionHeader, RowDelete, EmptyState, GroupHeading } from "./form-ui";
 
@@ -11,6 +11,7 @@ interface Props {
   setMaterialRows: React.Dispatch<React.SetStateAction<MaterialRow[]>>;
   outsourcedRows: OutsourcedRow[];
   setOutsourcedRows: React.Dispatch<React.SetStateAction<OutsourcedRow[]>>;
+  materialCatalog: MaterialCatalogItem[];
 }
 
 export function MaterialsSection({
@@ -18,14 +19,63 @@ export function MaterialsSection({
   setMaterialRows,
   outsourcedRows,
   setOutsourcedRows,
+  materialCatalog,
 }: Props) {
+  const inHouseCatalog = materialCatalog.filter((m) => m.kind === "IN_HOUSE");
+  const outsourcedCatalog = materialCatalog.filter((m) => m.kind === "OUTSOURCED");
+
+  // When a material name matches a catalog item exactly and the price/units
+  // fields are still empty, auto-fill them from the catalog's last-known
+  // price — the tech can always overwrite it, which re-saves the catalog's
+  // default on submit (see syncMaterialCatalogPrices in work-order-data.ts).
+  function applyInHouseCatalogMatch(i: number, name: string) {
+    const match = inHouseCatalog.find((m) => m.name.toLowerCase() === name.trim().toLowerCase());
+    if (!match) return;
+    setMaterialRows((prev) =>
+      prev.map((r, idx) => {
+        if (idx !== i) return r;
+        return {
+          ...r,
+          units: r.units || match.unit || "",
+          unitPrice: r.unitPrice || (match.defaultPrice != null ? String(match.defaultPrice) : ""),
+        };
+      })
+    );
+  }
+
+  function applyOutsourcedCatalogMatch(i: number, name: string) {
+    const match = outsourcedCatalog.find((m) => m.name.toLowerCase() === name.trim().toLowerCase());
+    if (!match) return;
+    setOutsourcedRows((prev) =>
+      prev.map((r, idx) => {
+        if (idx !== i) return r;
+        return {
+          ...r,
+          unit: r.unit || match.unit || "",
+          perUnitCost: r.perUnitCost || (match.defaultPrice != null ? String(match.defaultPrice) : ""),
+        };
+      })
+    );
+  }
+
   return (
     <>
       <GroupHeading>Materials</GroupHeading>
 
+      <datalist id="in-house-material-names">
+        {inHouseCatalog.map((m) => (
+          <option key={m.id} value={m.name} />
+        ))}
+      </datalist>
+      <datalist id="outsourced-material-names">
+        {outsourcedCatalog.map((m) => (
+          <option key={m.id} value={m.name} />
+        ))}
+      </datalist>
+
       <Card className="p-4 space-y-3">
         <SectionHeader title="MCC Materials" count={materialRows.length} onAdd={() =>
-          setMaterialRows((p) => [...p, { material: "", qty: "", units: "" }])
+          setMaterialRows((p) => [...p, { material: "", qty: "", units: "", unitPrice: "" }])
         } />
         {materialRows.length === 0 && <EmptyState text="No materials listed." />}
         {materialRows.map((row, i) => (
@@ -34,14 +84,22 @@ export function MaterialsSection({
               <RowDelete onClick={() => removeRow(setMaterialRows, i)} />
             </div>
             <Field label="Material">
-              <MobileInput value={row.material} onChange={(e) => updateRow(setMaterialRows, i, "material", e.target.value)} />
+              <MobileInput
+                list="in-house-material-names"
+                value={row.material}
+                onChange={(e) => updateRow(setMaterialRows, i, "material", e.target.value)}
+                onBlur={(e) => applyInHouseCatalogMatch(i, e.target.value)}
+              />
             </Field>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <Field label="QTY">
                 <MobileInput type="number" step="0.01" value={row.qty} onChange={(e) => updateRow(setMaterialRows, i, "qty", e.target.value)} />
               </Field>
               <Field label="Units">
                 <MobileInput value={row.units} onChange={(e) => updateRow(setMaterialRows, i, "units", e.target.value)} />
+              </Field>
+              <Field label="Unit Price">
+                <MobileInput type="number" step="0.01" value={row.unitPrice} onChange={(e) => updateRow(setMaterialRows, i, "unitPrice", e.target.value)} />
               </Field>
             </div>
           </div>
@@ -64,7 +122,12 @@ export function MaterialsSection({
                 <MobileInput value={row.supplier} onChange={(e) => updateRow(setOutsourcedRows, i, "supplier", e.target.value)} />
               </Field>
               <Field label="Material">
-                <MobileInput value={row.material} onChange={(e) => updateRow(setOutsourcedRows, i, "material", e.target.value)} />
+                <MobileInput
+                  list="outsourced-material-names"
+                  value={row.material}
+                  onChange={(e) => updateRow(setOutsourcedRows, i, "material", e.target.value)}
+                  onBlur={(e) => applyOutsourcedCatalogMatch(i, e.target.value)}
+                />
               </Field>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">

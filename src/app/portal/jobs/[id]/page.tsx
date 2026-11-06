@@ -139,6 +139,10 @@ export default async function JobDetailPage({
             <div className="text-muted-foreground text-xs">Job Type</div>
             <div className="font-medium">{wo.jobType}</div>
           </div>
+          <div>
+            <div className="text-muted-foreground text-xs">Estimate #</div>
+            <div className="font-medium">{wo.estimateNumber || "—"}</div>
+          </div>
         </div>
       </Card>
 
@@ -268,6 +272,7 @@ export default async function JobDetailPage({
                 <span>{m.material}</span>
                 <span className="text-muted-foreground">
                   {Number(m.qty)} {m.units || ""}
+                  {m.unitPrice != null && ` — $${Number(m.unitPrice).toFixed(2)}`}
                 </span>
               </div>
             ))}

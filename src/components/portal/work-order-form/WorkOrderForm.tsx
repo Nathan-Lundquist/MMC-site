@@ -31,7 +31,7 @@ import { PaymentsSection } from "./PaymentsSection";
 import { AdditionalWorkSection } from "./AdditionalWorkSection";
 import { NotesSection } from "./NotesSection";
 
-export function WorkOrderForm({ customers, employees, initialData }: FormProps) {
+export function WorkOrderForm({ customers, employees, materialCatalog, initialData }: FormProps) {
   const router = useRouter();
   const isEdit = !!initialData;
   const [saving, setSaving] = useState(false);
@@ -42,6 +42,7 @@ export function WorkOrderForm({ customers, employees, initialData }: FormProps) 
   const [jobType, setJobType] = useState(initialData?.jobType || "");
   const [foremanId, setForemanId] = useState(initialData?.foremanId || "");
   const [woNumber, setWoNumber] = useState(initialData?.woNumber || "");
+  const [estimateNumber, setEstimateNumber] = useState(initialData?.estimateNumber || "");
   const [pctComplete, setPctComplete] = useState(initialData?.pctComplete || "0");
   const [totalHours, setTotalHours] = useState(initialData?.totalHours || "0");
 
@@ -67,7 +68,7 @@ export function WorkOrderForm({ customers, employees, initialData }: FormProps) 
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!customerId || !woNumber) {
+    if (!customerId || (isEdit && !woNumber)) {
       setError("Customer and Work Order Number are required.");
       return;
     }
@@ -92,6 +93,7 @@ export function WorkOrderForm({ customers, employees, initialData }: FormProps) 
           startDate: daySummary?.first || null,
           endDate: daySummary?.last || null,
           woNumber,
+          estimateNumber,
           pctComplete: parseFloat(pctComplete) || 0,
           totalHours: parseFloat(totalHours) || 0,
           notes,
@@ -156,6 +158,9 @@ export function WorkOrderForm({ customers, employees, initialData }: FormProps) 
         setForemanId={setForemanId}
         woNumber={woNumber}
         setWoNumber={setWoNumber}
+        isEdit={isEdit}
+        estimateNumber={estimateNumber}
+        setEstimateNumber={setEstimateNumber}
         pctComplete={pctComplete}
         setPctComplete={setPctComplete}
         totalHours={totalHours}
@@ -186,6 +191,7 @@ export function WorkOrderForm({ customers, employees, initialData }: FormProps) 
         setMaterialRows={setMaterialRows}
         outsourcedRows={outsourcedRows}
         setOutsourcedRows={setOutsourcedRows}
+        materialCatalog={materialCatalog || []}
       />
 
       <PaymentsSection paymentRows={paymentRows} setPaymentRows={setPaymentRows} />

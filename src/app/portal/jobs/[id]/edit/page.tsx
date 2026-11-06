@@ -21,7 +21,7 @@ export default async function EditJobPage({
 }) {
   const { id } = await params;
 
-  const [wo, customers, employees] = await Promise.all([
+  const [wo, customers, employees, materialCatalog] = await Promise.all([
     prisma.workOrder.findUnique({
       where: { id },
       include: {
@@ -44,6 +44,10 @@ export default async function EditJobPage({
       orderBy: { name: "asc" },
     }),
     prisma.employee.findMany({
+      where: { active: true },
+      orderBy: { name: "asc" },
+    }),
+    prisma.landscapeMaterial.findMany({
       where: { active: true },
       orderBy: { name: "asc" },
     }),
@@ -91,6 +95,7 @@ export default async function EditJobPage({
     jobType: wo.jobType,
     foremanId: wo.foremanId,
     woNumber: wo.workOrderNumber,
+    estimateNumber: wo.estimateNumber || "",
     pctComplete: String(Number(wo.percentCompleted)),
     totalHours: String(Number(wo.totalManHours)),
     notes: wo.notes || "",
@@ -140,6 +145,7 @@ export default async function EditJobPage({
       material: m.material,
       qty: String(Number(m.qty)),
       units: m.units || "",
+      unitPrice: m.unitPrice ? String(Number(m.unitPrice)) : "",
     })),
 
     outsourcedRows: wo.outsourcedMaterials.map((m) => ({
@@ -206,6 +212,13 @@ export default async function EditJobPage({
       <WorkOrderForm
         customers={customers.map((c) => ({ id: c.id, name: c.name }))}
         employees={employees.map((e) => ({ id: e.id, name: e.name }))}
+        materialCatalog={materialCatalog.map((m) => ({
+          id: m.id,
+          name: m.name,
+          unit: m.unit,
+          kind: m.kind,
+          defaultPrice: m.defaultPrice ? Number(m.defaultPrice) : null,
+        }))}
         initialData={initialData}
       />
     </div>
