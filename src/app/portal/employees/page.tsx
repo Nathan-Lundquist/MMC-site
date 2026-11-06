@@ -1,12 +1,18 @@
 import { prisma } from "@/lib/db";
+import { auth } from "@/lib/auth";
 import { Card } from "@/components/ui/card";
 import { UserCog } from "lucide-react";
+import { EmployeeRateCell } from "@/components/portal/EmployeeRateCell";
 
 export default async function EmployeesPage() {
-  const employees = await prisma.employee.findMany({
-    orderBy: { name: "asc" },
-    where: { active: true },
-  });
+  const [session, employees] = await Promise.all([
+    auth(),
+    prisma.employee.findMany({
+      orderBy: { name: "asc" },
+      where: { active: true },
+    }),
+  ]);
+  const editable = session?.user.role === "ADMIN";
 
   return (
     <div className="space-y-6">
@@ -34,6 +40,7 @@ export default async function EmployeesPage() {
                 <th className="px-4 py-3 font-medium text-muted-foreground">Name</th>
                 <th className="px-4 py-3 font-medium text-muted-foreground">Email</th>
                 <th className="px-4 py-3 font-medium text-muted-foreground hidden sm:table-cell">Role</th>
+                <th className="px-4 py-3 font-medium text-muted-foreground text-right">Rate</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -45,6 +52,13 @@ export default async function EmployeesPage() {
                     <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground capitalize">
                       {e.role.toLowerCase()}
                     </span>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <EmployeeRateCell
+                      employeeId={e.id}
+                      initialRate={e.hourlyRate ? Number(e.hourlyRate) : null}
+                      editable={editable}
+                    />
                   </td>
                 </tr>
               ))}

@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/format";
-import { CloudSnow, Sprout, Sun, Leaf, TrendingUp, ArrowRight, LayoutGrid } from "lucide-react";
+import { CloudSnow, Sprout, Sun, Leaf, TrendingUp, ArrowRight, LayoutGrid, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import { Decimal } from "@prisma/client/runtime/library";
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -29,7 +29,7 @@ function seasonKey(date: Date): string {
   return `${start}-${String(start + 1).slice(2)}`;
 }
 
-type TabKey = "snow" | "spring" | "summer" | "fall" | "landscape" | "annual";
+type TabKey = "snow" | "spring" | "summer" | "fall" | "landscape" | "hours" | "annual";
 
 const TABS: { key: TabKey; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { key: "snow",      label: "Snow",      icon: CloudSnow },
@@ -37,8 +37,23 @@ const TABS: { key: TabKey; label: string; icon: React.ComponentType<{ className?
   { key: "summer",    label: "Summer",    icon: Sun },
   { key: "fall",      label: "Fall",      icon: Leaf },
   { key: "landscape", label: "Landscape", icon: LayoutGrid },
+  { key: "hours",     label: "Hours",     icon: Clock },
   { key: "annual",    label: "Annual",    icon: TrendingUp },
 ];
+
+// Monday-start week containing the given date, as YYYY-MM-DD.
+function weekStart(d: Date): string {
+  const day = d.getUTCDay(); // 0 = Sunday
+  const diff = (day === 0 ? -6 : 1) - day;
+  const monday = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + diff));
+  return monday.toISOString().slice(0, 10);
+}
+
+function addDays(dateStr: string, days: number): string {
+  const d = new Date(`${dateStr}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
 
 const SEASON_MONTHS: Record<string, number[]> = {
   spring: [2, 3, 4],
@@ -53,12 +68,12 @@ const LANDSCAPE_MONTHS = [2, 3, 4, 5, 6, 7, 8, 9, 10]; // Mar–Nov
 export default async function ReportsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; week?: string }>;
 }) {
   const session = await auth();
   if (!session?.user) redirect("/login");
 
-  const { tab = "snow" } = await searchParams;
+  const { tab = "snow", week } = await searchParams;
   const activeTab = (TABS.find((t) => t.key === tab)?.key ?? "snow") as TabKey;
 
   return (
@@ -91,6 +106,7 @@ export default async function ReportsPage({
       {activeTab === "summer"    && <LandscapeReport season="summer" />}
       {activeTab === "fall"      && <LandscapeReport season="fall" />}
       {activeTab === "landscape" && <LandscapeAnnualReport />}
+      {activeTab === "hours"     && <HoursReport week={week} />}
       {activeTab === "annual"    && <AnnualReport />}
     </div>
   );
@@ -531,6 +547,134 @@ async function AnnualReport() {
 }
 
 // ── Shared ─────────────────────────────────────────────────────────────────
+
+// ── Hours Report (weekly crew hours + cost per employee) ───────────────────
+
+async function HoursReport({ week }: { week?: string }) {
+  const start = week && /^\d{4}-\d{2}-\d{2}$/.test(week) ? week : weekStart(new Date());
+  const end = addDays(start, 7);
+
+  const [entries, employees] = await Promise.all([
+    prisma.crewDetail.findMany({
+      where: { date: { gte: new Date(`${start}T00:00:00Z`), lt: new Date(`${end}T00:00:00Z`) } },
+      include: { employee: true, workOrder: { select: { workOrderNumber: true } } },
+      orderBy: { date: "asc" },
+    }),
+    prisma.employee.findMany({ where: { active: true }, select: { id: true, name: true, hourlyRate: true } }),
+  ]);
+
+  const rateById = new Map(employees.map((e) => [e.id, e.hourlyRate ? Number(e.hourlyRate) : null]));
+
+  const totalsByEmployee = new Map<string, { name: string; hours: number; jobs: Set<string> }>();
+  let grandHours = 0;
+  for (const c of entries) {
+    const hrs = n(c.jobHours) + n(c.setupHours) + n(c.travelHours) + n(c.unloadHours) + n(c.deliveryHours);
+    grandHours += hrs;
+    const key = c.employeeId || "unassigned";
+    const name = c.employee?.name || "Unassigned";
+    if (!totalsByEmployee.has(key)) totalsByEmployee.set(key, { name, hours: 0, jobs: new Set() });
+    const row = totalsByEmployee.get(key)!;
+    row.hours += hrs;
+    row.jobs.add(c.workOrder.workOrderNumber);
+  }
+
+  const rows = Array.from(totalsByEmployee.entries())
+    .map(([employeeId, v]) => ({
+      employeeId,
+      name: v.name,
+      hours: v.hours,
+      jobCount: v.jobs.size,
+      rate: rateById.get(employeeId) ?? null,
+      cost: rateById.get(employeeId) ? v.hours * rateById.get(employeeId)! : null,
+    }))
+    .sort((a, b) => b.hours - a.hours);
+
+  const grandCost = rows.reduce((sum, r) => sum + (r.cost ?? 0), 0);
+  const hasAnyRate = rows.some((r) => r.rate != null);
+
+  const prevWeek = addDays(start, -7);
+  const nextWeek = addDays(start, 7);
+  const endDisplay = addDays(start, 6);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-1">
+          <Link
+            href={`/portal/reports?tab=hours&week=${prevWeek}`}
+            className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </Link>
+          <span className="text-sm font-medium text-foreground px-1">
+            {new Date(`${start}T00:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" })}
+            {" – "}
+            {new Date(`${endDisplay}T00:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" })}
+          </span>
+          <Link
+            href={`/portal/reports?tab=hours&week=${nextWeek}`}
+            className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </Link>
+        </div>
+        <Link href={`/portal/reports?tab=hours&week=${weekStart(new Date())}`} className="text-xs text-brand hover:underline">
+          This week
+        </Link>
+      </div>
+
+      {rows.length === 0 ? (
+        <Card className="p-10 text-center">
+          <p className="text-sm text-muted-foreground">No crew hours logged this week</p>
+        </Card>
+      ) : (
+        <Card className="overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-secondary/50 text-left">
+                  <th className="px-4 py-2.5 font-medium text-muted-foreground">Employee</th>
+                  <th className="px-4 py-2.5 font-medium text-muted-foreground text-right">Jobs</th>
+                  <th className="px-4 py-2.5 font-medium text-muted-foreground text-right">Hours</th>
+                  {hasAnyRate && <th className="px-4 py-2.5 font-medium text-muted-foreground text-right">Cost</th>}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {rows.map((r) => (
+                  <tr key={r.employeeId}>
+                    <td className="px-4 py-2.5 font-medium">{r.name}</td>
+                    <td className="px-4 py-2.5 text-right text-muted-foreground tabular-nums">{r.jobCount}</td>
+                    <td className="px-4 py-2.5 text-right tabular-nums">{r.hours.toFixed(1)}</td>
+                    {hasAnyRate && (
+                      <td className="px-4 py-2.5 text-right tabular-nums">
+                        {r.cost != null ? formatCurrency(r.cost) : "—"}
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="border-t border-border font-medium bg-secondary/30">
+                  <td className="px-4 py-2.5">Total</td>
+                  <td className="px-4 py-2.5 text-right tabular-nums">{entries.length ? new Set(entries.map((e) => e.workOrder.workOrderNumber)).size : 0}</td>
+                  <td className="px-4 py-2.5 text-right tabular-nums">{grandHours.toFixed(1)}</td>
+                  {hasAnyRate && <td className="px-4 py-2.5 text-right tabular-nums">{formatCurrency(grandCost)}</td>}
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </Card>
+      )}
+
+      {!hasAnyRate && (
+        <p className="text-xs text-muted-foreground">
+          Set an hourly rate on the{" "}
+          <Link href="/portal/employees" className="text-brand hover:underline">Employees</Link> page to see cost totals here.
+        </p>
+      )}
+    </div>
+  );
+}
 
 function StatCell({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (

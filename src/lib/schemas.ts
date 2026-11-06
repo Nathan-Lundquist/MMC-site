@@ -209,6 +209,12 @@ export const landscapeMaterialUpdateSchema = z.object({
   active: z.boolean().optional(),
 });
 
+// --- Employee schemas ---
+
+export const employeeUpdateSchema = z.object({
+  hourlyRate: z.number().min(0).nullable().optional(),
+});
+
 // --- Change request schemas ---
 
 export const changeRequestCreateSchema = z.object({
