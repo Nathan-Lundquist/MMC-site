@@ -15,7 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { JOB_CATEGORY_FILTER_OPTIONS } from "@/lib/job-categories";
+import { JOB_CATEGORIES, JOB_CATEGORY_FILTER_OPTIONS } from "@/lib/job-categories";
 import { registerUnsavedChangesGuard } from "@/lib/unsaved-changes-guard";
 import { CostingTabs } from "./CostingTabs";
 
@@ -56,6 +56,7 @@ interface ApiResponse {
 }
 
 interface EditableFields {
+  jobCategory: string;
   invoiceNumber: string;
   invoiceAmount: string;
   estCrewTotal: string;
@@ -114,13 +115,6 @@ function fmtDate(dateStr: string | null): string {
   });
 }
 
-function categoryLabel(cat: string): string {
-  return cat
-    .replace(/_/g, " ")
-    .toLowerCase()
-    .replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
 /* ─────────────────────────────────────────────────────────
    Component
    ───────────────────────────────────────────────────────── */
@@ -175,6 +169,7 @@ export function BulkCostingView() {
       const origs: Record<string, EditableFields> = {};
       for (const wo of json.workOrders) {
         origs[wo.id] = {
+          jobCategory: wo.jobCategory,
           invoiceNumber: wo.invoiceNumber || "",
           invoiceAmount: toEditStr(wo.invoiceAmount),
           estCrewTotal: toEditStr(wo.estCrewTotal),
@@ -301,6 +296,7 @@ export function BulkCostingView() {
 
       const updates = Array.from(dirtyRows).map((woId) => ({
         id: woId,
+        jobCategory: getFieldValue(woId, "jobCategory") || undefined,
         invoiceNumber: getFieldValue(woId, "invoiceNumber") || null,
         invoiceAmount: numOrNull(woId, "invoiceAmount"),
         estCrewTotal: numOrNull(woId, "estCrewTotal"),
@@ -619,8 +615,16 @@ export function BulkCostingView() {
                         </td>
 
                         {/* Type */}
-                        <td className="px-2 py-0.5 text-muted-foreground max-w-[100px] truncate">
-                          {categoryLabel(wo.jobCategory)}
+                        <td className="px-0.5 py-0.5 max-w-[140px]">
+                          <select
+                            value={getFieldValue(wo.id, "jobCategory")}
+                            onChange={(e) => setFieldValue(wo.id, "jobCategory", e.target.value)}
+                            className="w-full h-7 px-1 rounded border border-transparent bg-transparent text-xs text-foreground hover:border-border focus:border-brand focus:bg-background focus:outline-none focus:ring-1 focus:ring-brand/30 transition-colors"
+                          >
+                            {JOB_CATEGORIES.map((c) => (
+                              <option key={c.value} value={c.value}>{c.label}</option>
+                            ))}
+                          </select>
                         </td>
 
                         {/* Date */}

@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { Prisma } from "@prisma/client";
+import { Prisma, JobCategory } from "@prisma/client";
 import { requireAuth } from "@/lib/api-auth";
 
 interface BulkUpdateItem {
   id: string;
+  jobCategory?: string;
   invoiceNumber?: string | null;
   invoiceAmount?: number | null;
   estCrewTotal?: number | null;
@@ -86,9 +87,15 @@ export async function PUT(req: NextRequest) {
           }
         }
 
+        const jobCategoryUpdate =
+          item.jobCategory && (Object.values(JobCategory) as string[]).includes(item.jobCategory)
+            ? { jobCategory: item.jobCategory as JobCategory }
+            : {};
+
         await tx.workOrder.update({
           where: { id: item.id },
           data: {
+            ...jobCategoryUpdate,
             invoiceNumber: item.invoiceNumber ?? null,
             invoiceAmount: toDecimal(item.invoiceAmount),
             estCrewTotal: toDecimal(item.estCrewTotal),
