@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/api-auth";
-import { buildNestedCreateData, createAdditionalWork } from "@/lib/work-order-data";
+import { buildNestedCreateData, createAdditionalWork, syncMaterialCatalogPrices } from "@/lib/work-order-data";
 import { workOrderBodySchema } from "@/lib/schemas";
 import { toReceiptDTO } from "@/lib/receipts";
 
@@ -79,6 +79,7 @@ export async function PUT(
       startDate,
       endDate,
       woNumber,
+      estimateNumber,
       pctComplete,
       totalHours,
       notes,
@@ -131,6 +132,7 @@ export async function PUT(
           jobCategory,
           projectStartDate: startDate ? new Date(startDate) : null,
           projectEndDate: endDate ? new Date(endDate) : null,
+          estimateNumber: estimateNumber || null,
           percentCompleted: pctComplete,
           totalManHours: totalHours,
           notes: notes || null,
@@ -144,6 +146,7 @@ export async function PUT(
       });
 
       await createAdditionalWork(tx, wo.id, body);
+      await syncMaterialCatalogPrices(tx, body.materials, body.outsourcedMaterials);
       return wo;
     });
 

@@ -1,23 +1,24 @@
-import { Card } from "@/components/ui/card";
-import { Package } from "lucide-react";
+import { auth } from "@/lib/auth";
+import { MaterialSettings } from "@/components/portal/landscape-form";
+import { MANAGER_VISIBLE_ROLES } from "@/lib/constants";
 
-export default function MaterialsPage() {
+export default async function MaterialsPage() {
+  const session = await auth();
+  const editable = MANAGER_VISIBLE_ROLES.includes(
+    (session?.user.role ?? "") as (typeof MANAGER_VISIBLE_ROLES)[number]
+  );
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="font-display text-xl font-bold text-foreground">
-          Landscape Materials
+          Materials
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Track materials inventory and usage
+          Catalog of in-house and outsourced materials, with default prices
         </p>
       </div>
-      <Card className="p-12 text-center">
-        <Package className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-        <p className="text-sm text-muted-foreground">
-          Materials tracking coming soon.
-        </p>
-      </Card>
+      <MaterialSettings editable={editable} />
     </div>
   );
 }

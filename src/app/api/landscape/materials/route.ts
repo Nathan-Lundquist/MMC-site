@@ -9,8 +9,12 @@ export async function GET(req: NextRequest) {
 
   try {
     const all = req.nextUrl.searchParams.get("all") === "true";
+    const kind = req.nextUrl.searchParams.get("kind");
     const materials = await prisma.landscapeMaterial.findMany({
-      where: all ? undefined : { active: true },
+      where: {
+        ...(all ? {} : { active: true }),
+        ...(kind === "IN_HOUSE" || kind === "OUTSOURCED" ? { kind } : {}),
+      },
       orderBy: { name: "asc" },
     });
 
@@ -52,6 +56,8 @@ export async function POST(req: NextRequest) {
       data: {
         name: result.data.name,
         unit: result.data.unit || "",
+        kind: result.data.kind,
+        defaultPrice: result.data.defaultPrice ?? null,
       },
     });
 

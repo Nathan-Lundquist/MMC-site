@@ -2,6 +2,64 @@ import type { PrismaClient } from "@prisma/client";
 
 type Tx = Omit<PrismaClient, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">;
 
+/**
+ * Next auto-generated work order number for the given year, formatted
+ * `YYYY-0001`. Scoped per-year so the sequence resets annually; only
+ * considers existing numbers already in that format (legacy imported
+ * numbers like "25-32038" are a different shape and ignored).
+ */
+export async function generateNextWoNumber(tx: Tx, year: number): Promise<string> {
+  const prefix = `${year}-`;
+  const existing = await tx.workOrder.findMany({
+    where: { workOrderNumber: { startsWith: prefix } },
+    select: { workOrderNumber: true },
+  });
+
+  // Compare numerically (not lexicographically) so the sequence keeps
+  // incrementing correctly past 9999 (where string sort would break).
+  let max = 0;
+  for (const { workOrderNumber } of existing) {
+    const suffix = workOrderNumber.slice(prefix.length);
+    if (/^\d+$/.test(suffix)) max = Math.max(max, parseInt(suffix, 10));
+  }
+
+  return `${prefix}${String(max + 1).padStart(4, "0")}`;
+}
+
+/**
+ * Upserts the catalog (shared with the landscape crew-log feature) with the
+ * latest price entered for each named material on this job. Always
+ * overwrites with the newest value per Nathan's note: "if the price
+ * changes ... save that number to the item permanently."
+ */
+export async function syncMaterialCatalogPrices(
+  tx: Tx,
+  materials: Array<{ material?: string; units?: string; unitPrice?: string }>,
+  outsourcedMaterials: Array<{ material?: string; unit?: string; perUnitCost?: string }>
+) {
+  for (const m of materials) {
+    const name = m.material?.trim();
+    const price = m.unitPrice ? parseFloat(m.unitPrice) : NaN;
+    if (!name || isNaN(price)) continue;
+    await tx.landscapeMaterial.upsert({
+      where: { name },
+      create: { name, unit: m.units || "", kind: "IN_HOUSE", defaultPrice: price },
+      update: { defaultPrice: price },
+    });
+  }
+
+  for (const m of outsourcedMaterials) {
+    const name = m.material?.trim();
+    const price = m.perUnitCost ? parseFloat(m.perUnitCost) : NaN;
+    if (!name || isNaN(price)) continue;
+    await tx.landscapeMaterial.upsert({
+      where: { name },
+      create: { name, unit: m.unit || "", kind: "OUTSOURCED", defaultPrice: price },
+      update: { defaultPrice: price },
+    });
+  }
+}
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 interface RawBody {
   timeEntries?: any[];
@@ -139,10 +197,11 @@ export function buildNestedCreateData(body: RawBody) {
     materials: {
       create: materials
         .filter((m: { material: string }) => m.material)
-        .map((m: { material: string; qty: string; units: string }) => ({
+        .map((m: { material: string; qty: string; units: string; unitPrice?: string }) => ({
           material: m.material,
           qty: parseFloat(m.qty) || 0,
           units: m.units || null,
+          unitPrice: m.unitPrice ? parseFloat(m.unitPrice) : null,
         })),
     },
 

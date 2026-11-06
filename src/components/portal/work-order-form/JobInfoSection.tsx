@@ -17,6 +17,9 @@ interface Props {
   setForemanId: (v: string) => void;
   woNumber: string;
   setWoNumber: (v: string) => void;
+  isEdit: boolean;
+  estimateNumber: string;
+  setEstimateNumber: (v: string) => void;
   pctComplete: string;
   setPctComplete: (v: string) => void;
   totalHours: string;
@@ -36,6 +39,9 @@ export function JobInfoSection({
   setForemanId,
   woNumber,
   setWoNumber,
+  isEdit,
+  estimateNumber,
+  setEstimateNumber,
   pctComplete,
   setPctComplete,
   totalHours,
@@ -74,12 +80,28 @@ export function JobInfoSection({
           </MobileSelect>
         </Field>
 
-        <Field label="Work Order # *">
+        {isEdit ? (
+          <Field label="Work Order # *">
+            <MobileInput
+              value={woNumber}
+              onChange={(e) => setWoNumber(e.target.value)}
+              placeholder="25-32038"
+              required
+            />
+          </Field>
+        ) : (
+          <Field label="Work Order #">
+            <div className="h-11 sm:h-9 flex items-center px-3 rounded-md border border-dashed border-input bg-secondary/30 text-sm text-muted-foreground">
+              Assigned automatically on save
+            </div>
+          </Field>
+        )}
+
+        <Field label="Estimate #">
           <MobileInput
-            value={woNumber}
-            onChange={(e) => setWoNumber(e.target.value)}
-            placeholder="25-32038"
-            required
+            value={estimateNumber}
+            onChange={(e) => setEstimateNumber(e.target.value)}
+            placeholder="Optional"
           />
         </Field>
 

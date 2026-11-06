@@ -53,6 +53,7 @@ const materialSchema = z.object({
   material: z.string(),
   qty: z.string(),
   units: z.string(),
+  unitPrice: z.string().optional().default(""),
 });
 
 const outsourcedMaterialSchema = z.object({
@@ -106,7 +107,8 @@ export const workOrderBodySchema = z.object({
   foremanId: z.string().optional().default(""),
   startDate: z.string().nullable().optional(),
   endDate: z.string().nullable().optional(),
-  woNumber: z.string().min(1, "Work Order Number is required"),
+  woNumber: z.string().optional().default(""),
+  estimateNumber: z.string().optional().default(""),
   pctComplete: z.number().min(0).max(100).optional().default(0),
   totalHours: z.number().min(0).optional().default(0),
   notes: z.string().optional().default(""),
@@ -195,12 +197,22 @@ export const crewWorkLogSchema = z.object({
 export const landscapeMaterialSchema = z.object({
   name: z.string().min(1, "Material name is required").max(200),
   unit: z.string().max(50).optional().default(""),
+  kind: z.enum(["IN_HOUSE", "OUTSOURCED"]).optional().default("IN_HOUSE"),
+  defaultPrice: z.number().min(0).nullable().optional(),
 });
 
 export const landscapeMaterialUpdateSchema = z.object({
   name: z.string().min(1).max(200).optional(),
   unit: z.string().max(50).optional(),
+  kind: z.enum(["IN_HOUSE", "OUTSOURCED"]).optional(),
+  defaultPrice: z.number().min(0).nullable().optional(),
   active: z.boolean().optional(),
+});
+
+// --- Employee schemas ---
+
+export const employeeUpdateSchema = z.object({
+  hourlyRate: z.number().min(0).nullable().optional(),
 });
 
 // --- Change request schemas ---

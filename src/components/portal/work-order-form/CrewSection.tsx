@@ -1,10 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Plus } from "lucide-react";
+import { Plus, X, Check, Pencil } from "lucide-react";
 import type { CrewRow, MachineRow } from "./types";
 import { todayLocal, fmtDate, updateRow, removeRow } from "./helpers";
 import {
@@ -33,6 +32,34 @@ export function CrewSection({
   machineRows,
   setMachineRows,
 }: Props) {
+  // Rows start expanded; "Save" on a row collapses it to a compact summary
+  // line so a long crew list doesn't require scrolling past a wall of open
+  // cards to add the next entry.
+  const [collapsed, setCollapsed] = useState<Set<number>>(new Set());
+
+  function addRow() {
+    setCrewRows((p) => [...p, { date: todayLocal(), employeeIds: [], jobHours: "", setupHours: "", travelHours: "", unloadHours: "", deliveryHours: "" }]);
+  }
+
+  function collapse(i: number) {
+    setCollapsed((prev) => new Set(prev).add(i));
+  }
+
+  function expand(i: number) {
+    setCollapsed((prev) => {
+      const next = new Set(prev);
+      next.delete(i);
+      return next;
+    });
+  }
+
+  function deleteRow(i: number) {
+    removeRow(setCrewRows, i);
+    // Index-based collapse state can't be remapped reliably across a
+    // delete, so just reset it — every remaining row re-expands.
+    setCollapsed(new Set());
+  }
+
   return (
     <>
       <GroupHeading>Crew &amp; Equipment</GroupHeading>
@@ -52,9 +79,7 @@ export function CrewSection({
         <Button
           type="button"
           variant="outline"
-          onClick={() =>
-            setCrewRows((p) => [...p, { date: todayLocal(), employeeIds: [], jobHours: "", setupHours: "", travelHours: "", unloadHours: "", deliveryHours: "" }])
-          }
+          onClick={addRow}
           className="w-full h-12 text-sm font-medium gap-2"
         >
           <Plus className="w-4 h-4" />
@@ -63,9 +88,21 @@ export function CrewSection({
 
         {crewRows.length === 0 && <EmptyState text="Add an entry per day — select the crew and enter hours." />}
 
-        {crewRows.map((row, i) => (
-          <CrewRowCard key={i} index={i} row={row} employees={employees} setCrewRows={setCrewRows} />
-        ))}
+        {crewRows.map((row, i) =>
+          collapsed.has(i) ? (
+            <CrewRowSummary key={i} row={row} employees={employees} onEdit={() => expand(i)} onDelete={() => deleteRow(i)} />
+          ) : (
+            <CrewRowCard
+              key={i}
+              index={i}
+              row={row}
+              employees={employees}
+              setCrewRows={setCrewRows}
+              onSave={() => collapse(i)}
+              onDelete={() => deleteRow(i)}
+            />
+          )
+        )}
       </Card>
 
       <Card className="p-4 space-y-3">
@@ -91,47 +128,90 @@ export function CrewSection({
   );
 }
 
+function crewRowTotalHrs(row: CrewRow) {
+  return [row.jobHours, row.setupHours, row.travelHours, row.unloadHours, row.deliveryHours].reduce(
+    (sum, v) => sum + (parseFloat(v) || 0),
+    0
+  );
+}
+
+/** Compact read-only line shown once a crew entry is saved/collapsed. */
+function CrewRowSummary({
+  row,
+  employees,
+  onEdit,
+  onDelete,
+}: {
+  row: CrewRow;
+  employees: { id: string; name: string }[];
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const selectedNames = employees.filter((e) => row.employeeIds.includes(e.id)).map((e) => e.name);
+  const totalHrs = crewRowTotalHrs(row);
+  const peopleCount = row.employeeIds.length || 1;
+
+  return (
+    <div className="w-full flex items-center justify-between gap-2 p-3 border border-border rounded-lg hover:bg-secondary/30 transition-colors">
+      <button
+        type="button"
+        onClick={onEdit}
+        className="min-w-0 flex-1 flex items-center gap-2 flex-wrap text-left"
+      >
+        <span className="text-sm font-medium text-foreground">
+          {row.date ? fmtDate(row.date) : "No date"}
+        </span>
+        <span className="text-xs text-muted-foreground truncate">
+          {selectedNames.length > 0 ? selectedNames.join(", ") : "No crew selected"}
+        </span>
+        {totalHrs > 0 && (
+          <span className="text-[11px] font-medium bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded shrink-0">
+            {(totalHrs * peopleCount).toFixed(1)} man-hrs
+          </span>
+        )}
+      </button>
+      <div className="flex items-center gap-1 shrink-0">
+        <button type="button" onClick={onEdit} title="Edit" className="p-2 text-muted-foreground hover:text-foreground">
+          <Pencil className="w-3.5 h-3.5" />
+        </button>
+        <RowDelete onClick={onDelete} />
+      </div>
+    </div>
+  );
+}
+
 function CrewRowCard({
   index: i,
   row,
   employees,
   setCrewRows,
+  onSave,
+  onDelete,
 }: {
   index: number;
   row: CrewRow;
   employees: { id: string; name: string }[];
   setCrewRows: React.Dispatch<React.SetStateAction<CrewRow[]>>;
+  onSave: () => void;
+  onDelete: () => void;
 }) {
   const selectedNames = employees
     .filter((e) => row.employeeIds.includes(e.id))
     .map((e) => e.name);
-  const totalHrs = [row.jobHours, row.setupHours, row.travelHours, row.unloadHours, row.deliveryHours]
-    .reduce((sum, v) => sum + (parseFloat(v) || 0), 0);
+  const totalHrs = crewRowTotalHrs(row);
+  const peopleCount = row.employeeIds.length || 1;
+  const available = employees.filter((e) => !row.employeeIds.includes(e.id));
 
-  function toggleEmployee(empId: string) {
+  function addEmployee(empId: string) {
     setCrewRows((prev) =>
-      prev.map((r, idx) => {
-        if (idx !== i) return r;
-        const ids = r.employeeIds.includes(empId)
-          ? r.employeeIds.filter((id) => id !== empId)
-          : [...r.employeeIds, empId];
-        return { ...r, employeeIds: ids };
-      })
+      prev.map((r, idx) => (idx === i ? { ...r, employeeIds: [...r.employeeIds, empId] } : r))
     );
   }
 
-  function selectAll() {
+  function removeEmployee(empId: string) {
     setCrewRows((prev) =>
       prev.map((r, idx) =>
-        idx === i ? { ...r, employeeIds: employees.map((e) => e.id) } : r
-      )
-    );
-  }
-
-  function selectNone() {
-    setCrewRows((prev) =>
-      prev.map((r, idx) =>
-        idx === i ? { ...r, employeeIds: [] } : r
+        idx === i ? { ...r, employeeIds: r.employeeIds.filter((id) => id !== empId) } : r
       )
     );
   }
@@ -143,58 +223,53 @@ function CrewRowCard({
           <span className="text-sm font-medium text-foreground">
             {row.date ? fmtDate(row.date) : `Entry ${i + 1}`}
           </span>
-          {selectedNames.length > 0 && (
-            <span className="text-[11px] font-medium bg-brand/10 text-brand px-1.5 py-0.5 rounded-full">
-              {selectedNames.length} employee{selectedNames.length !== 1 && "s"}
-            </span>
-          )}
           {totalHrs > 0 && (
             <span className="text-[11px] font-medium bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded">
-              {totalHrs.toFixed(1)}h each
+              {totalHrs.toFixed(1)}h each &times; {peopleCount} = {(totalHrs * peopleCount).toFixed(1)} man-hrs
             </span>
           )}
         </div>
-        <RowDelete onClick={() => removeRow(setCrewRows, i)} />
+        <RowDelete onClick={onDelete} />
       </div>
 
       <Field label="Date" action={<TodayBtn onClick={() => updateRow(setCrewRows, i, "date", todayLocal())} />}>
         <MobileInput type="date" value={row.date} onChange={(e) => updateRow(setCrewRows, i, "date", e.target.value)} />
       </Field>
 
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between">
-          <Label className="text-xs font-medium">Employees</Label>
-          <div className="flex gap-1">
-            <button type="button" onClick={selectAll} className="text-[11px] text-brand hover:underline px-1">All</button>
-            <span className="text-[11px] text-muted-foreground">/</span>
-            <button type="button" onClick={selectNone} className="text-[11px] text-muted-foreground hover:underline px-1">None</button>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-0.5">
-          {employees.map((emp) => {
-            const checked = row.employeeIds.includes(emp.id);
+      <Field label="Employees">
+        <div className="flex flex-wrap gap-1.5">
+          {selectedNames.map((name, idx) => {
+            const empId = row.employeeIds[idx];
             return (
-              <label
-                key={emp.id}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-md cursor-pointer transition-colors active:bg-secondary/60 ${
-                  checked ? "bg-brand/5 border border-brand/20" : "bg-secondary/30 border border-transparent"
-                }`}
+              <span
+                key={empId}
+                className="inline-flex items-center gap-1 pl-2.5 pr-1 py-1 rounded-full text-xs font-medium bg-brand/10 text-brand"
               >
-                <Checkbox
-                  checked={checked}
-                  onCheckedChange={() => toggleEmployee(emp.id)}
-                />
-                <span className="text-sm">{emp.name}</span>
-              </label>
+                {name}
+                <button
+                  type="button"
+                  onClick={() => removeEmployee(empId)}
+                  className="p-0.5 rounded-full hover:bg-brand/20"
+                  title={`Remove ${name}`}
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
             );
           })}
+
+          {available.length > 0 && (
+            <div className="w-full sm:w-auto sm:min-w-[160px]">
+              <MobileSelect value="" onChange={(v) => v && addEmployee(v)}>
+                <option value="">+ Add employee...</option>
+                {available.map((emp) => (
+                  <option key={emp.id} value={emp.id}>{emp.name}</option>
+                ))}
+              </MobileSelect>
+            </div>
+          )}
         </div>
-        {selectedNames.length > 0 && (
-          <p className="text-xs text-muted-foreground">
-            {selectedNames.join(", ")}
-          </p>
-        )}
-      </div>
+      </Field>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         <Field label="Job Hrs">
@@ -213,6 +288,11 @@ function CrewRowCard({
           <MobileInput type="number" inputMode="decimal" step="0.25" value={row.deliveryHours} onChange={(e) => updateRow(setCrewRows, i, "deliveryHours", e.target.value)} />
         </Field>
       </div>
+
+      <Button type="button" variant="outline" onClick={onSave} className="w-full h-10 text-sm font-medium gap-2">
+        <Check className="w-4 h-4" />
+        Save Entry
+      </Button>
     </div>
   );
 }

@@ -28,6 +28,8 @@ model Employee {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
+  hourlyRate   Decimal? @db.Decimal(8, 2) @map("hourly_rate")
+
   foremanOf             WorkOrder[]                @relation("Foreman")
   crewDetails           CrewDetail[]
   additionalCrewDetails AdditionalWorkCrewDetail[]
@@ -80,6 +82,7 @@ enum JobCategory {
   SPRINKLER
   LIGHTING
   HARDSCAPE
+  WARRANTY
   OTHER
 }
 
@@ -106,6 +109,8 @@ model WorkOrder {
   materialsNotUsed String?         @map("materials_not_used")
   status           WorkOrderStatus @default(DRAFT)
   boardStatusChangedAt DateTime?   @map("board_status_changed_at")
+
+  estimateNumber     String?   @map("estimate_number")
 
   // ── Job Costing: Estimates ──
   invoiceNumber      String?   @map("invoice_number")
@@ -321,6 +326,7 @@ model Material {
   material    String
   qty         Decimal   @db.Decimal(10, 2)
   units       String?
+  unitPrice   Decimal?  @db.Decimal(10, 2) @map("unit_price")
 
   @@map("materials")
 }
@@ -439,12 +445,19 @@ model SnowSiteService {
 
 // ── Landscape Materials (settings-managed fixed list) ──────
 
+enum MaterialKind {
+  IN_HOUSE
+  OUTSOURCED
+}
+
 model LandscapeMaterial {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  unit      String   @default("")
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now()) @map("created_at")
+  id           String       @id @default(cuid())
+  name         String       @unique
+  unit         String       @default("")
+  kind         MaterialKind @default(IN_HOUSE)
+  defaultPrice Decimal?     @db.Decimal(10, 2) @map("default_price")
+  active       Boolean      @default(true)
+  createdAt    DateTime     @default(now()) @map("created_at")
 
   logMaterials CrewWorkLogMaterial[]
 

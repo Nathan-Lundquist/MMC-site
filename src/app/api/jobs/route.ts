@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/api-auth";
-import { buildNestedCreateData, createAdditionalWork } from "@/lib/work-order-data";
+import {
+  buildNestedCreateData,
+  createAdditionalWork,
+  generateNextWoNumber,
+  syncMaterialCatalogPrices,
+} from "@/lib/work-order-data";
 import { workOrderBodySchema } from "@/lib/schemas";
 
 export async function POST(req: NextRequest) {
@@ -26,25 +31,16 @@ export async function POST(req: NextRequest) {
       foremanId,
       startDate,
       endDate,
-      woNumber,
+      estimateNumber,
       pctComplete,
       totalHours,
       notes,
       materialsNotUsed,
     } = body;
 
-    // Check for duplicate WO number
-    const existing = await prisma.workOrder.findUnique({
-      where: { workOrderNumber: woNumber },
-    });
-    if (existing) {
-      return NextResponse.json(
-        { error: `Work order ${woNumber} already exists.` },
-        { status: 409 }
-      );
-    }
-
     const workOrder = await prisma.$transaction(async (tx) => {
+      const woNumber = await generateNextWoNumber(tx, new Date().getFullYear());
+
       const wo = await tx.workOrder.create({
         data: {
           workOrderNumber: woNumber,
@@ -54,6 +50,7 @@ export async function POST(req: NextRequest) {
           jobCategory,
           projectStartDate: startDate ? new Date(startDate) : null,
           projectEndDate: endDate ? new Date(endDate) : null,
+          estimateNumber: estimateNumber || null,
           percentCompleted: pctComplete,
           totalManHours: totalHours,
           notes: notes || null,
@@ -64,6 +61,7 @@ export async function POST(req: NextRequest) {
       });
 
       await createAdditionalWork(tx, wo.id, body);
+      await syncMaterialCatalogPrices(tx, body.materials, body.outsourcedMaterials);
       return wo;
     });
 
