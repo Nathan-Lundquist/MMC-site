@@ -2,6 +2,7 @@
 
 import { Card } from "@/components/ui/card";
 import { MobileSelect, MobileInput, Field, CategorySelect } from "./form-ui";
+import { CustomerCombobox } from "./CustomerCombobox";
 import { JOB_CATEGORIES } from "@/lib/job-categories";
 
 interface Props {
@@ -51,12 +52,7 @@ export function JobInfoSection({
     <Card className="p-4 space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field label="Customer *">
-          <MobileSelect value={customerId} onChange={setCustomerId}>
-            <option value="">Select customer...</option>
-            {customers.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </MobileSelect>
+          <CustomerCombobox customers={customers} value={customerId} onChange={setCustomerId} />
         </Field>
 
         <Field label="Category *">
