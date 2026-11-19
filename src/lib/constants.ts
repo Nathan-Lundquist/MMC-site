@@ -60,6 +60,9 @@ export const RECEIPT_TYPE_COLORS: Record<string, string> = {
 /** Roles allowed to delete a receipt (shared by the API route and the client UI) */
 export const RECEIPT_DELETE_ROLES = ["ADMIN", "MANAGER"] as const;
 
+/** Roles allowed to delete an uploaded before/after job photo (shared by the API route and the client UI) */
+export const PHOTO_DELETE_ROLES = ["ADMIN", "MANAGER"] as const;
+
 /** Roles allowed to see admin-only portal nav items (shared across PortalShell's nav config) */
 export const MANAGER_VISIBLE_ROLES = ["ADMIN", "MANAGER"] as const;
 

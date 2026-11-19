@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, DollarSign, Pencil } from "lucide-react";
 import ReceiptsSection from "@/components/portal/ReceiptsSection";
+import PhotosSection from "@/components/portal/PhotosSection";
 import { toReceiptDTO } from "@/lib/receipts";
+import { toPhotoDTO } from "@/lib/photos";
 import { CLEAN_UP_CATEGORY_VALUES } from "@/lib/job-categories";
 
 export default async function JobDetailPage({
@@ -42,6 +44,9 @@ export default async function JobDetailPage({
           include: { uploadedBy: { select: { name: true } } },
           orderBy: { createdAt: "desc" },
         },
+        photos: {
+          orderBy: { uploadedAt: "asc" },
+        },
       },
     }),
   ]);
@@ -49,6 +54,7 @@ export default async function JobDetailPage({
   if (!wo) return notFound();
 
   const receipts = wo.receipts.map(toReceiptDTO);
+  const photos = wo.photos.map(toPhotoDTO);
   const backHref = (CLEAN_UP_CATEGORY_VALUES as readonly string[]).includes(wo.jobCategory)
     ? "/portal/cleanups"
     : "/portal/landscape";
@@ -438,6 +444,13 @@ export default async function JobDetailPage({
           </div>
         </Card>
       )}
+
+      {/* Photos */}
+      <PhotosSection
+        workOrderId={wo.id}
+        initialPhotos={photos}
+        userRole={session!.user.role}
+      />
 
       {/* Receipts */}
       <ReceiptsSection

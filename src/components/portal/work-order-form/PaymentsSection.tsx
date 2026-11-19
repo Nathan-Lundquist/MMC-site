@@ -40,16 +40,9 @@ export function PaymentsSection({ paymentRows, setPaymentRows }: Props) {
         ))}
       </Card>
 
-      <Card className="p-4 space-y-3">
-        <h3 className="font-display text-sm font-semibold text-foreground">Photos</h3>
-        <Field label="Before Pictures">
-          <MobileInput type="file" accept="image/*" multiple />
-        </Field>
-        <Field label="After Pictures">
-          <MobileInput type="file" accept="image/*" multiple />
-        </Field>
-        <p className="text-xs text-muted-foreground">Upload happens on save.</p>
-      </Card>
+      <p className="text-xs text-muted-foreground px-1">
+        Before/After photos can be added once the job is saved, from the job detail page.
+      </p>
     </>
   );
 }

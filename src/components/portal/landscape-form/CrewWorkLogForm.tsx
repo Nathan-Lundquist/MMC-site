@@ -12,7 +12,6 @@ import {
   Field,
   CategorySelect,
 } from "@/components/portal/work-order-form/form-ui";
-import { JOB_CATEGORIES } from "@/lib/job-categories";
 import { JobQuickCreate, type CategoryOption, type Customer } from "./JobQuickCreate";
 
 interface WorkOrderOption {
@@ -46,7 +45,7 @@ export function CrewWorkLogForm({
   currentUser,
   defaultWorkOrderId,
   customers,
-  quickCreateCategoryOptions,
+  categoryOptions,
 }: {
   workOrders: WorkOrderOption[];
   materials: MaterialOption[];
@@ -54,7 +53,7 @@ export function CrewWorkLogForm({
   currentUser: string;
   defaultWorkOrderId?: string;
   customers: Customer[];
-  quickCreateCategoryOptions: CategoryOption[];
+  categoryOptions: CategoryOption[];
 }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -177,7 +176,7 @@ export function CrewWorkLogForm({
       {/* New job */}
       <JobQuickCreate
         customers={customers}
-        categoryOptions={quickCreateCategoryOptions}
+        categoryOptions={categoryOptions}
         onCreated={(job) => {
           setWorkOrderOptions((prev) => [
             {
@@ -215,7 +214,7 @@ export function CrewWorkLogForm({
         <CategorySelect
           value={workType}
           onChange={setWorkType}
-          options={JOB_CATEGORIES}
+          options={categoryOptions}
           placeholder="Select work type..."
         />
       </Card>

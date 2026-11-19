@@ -65,7 +65,7 @@ export default async function LandscapeLogPage({
         currentUser={session.user.name || ""}
         defaultWorkOrderId={wo}
         customers={customers}
-        quickCreateCategoryOptions={SPRING_SUMMER_CATEGORIES}
+        categoryOptions={SPRING_SUMMER_CATEGORIES}
       />
     </div>
   );

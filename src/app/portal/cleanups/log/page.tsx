@@ -65,7 +65,7 @@ export default async function CleanUpsLogPage({
         currentUser={session.user.name || ""}
         defaultWorkOrderId={wo}
         customers={customers}
-        quickCreateCategoryOptions={CLEAN_UP_CATEGORIES}
+        categoryOptions={CLEAN_UP_CATEGORIES}
       />
     </div>
   );
