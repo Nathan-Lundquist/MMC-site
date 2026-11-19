@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Save, Loader2 } from "lucide-react";
+import { CLEAN_UP_CATEGORY_VALUES } from "@/lib/job-categories";
 
 import type {
   FormProps,
@@ -134,7 +135,12 @@ export function WorkOrderForm({ customers, employees, materialCatalog, initialDa
         throw new Error(data.error || "Failed to save");
       }
 
-      router.push(isEdit ? `/portal/jobs/${initialData!.id}` : "/portal/jobs");
+      if (isEdit) {
+        router.push(`/portal/jobs/${initialData!.id}`);
+      } else {
+        const isCleanUp = (CLEAN_UP_CATEGORY_VALUES as readonly string[]).includes(jobCategory);
+        router.push(isCleanUp ? "/portal/cleanups" : "/portal/landscape");
+      }
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save");
@@ -230,7 +236,14 @@ export function WorkOrderForm({ customers, employees, materialCatalog, initialDa
         <Button
           type="button"
           variant="outline"
-          onClick={() => router.push("/portal/jobs")}
+          onClick={() => {
+            if (isEdit) {
+              router.push(`/portal/jobs/${initialData!.id}`);
+              return;
+            }
+            const isCleanUp = (CLEAN_UP_CATEGORY_VALUES as readonly string[]).includes(jobCategory);
+            router.push(isCleanUp ? "/portal/cleanups" : "/portal/landscape");
+          }}
           className="h-12 sm:h-10 px-6 text-base sm:text-sm"
         >
           Cancel

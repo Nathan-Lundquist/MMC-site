@@ -4,33 +4,26 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition, useRef, useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Search, X, Loader2 } from "lucide-react";
-import { JOB_CATEGORY_FILTER_OPTIONS } from "@/lib/job-categories";
+import { SPRING_SUMMER_CATEGORIES } from "@/lib/job-categories";
 
-const STATUSES = [
-  { value: "", label: "All Statuses" },
-  { value: "DRAFT", label: "Draft" },
-  { value: "IN_PROGRESS", label: "In Progress" },
-  { value: "COMPLETED", label: "Completed" },
-  { value: "INVOICED", label: "Invoiced" },
-  { value: "PAID", label: "Paid" },
-  { value: "CANCELLED", label: "Cancelled" },
-] as const;
+const CATEGORY_OPTIONS = [
+  { value: "", label: "All Categories" },
+  ...SPRING_SUMMER_CATEGORIES,
+];
 
-interface JobsToolbarProps {
+interface LandscapeToolbarProps {
   years: number[];
   currentSearch: string;
   currentCategory: string;
-  currentStatus: string;
   currentYear: string;
 }
 
-export default function JobsToolbar({
+export default function LandscapeToolbar({
   years,
   currentSearch,
   currentCategory,
-  currentStatus,
   currentYear,
-}: JobsToolbarProps) {
+}: LandscapeToolbarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
@@ -50,10 +43,10 @@ export default function JobsToolbar({
     } else {
       params.delete(key);
     }
-    // Reset to page 1 when filters change
+    // Reset to page 1 when filters change, keep the active/closed tab
     params.delete("page");
     startTransition(() => {
-      router.push(`/portal/jobs?${params.toString()}`);
+      router.push(`/portal/landscape?${params.toString()}`);
     });
   }
 
@@ -73,18 +66,20 @@ export default function JobsToolbar({
 
   function clearAllFilters() {
     setSearchValue("");
+    const params = new URLSearchParams();
+    const tab = searchParams.get("tab");
+    if (tab) params.set("tab", tab);
+    const qs = params.toString();
     startTransition(() => {
-      router.push("/portal/jobs");
+      router.push(`/portal/landscape${qs ? `?${qs}` : ""}`);
     });
   }
 
-  const hasFilters = currentSearch || currentCategory || currentStatus || currentYear;
+  const hasFilters = currentSearch || currentCategory || currentYear;
 
   return (
     <div className="space-y-3">
-      {/* Search + Filters Row */}
       <div className="flex flex-col sm:flex-row gap-2">
-        {/* Search Input */}
         <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
           <Input
@@ -105,33 +100,18 @@ export default function JobsToolbar({
           )}
         </div>
 
-        {/* Category Filter */}
         <select
           value={currentCategory}
           onChange={(e) => updateParams("category", e.target.value)}
           className="h-9 rounded-lg border border-input bg-background px-3 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 cursor-pointer"
         >
-          {JOB_CATEGORY_FILTER_OPTIONS.map((cat) => (
+          {CATEGORY_OPTIONS.map((cat) => (
             <option key={cat.value} value={cat.value}>
               {cat.label}
             </option>
           ))}
         </select>
 
-        {/* Status Filter */}
-        <select
-          value={currentStatus}
-          onChange={(e) => updateParams("status", e.target.value)}
-          className="h-9 rounded-lg border border-input bg-background px-3 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 cursor-pointer"
-        >
-          {STATUSES.map((s) => (
-            <option key={s.value} value={s.value}>
-              {s.label}
-            </option>
-          ))}
-        </select>
-
-        {/* Year Filter */}
         <select
           value={currentYear}
           onChange={(e) => updateParams("year", e.target.value)}
@@ -146,7 +126,6 @@ export default function JobsToolbar({
         </select>
       </div>
 
-      {/* Active filters indicator */}
       {(hasFilters || isPending) && (
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           {isPending && <Loader2 className="w-3 h-3 animate-spin" />}

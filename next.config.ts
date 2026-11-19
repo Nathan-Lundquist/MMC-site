@@ -6,11 +6,6 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
-        source: '/portal/landscape',
-        destination: '/portal/landscape/log',
-        permanent: false,
-      },
-      {
         source: '/portal/costing/bulk',
         destination: '/portal/costing?tab=bulk',
         permanent: false,

@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { ArrowLeft, DollarSign, Pencil } from "lucide-react";
 import ReceiptsSection from "@/components/portal/ReceiptsSection";
 import { toReceiptDTO } from "@/lib/receipts";
+import { CLEAN_UP_CATEGORY_VALUES } from "@/lib/job-categories";
 
 export default async function JobDetailPage({
   params,
@@ -48,6 +49,9 @@ export default async function JobDetailPage({
   if (!wo) return notFound();
 
   const receipts = wo.receipts.map(toReceiptDTO);
+  const backHref = (CLEAN_UP_CATEGORY_VALUES as readonly string[]).includes(wo.jobCategory)
+    ? "/portal/cleanups"
+    : "/portal/landscape";
 
   const statusColors: Record<string, string> = {
     DRAFT: "bg-secondary text-secondary-foreground",
@@ -61,7 +65,7 @@ export default async function JobDetailPage({
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-start gap-3">
-        <Link href="/portal/jobs">
+        <Link href={backHref}>
           <Button variant="ghost" size="icon" className="mt-0.5">
             <ArrowLeft className="w-4 h-4" />
           </Button>

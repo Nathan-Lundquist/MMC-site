@@ -89,7 +89,7 @@ const NAV_SECTIONS: NavSection[] = [
     heading: "Landscape",
     items: [
       { href: "/portal/landscape/log", label: "Log Work", icon: PenLine },
-      { href: "/portal/jobs", label: "Jobs", icon: ClipboardList },
+      { href: "/portal/landscape", label: "Jobs", icon: ClipboardList, exact: true },
       { href: "/portal/materials", label: "Materials", icon: Package },
       { href: "/portal/customers", label: "All Customers", icon: Users },
       { href: "/portal/breakdown", label: "Breakdown", icon: BarChart3 },
