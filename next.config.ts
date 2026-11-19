@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ['10.10.10.11', '192.168.0.49', 'localhost'],
+  allowedDevOrigins: ['10.10.10.11', '10.10.10.56', '192.168.0.56', 'localhost'],
   serverExternalPackages: ['adm-zip'],
   async redirects() {
     return [

@@ -75,10 +75,13 @@ interface NavSection {
   items: NavItem[];
   /** When set, only these roles see this section. Omit to show it to everyone. */
   allowedRoles?: readonly string[];
+  /** When true, the section is hidden from nav entirely (routes still work, just not linked). */
+  hidden?: boolean;
 }
 
 const NAV_SECTIONS: NavSection[] = [
   {
+    hidden: true,
     items: [
       { href: "/portal", label: "Dashboard", icon: LayoutDashboard, exact: true },
       { href: "/portal/board", label: "Board", icon: Kanban, exact: true },
@@ -114,6 +117,7 @@ const NAV_SECTIONS: NavSection[] = [
   },
   {
     heading: "Time",
+    hidden: true,
     items: [
       { href: "/portal/time", label: "My Clock", icon: Timer, exact: true },
       { href: "/portal/time/log", label: "Time Log", icon: CalendarClock, allowedRoles: MANAGER_VISIBLE_ROLES },
@@ -121,6 +125,7 @@ const NAV_SECTIONS: NavSection[] = [
   },
   {
     heading: "Admin",
+    hidden: true,
     allowedRoles: MANAGER_VISIBLE_ROLES,
     items: [
       { href: "/portal/machines", label: "Maintenance", icon: Tractor },
@@ -140,7 +145,7 @@ function isActive(pathname: string, item: NavItem) {
 }
 
 function visibleSections(role: string) {
-  return NAV_SECTIONS.filter((s) => !s.allowedRoles || s.allowedRoles.includes(role)).map((s) => ({
+  return NAV_SECTIONS.filter((s) => !s.hidden && (!s.allowedRoles || s.allowedRoles.includes(role))).map((s) => ({
     ...s,
     items: s.items.filter((i) => !i.allowedRoles || i.allowedRoles.includes(role)),
   }));
@@ -392,7 +397,7 @@ export function PortalShell({
       </Sheet>
 
       {/* Page content */}
-      <main className="p-4 lg:p-6 max-w-6xl">{children}</main>
+      <main className="p-4 lg:p-6 w-full">{children}</main>
 
       {(CHANGE_REQUEST_ROLES as readonly string[]).includes(user.role) && <ChangeRequestWidget />}
     </div>

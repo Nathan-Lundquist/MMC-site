@@ -1,154 +1,149 @@
 import { prisma } from "@/lib/db";
-import { Card } from "@/components/ui/card";
-import { ClipboardList, Users, UserCog, Clock } from "lucide-react";
+import { auth } from "@/lib/auth";
 import Link from "next/link";
+import { Sprout, Leaf, CloudSnow, ArrowRight } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { CLEAN_UP_CATEGORY_VALUES } from "@/lib/job-categories";
 
-export default async function PortalDashboard() {
-  const [woCount, customerCount, employeeCount, recentOrders] =
-    await Promise.all([
-      prisma.workOrder.count(),
-      prisma.customer.count(),
-      prisma.employee.count({ where: { active: true } }),
-      prisma.workOrder.findMany({
-        take: 5,
-        orderBy: { createdAt: "desc" },
-        include: { customer: true, foreman: true },
-      }),
-    ]);
+const ACTIVE_STATUSES = ["DRAFT", "IN_PROGRESS"] as const;
 
-  const stats = [
+// Nov/Dec belongs to that year's season start; Jan–Oct belongs to the previous year's season.
+function currentSnowSeasonStart(now: Date): Date {
+  const y = now.getUTCFullYear();
+  const m = now.getUTCMonth();
+  const startYear = m >= 10 ? y : y - 1;
+  return new Date(Date.UTC(startYear, 10, 1));
+}
+
+export default async function PortalHome() {
+  const session = await auth();
+  const firstName = session?.user?.name?.split(" ")[0];
+
+  const seasonStart = currentSnowSeasonStart(new Date());
+
+  const [landscapeActive, cleanUpActive, stormsThisSeason] = await Promise.all([
+    prisma.workOrder.count({
+      where: {
+        jobCategory: { notIn: [...CLEAN_UP_CATEGORY_VALUES] },
+        status: { in: [...ACTIVE_STATUSES] },
+      },
+    }),
+    prisma.workOrder.count({
+      where: {
+        jobCategory: { in: [...CLEAN_UP_CATEGORY_VALUES] },
+        status: { in: [...ACTIVE_STATUSES] },
+      },
+    }),
+    prisma.snowStorm.count({ where: { eventStart: { gte: seasonStart } } }),
+  ]);
+
+  const jobTypes = [
     {
-      label: "Jobs",
-      value: woCount,
-      icon: ClipboardList,
-      href: "/portal/jobs",
+      href: "/portal/landscape",
+      label: "Landscape",
+      icon: Sprout,
+      count: landscapeActive,
+      countLabel: landscapeActive === 1 ? "active job" : "active jobs",
+      accent: "emerald",
     },
     {
-      label: "Customers",
-      value: customerCount,
-      icon: Users,
-      href: "/portal/customers",
+      href: "/portal/cleanups",
+      label: "Clean Ups",
+      icon: Leaf,
+      count: cleanUpActive,
+      countLabel: cleanUpActive === 1 ? "active job" : "active jobs",
+      accent: "amber",
     },
     {
-      label: "Employees",
-      value: employeeCount,
-      icon: UserCog,
-      href: "/portal/employees",
+      href: "/portal/snow",
+      label: "Winter",
+      icon: CloudSnow,
+      count: stormsThisSeason,
+      countLabel: stormsThisSeason === 1 ? "storm this season" : "storms this season",
+      accent: "sky",
     },
-  ];
+  ] as const;
+
+  const ACCENTS: Record<
+    (typeof jobTypes)[number]["accent"],
+    { icon: string; glow: string; ring: string }
+  > = {
+    emerald: {
+      icon: "bg-emerald-500/10 text-emerald-600",
+      glow: "bg-emerald-500",
+      ring: "group-hover:ring-emerald-500/25",
+    },
+    amber: {
+      icon: "bg-amber-500/10 text-amber-600",
+      glow: "bg-amber-500",
+      ring: "group-hover:ring-amber-500/25",
+    },
+    sky: {
+      icon: "bg-sky-500/10 text-sky-600",
+      glow: "bg-sky-500",
+      ring: "group-hover:ring-sky-500/25",
+    },
+  };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="font-display text-xl font-bold text-foreground">
-          Dashboard
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Overview of operations
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-7rem)] text-center px-4">
+      <div className="animate-fade-in">
+        <p className="text-sm font-medium text-muted-foreground">
+          Mike&apos;s Clean Cut &mdash; Employee Portal
         </p>
+        <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground mt-1">
+          {firstName ? `Hey ${firstName}, what's the job?` : "What's the job?"}
+        </h1>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {stats.map((stat) => (
-          <Link key={stat.label} href={stat.href}>
-            <Card className="p-4 hover:border-brand/30 transition-colors cursor-pointer">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-brand/10 text-brand flex items-center justify-center">
-                  <stat.icon className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="font-display text-2xl font-bold text-foreground">
-                    {stat.value}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {stat.label}
-                  </div>
-                </div>
-              </div>
-            </Card>
-          </Link>
-        ))}
-      </div>
-
-      {/* Recent work orders */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="font-display text-sm font-semibold text-foreground">
-            Recent Jobs
-          </h2>
-          <Link
-            href="/portal/jobs"
-            className="text-xs text-brand hover:underline"
-          >
-            View all
-          </Link>
-        </div>
-
-        {recentOrders.length === 0 ? (
-          <Card className="p-8 text-center">
-            <Clock className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">
-              No jobs yet. Create your first one to get started.
-            </p>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mt-10 w-full max-w-4xl">
+        {jobTypes.map((type, i) => {
+          const accent = ACCENTS[type.accent];
+          return (
             <Link
-              href="/portal/jobs/new"
-              className="inline-flex mt-3 text-sm font-medium text-brand hover:underline"
+              key={type.href}
+              href={type.href}
+              className={cn(
+                "group relative overflow-hidden rounded-3xl border border-border bg-card p-7 sm:p-8",
+                "flex flex-col items-center text-center",
+                "ring-1 ring-transparent transition-all duration-200",
+                "hover:-translate-y-1 hover:shadow-xl hover:border-transparent",
+                accent.ring,
+                "animate-fade-in"
+              )}
+              style={{ animationDelay: `${i * 80}ms`, animationFillMode: "backwards" }}
             >
-              Create Job
+              <div
+                className={cn(
+                  "absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-[0.08] blur-2xl transition-opacity group-hover:opacity-[0.16]",
+                  accent.glow
+                )}
+                aria-hidden
+              />
+
+              <div
+                className={cn(
+                  "w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105",
+                  accent.icon
+                )}
+              >
+                <type.icon className="w-8 h-8" />
+              </div>
+
+              <div className="mt-5 font-display text-lg font-bold text-foreground">
+                {type.label}
+              </div>
+              <div className="text-sm text-muted-foreground mt-1">
+                {type.count.toLocaleString()} {type.countLabel}
+              </div>
+
+              <div className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-brand">
+                Open
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              </div>
             </Link>
-          </Card>
-        ) : (
-          <div className="border border-border rounded-xl overflow-hidden">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-secondary/50 text-left">
-                  <th className="px-4 py-2.5 font-medium text-muted-foreground">
-                    WO #
-                  </th>
-                  <th className="px-4 py-2.5 font-medium text-muted-foreground">
-                    Customer
-                  </th>
-                  <th className="px-4 py-2.5 font-medium text-muted-foreground hidden sm:table-cell">
-                    Type
-                  </th>
-                  <th className="px-4 py-2.5 font-medium text-muted-foreground hidden md:table-cell">
-                    Status
-                  </th>
-                  <th className="px-4 py-2.5 font-medium text-muted-foreground text-right">
-                    Complete
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {recentOrders.map((wo) => (
-                  <tr key={wo.id} className="hover:bg-secondary/30">
-                    <td className="px-4 py-2.5">
-                      <Link
-                        href={`/portal/jobs/${wo.id}`}
-                        className="font-medium text-brand hover:underline"
-                      >
-                        {wo.workOrderNumber}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-2.5">{wo.customer.name}</td>
-                    <td className="px-4 py-2.5 hidden sm:table-cell text-muted-foreground">
-                      {wo.jobType}
-                    </td>
-                    <td className="px-4 py-2.5 hidden md:table-cell">
-                      <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
-                        {wo.status.replace("_", " ")}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2.5 text-right text-muted-foreground">
-                      {Number(wo.percentCompleted)}%
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+          );
+        })}
       </div>
     </div>
   );
