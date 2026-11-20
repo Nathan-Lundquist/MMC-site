@@ -451,17 +451,28 @@ enum MaterialKind {
 }
 
 model LandscapeMaterial {
-  id           String       @id @default(cuid())
-  name         String       @unique
-  unit         String       @default("")
-  kind         MaterialKind @default(IN_HOUSE)
-  defaultPrice Decimal?     @db.Decimal(10, 2) @map("default_price")
-  active       Boolean      @default(true)
-  createdAt    DateTime     @default(now()) @map("created_at")
+  id           String            @id @default(cuid())
+  name         String            @unique
+  unit         String            @default("")
+  kind         MaterialKind      @default(IN_HOUSE)
+  category     MaterialCategory?
+  supplier     String?
+  defaultPrice Decimal?          @db.Decimal(10, 2) @map("default_price")
+  active       Boolean           @default(true)
+  createdAt    DateTime          @default(now()) @map("created_at")
 
   logMaterials CrewWorkLogMaterial[]
 
   @@map("landscape_materials")
+}
+
+enum MaterialCategory {
+  BULK_MATERIAL_SOD
+  SEED_FERTILIZER
+  EDGING_FABRIC_PINS
+  DRAINAGE_SUPPLIES
+  SPRINKLER_SUPPLIES
+  HARDSCAPE_OTHER_SUPPLIES
 }
 
 // ── Crew Work Logs (field entries linked to work orders) ────

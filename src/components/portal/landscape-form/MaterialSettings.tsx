@@ -9,14 +9,18 @@ import {
   MobileSelect,
   Field,
 } from "@/components/portal/work-order-form/form-ui";
+import { MATERIAL_CATEGORIES } from "@/lib/material-categories";
 
 type Kind = "IN_HOUSE" | "OUTSOURCED";
+type Category = (typeof MATERIAL_CATEGORIES)[number]["value"];
 
 interface Material {
   id: string;
   name: string;
   unit: string;
   kind: Kind;
+  category: Category | null;
+  supplier: string | null;
   defaultPrice: number | string | null;
   active: boolean;
 }
@@ -27,10 +31,13 @@ export function MaterialSettings({ editable = true }: { editable?: boolean }) {
   const [newName, setNewName] = useState("");
   const [newUnit, setNewUnit] = useState("");
   const [newKind, setNewKind] = useState<Kind>("IN_HOUSE");
+  const [newCategory, setNewCategory] = useState<Category | "">("");
+  const [newSupplier, setNewSupplier] = useState("");
   const [newPrice, setNewPrice] = useState("");
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState("");
   const [priceDrafts, setPriceDrafts] = useState<Record<string, string>>({});
+  const [supplierDrafts, setSupplierDrafts] = useState<Record<string, string>>({});
 
   const loadMaterials = useCallback(async () => {
     try {
@@ -61,6 +68,8 @@ export function MaterialSettings({ editable = true }: { editable?: boolean }) {
           name: newName.trim(),
           unit: newUnit.trim(),
           kind: newKind,
+          category: newCategory || null,
+          supplier: newSupplier.trim() || null,
           defaultPrice: newPrice.trim() ? parseFloat(newPrice) : null,
         }),
       });
@@ -76,6 +85,8 @@ export function MaterialSettings({ editable = true }: { editable?: boolean }) {
       );
       setNewName("");
       setNewUnit("");
+      setNewCategory("");
+      setNewSupplier("");
       setNewPrice("");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to add material");
@@ -84,7 +95,7 @@ export function MaterialSettings({ editable = true }: { editable?: boolean }) {
     }
   }
 
-  async function updateMaterial(id: string, data: Partial<Pick<Material, "active" | "defaultPrice">>) {
+  async function updateMaterial(id: string, data: Partial<Pick<Material, "active" | "defaultPrice" | "category" | "supplier">>) {
     try {
       const res = await fetch(`/api/landscape/materials/${id}`, {
         method: "PUT",
@@ -112,6 +123,21 @@ export function MaterialSettings({ editable = true }: { editable?: boolean }) {
     if (price !== null && isNaN(price)) return;
     updateMaterial(material.id, { defaultPrice: price });
     setPriceDrafts((prev) => {
+      const next = { ...prev };
+      delete next[material.id];
+      return next;
+    });
+  }
+
+  function setCategory(material: Material, category: Category | "") {
+    updateMaterial(material.id, { category: category || null });
+  }
+
+  function saveSupplier(material: Material) {
+    const raw = supplierDrafts[material.id];
+    if (raw === undefined) return;
+    updateMaterial(material.id, { supplier: raw.trim() || null });
+    setSupplierDrafts((prev) => {
       const next = { ...prev };
       delete next[material.id];
       return next;
@@ -183,6 +209,26 @@ export function MaterialSettings({ editable = true }: { editable?: boolean }) {
             </MobileSelect>
           </Field>
         </div>
+        <div className="w-44 shrink-0">
+          <Field label="Category">
+            <MobileSelect value={newCategory} onChange={(v) => setNewCategory(v as Category | "")}>
+              <option value="">No category</option>
+              {MATERIAL_CATEGORIES.map((c) => (
+                <option key={c.value} value={c.value}>{c.label}</option>
+              ))}
+            </MobileSelect>
+          </Field>
+        </div>
+        <div className="w-36 shrink-0">
+          <Field label="Supplier">
+            <MobileInput
+              placeholder="e.g. Home Depot"
+              value={newSupplier}
+              onChange={(e) => setNewSupplier(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && addMaterial()}
+            />
+          </Field>
+        </div>
         <div className="shrink-0 flex items-end">
           <Button
             onClick={addMaterial}
@@ -208,6 +254,10 @@ export function MaterialSettings({ editable = true }: { editable?: boolean }) {
         priceDrafts={priceDrafts}
         setPriceDrafts={setPriceDrafts}
         savePrice={savePrice}
+        supplierDrafts={supplierDrafts}
+        setSupplierDrafts={setSupplierDrafts}
+        saveSupplier={saveSupplier}
+        setCategory={setCategory}
         toggleActive={toggleActive}
         editable={editable}
       />
@@ -217,6 +267,10 @@ export function MaterialSettings({ editable = true }: { editable?: boolean }) {
         priceDrafts={priceDrafts}
         setPriceDrafts={setPriceDrafts}
         savePrice={savePrice}
+        supplierDrafts={supplierDrafts}
+        setSupplierDrafts={setSupplierDrafts}
+        saveSupplier={saveSupplier}
+        setCategory={setCategory}
         toggleActive={toggleActive}
         editable={editable}
       />
@@ -230,6 +284,10 @@ function MaterialKindList({
   priceDrafts,
   setPriceDrafts,
   savePrice,
+  supplierDrafts,
+  setSupplierDrafts,
+  saveSupplier,
+  setCategory,
   toggleActive,
   editable,
 }: {
@@ -238,6 +296,10 @@ function MaterialKindList({
   priceDrafts: Record<string, string>;
   setPriceDrafts: React.Dispatch<React.SetStateAction<Record<string, string>>>;
   savePrice: (material: Material) => void;
+  supplierDrafts: Record<string, string>;
+  setSupplierDrafts: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+  saveSupplier: (material: Material) => void;
+  setCategory: (material: Material, category: Category | "") => void;
   toggleActive: (material: Material) => void;
   editable: boolean;
 }) {
@@ -250,11 +312,11 @@ function MaterialKindList({
         {materials.map((mat) => (
           <div
             key={mat.id}
-            className={`flex items-center justify-between gap-2 px-3 py-2.5 ${
+            className={`flex flex-wrap items-center gap-2 px-3 py-2.5 ${
               !mat.active ? "opacity-50" : ""
             }`}
           >
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 flex-1 basis-40">
               <span className="text-sm">{mat.name}</span>
               {mat.unit && (
                 <span className="text-xs text-muted-foreground ml-1.5">
@@ -262,6 +324,44 @@ function MaterialKindList({
                 </span>
               )}
             </div>
+
+            <div className="w-40 shrink-0">
+              {editable ? (
+                <select
+                  value={mat.category ?? ""}
+                  onChange={(e) => setCategory(mat, e.target.value as Category | "")}
+                  className="w-full h-8 px-2 rounded border border-input bg-background text-xs text-muted-foreground"
+                >
+                  <option value="">No category</option>
+                  {MATERIAL_CATEGORIES.map((c) => (
+                    <option key={c.value} value={c.value}>{c.label}</option>
+                  ))}
+                </select>
+              ) : (
+                <span className="text-xs text-muted-foreground">
+                  {MATERIAL_CATEGORIES.find((c) => c.value === mat.category)?.label ?? "—"}
+                </span>
+              )}
+            </div>
+
+            <div className="w-32 shrink-0">
+              {editable ? (
+                <input
+                  type="text"
+                  placeholder="Supplier"
+                  value={supplierDrafts[mat.id] ?? mat.supplier ?? ""}
+                  onChange={(e) =>
+                    setSupplierDrafts((prev) => ({ ...prev, [mat.id]: e.target.value }))
+                  }
+                  onBlur={() => saveSupplier(mat)}
+                  onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
+                  className="w-full h-8 px-2 rounded border border-input bg-background text-sm"
+                />
+              ) : (
+                <span className="text-sm text-muted-foreground">{mat.supplier ?? "—"}</span>
+              )}
+            </div>
+
             <div className="w-24 shrink-0">
               {editable ? (
                 <input

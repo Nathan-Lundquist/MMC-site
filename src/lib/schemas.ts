@@ -194,10 +194,21 @@ export const crewWorkLogSchema = z.object({
   notes: z.string().optional().default(""),
 });
 
+const MATERIAL_CATEGORY_VALUES = [
+  "BULK_MATERIAL_SOD",
+  "SEED_FERTILIZER",
+  "EDGING_FABRIC_PINS",
+  "DRAINAGE_SUPPLIES",
+  "SPRINKLER_SUPPLIES",
+  "HARDSCAPE_OTHER_SUPPLIES",
+] as const;
+
 export const landscapeMaterialSchema = z.object({
   name: z.string().min(1, "Material name is required").max(200),
   unit: z.string().max(50).optional().default(""),
   kind: z.enum(["IN_HOUSE", "OUTSOURCED"]).optional().default("IN_HOUSE"),
+  category: z.enum(MATERIAL_CATEGORY_VALUES).nullable().optional(),
+  supplier: z.string().max(200).nullable().optional(),
   defaultPrice: z.number().min(0).nullable().optional(),
 });
 
@@ -205,6 +216,8 @@ export const landscapeMaterialUpdateSchema = z.object({
   name: z.string().min(1).max(200).optional(),
   unit: z.string().max(50).optional(),
   kind: z.enum(["IN_HOUSE", "OUTSOURCED"]).optional(),
+  category: z.enum(MATERIAL_CATEGORY_VALUES).nullable().optional(),
+  supplier: z.string().max(200).nullable().optional(),
   defaultPrice: z.number().min(0).nullable().optional(),
   active: z.boolean().optional(),
 });

@@ -57,6 +57,8 @@ export async function POST(req: NextRequest) {
         name: result.data.name,
         unit: result.data.unit || "",
         kind: result.data.kind,
+        category: result.data.category ?? null,
+        supplier: result.data.supplier || null,
         defaultPrice: result.data.defaultPrice ?? null,
       },
     });
