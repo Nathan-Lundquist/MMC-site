@@ -3,9 +3,9 @@ import { auth } from "@/lib/auth";
 import Link from "next/link";
 import {
   Sprout,
-  Leaf,
   CloudSnow,
   ArrowUpRight,
+  ClipboardList,
   Package,
   Users,
   BarChart3,
@@ -59,20 +59,15 @@ export default async function PortalHome() {
     prisma.snowStorm.count({ where: { eventStart: { gte: seasonStart } } }),
   ]);
 
+  const warmSeasonActive = landscapeActive + cleanUpActive;
+
   const jobTypes = [
     {
-      href: "/portal/landscape",
-      label: "Landscape",
+      href: "/portal/jobs",
+      label: "Spring/Summer/Fall",
       icon: Sprout,
-      count: landscapeActive,
-      countLabel: landscapeActive === 1 ? "active job" : "active jobs",
-    },
-    {
-      href: "/portal/cleanups",
-      label: "Clean Ups",
-      icon: Leaf,
-      count: cleanUpActive,
-      countLabel: cleanUpActive === 1 ? "active job" : "active jobs",
+      count: warmSeasonActive,
+      countLabel: warmSeasonActive === 1 ? "active job" : "active jobs",
     },
     {
       href: "/portal/snow",
@@ -84,6 +79,7 @@ export default async function PortalHome() {
   ];
 
   const quickLinks = [
+    { href: "/portal/jobs", label: "Jobs", icon: ClipboardList },
     { href: "/portal/board", label: "Board", icon: Kanban },
     { href: "/portal/reports", label: "Reports", icon: FileBarChart },
     { href: "/portal/breakdown", label: "Breakdown", icon: BarChart3 },
@@ -117,7 +113,7 @@ export default async function PortalHome() {
         </h1>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {jobTypes.map((type, i) => (
           <Link
             key={type.href}

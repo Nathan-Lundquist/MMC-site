@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Search, X, Loader2 } from "lucide-react";
 import { SPRING_SUMMER_CATEGORIES } from "@/lib/job-categories";
 
-const CATEGORY_OPTIONS = [
+const DEFAULT_CATEGORY_OPTIONS = [
   { value: "", label: "All Categories" },
   ...SPRING_SUMMER_CATEGORIES,
 ];
@@ -16,6 +16,8 @@ interface LandscapeToolbarProps {
   currentSearch: string;
   currentCategory: string;
   currentYear: string;
+  basePath?: string;
+  categoryOptions?: { value: string; label: string }[];
 }
 
 export default function LandscapeToolbar({
@@ -23,6 +25,8 @@ export default function LandscapeToolbar({
   currentSearch,
   currentCategory,
   currentYear,
+  basePath = "/portal/landscape",
+  categoryOptions = DEFAULT_CATEGORY_OPTIONS,
 }: LandscapeToolbarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -46,7 +50,7 @@ export default function LandscapeToolbar({
     // Reset to page 1 when filters change, keep the active/closed tab
     params.delete("page");
     startTransition(() => {
-      router.push(`/portal/landscape?${params.toString()}`);
+      router.push(`${basePath}?${params.toString()}`);
     });
   }
 
@@ -71,7 +75,7 @@ export default function LandscapeToolbar({
     if (tab) params.set("tab", tab);
     const qs = params.toString();
     startTransition(() => {
-      router.push(`/portal/landscape${qs ? `?${qs}` : ""}`);
+      router.push(`${basePath}${qs ? `?${qs}` : ""}`);
     });
   }
 
@@ -105,7 +109,7 @@ export default function LandscapeToolbar({
           onChange={(e) => updateParams("category", e.target.value)}
           className="h-9 rounded-lg border border-input bg-background px-3 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 cursor-pointer"
         >
-          {CATEGORY_OPTIONS.map((cat) => (
+          {categoryOptions.map((cat) => (
             <option key={cat.value} value={cat.value}>
               {cat.label}
             </option>
