@@ -3,9 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
-import { PenLine, Pencil, ChevronRight } from "lucide-react";
+import { PenLine, Pencil, ClipboardList } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { formatCurrency, formatDate } from "@/lib/format";
 import { CLEAN_UP_CATEGORIES } from "@/lib/job-categories";
 import { StatusBadge } from "@/components/portal/StatusBadge";
+import { ProfitCell } from "@/components/portal/ProfitCell";
 import { JobQuickCreate, type WorkOrderItem, type Customer } from "./JobQuickCreate";
 
 export function CleanUpsWorkOrderList({
@@ -18,7 +21,6 @@ export function CleanUpsWorkOrderList({
   tab?: "active" | "closed";
 }) {
   const [workOrders, setWorkOrders] = useState(initialWOs);
-  const heading = tab === "closed" ? "Closed Clean-Up Jobs" : "Active Clean-Up Jobs";
   const emptyMessage = tab === "closed" ? "No closed clean-up jobs" : "No active clean-up jobs";
 
   return (
@@ -31,67 +33,133 @@ export function CleanUpsWorkOrderList({
         />
       )}
 
-      <div>
-        <h2 className="font-display text-sm font-semibold text-foreground mb-2">
-          {heading} ({workOrders.length})
-        </h2>
-        {workOrders.length === 0 ? (
-          <Card className="p-6">
-            <p className="text-sm text-muted-foreground text-center">
-              {emptyMessage}
-            </p>
-          </Card>
-        ) : (
-          <div className="space-y-2">
-            {workOrders.map((wo) => (
-              <Card key={wo.id} className="p-0 overflow-hidden">
-                <div className="flex items-center">
-                  <div className="flex-1 min-w-0 p-3">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <span className="text-sm font-semibold text-foreground">
-                        {wo.customerName}
-                      </span>
-                      <span className="text-[10px] font-medium bg-brand/10 text-brand px-1.5 py-0.5 rounded-full shrink-0">
-                        {wo.workOrderNumber}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <span>{wo.jobType}</span>
-                      <span>·</span>
-                      <StatusBadge status={wo.status} size="xs" />
-                      {wo.logCount > 0 && (
-                        <>
-                          <span>·</span>
-                          <span>
-                            {wo.logCount} log{wo.logCount !== 1 ? "s" : ""}
-                          </span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  <Link
-                    href={`/portal/jobs/${wo.id}/edit`}
-                    className="flex items-center gap-1 px-3 py-4 text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors border-l border-border"
-                  >
-                    <Pencil className="w-3.5 h-3.5" />
-                    <span className="text-xs font-medium">Edit</span>
-                  </Link>
+      {workOrders.length === 0 ? (
+        <Card className="p-12 text-center">
+          <ClipboardList className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+          <p className="text-sm text-muted-foreground">{emptyMessage}</p>
+        </Card>
+      ) : (
+        <div className="border border-border rounded-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="bg-secondary/60 text-center border-b border-border">
+                  <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap">
+                    WO #
+                  </th>
+                  <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap">
+                    Customer
+                  </th>
+                  <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden sm:table-cell">
+                    Job Type
+                  </th>
+                  <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden md:table-cell">
+                    Foreman
+                  </th>
+                  <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap">
+                    Status
+                  </th>
+                  <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden lg:table-cell">
+                    Date
+                  </th>
+                  <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden lg:table-cell">
+                    Invoice
+                  </th>
+                  <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden xl:table-cell">
+                    Profit
+                  </th>
                   {tab === "active" && (
-                    <Link
-                      href={`/portal/cleanups/log?wo=${wo.id}`}
-                      className="flex items-center gap-1 px-3 py-4 text-brand hover:bg-brand/5 transition-colors border-l border-border"
-                    >
-                      <PenLine className="w-4 h-4" />
-                      <span className="text-xs font-medium">Log</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </Link>
+                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap">
+                      Log
+                    </th>
                   )}
-                </div>
-              </Card>
-            ))}
+                  <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap">
+                    Edit
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {workOrders.map((wo, i) => {
+                  const detailHref = `/portal/jobs/${wo.id}`;
+                  return (
+                    <tr
+                      key={wo.id}
+                      className={cn(
+                        "border-b border-border last:border-b-0 hover:bg-brand/5",
+                        i % 2 === 1 && "bg-secondary/45"
+                      )}
+                    >
+                      <td className="p-0">
+                        <Link href={detailHref} className="block px-3 py-2 text-center font-semibold text-brand">
+                          {wo.workOrderNumber}
+                        </Link>
+                      </td>
+                      <td className="p-0">
+                        <Link href={detailHref} className="block px-3 py-2 text-center max-w-48 truncate mx-auto text-foreground">
+                          {wo.customerName}
+                        </Link>
+                      </td>
+                      <td className="p-0 hidden sm:table-cell">
+                        <Link href={detailHref} className="block px-3 py-2 text-center text-muted-foreground">
+                          {wo.jobType}
+                        </Link>
+                      </td>
+                      <td className="p-0 hidden md:table-cell">
+                        <Link href={detailHref} className="block px-3 py-2 text-center text-muted-foreground">
+                          {wo.foremanName || "—"}
+                        </Link>
+                      </td>
+                      <td className="p-0">
+                        <Link href={detailHref} className="flex items-center justify-center px-3 py-2">
+                          <StatusBadge status={wo.status} />
+                        </Link>
+                      </td>
+                      <td className="p-0 hidden lg:table-cell">
+                        <Link href={detailHref} className="block px-3 py-2 text-center text-muted-foreground whitespace-nowrap">
+                          {formatDate(wo.startDate)}
+                        </Link>
+                      </td>
+                      <td className="p-0 hidden lg:table-cell">
+                        <Link href={detailHref} className="block px-3 py-2 text-center tabular-nums whitespace-nowrap">
+                          {formatCurrency(wo.invoiceAmount)}
+                        </Link>
+                      </td>
+                      <td className="p-0 hidden xl:table-cell">
+                        <Link href={detailHref} className="block px-3 py-2 text-center tabular-nums whitespace-nowrap">
+                          <ProfitCell profit={wo.profit} profitPct={wo.profitPercent} />
+                        </Link>
+                      </td>
+                      {tab === "active" && (
+                        <td className="p-0">
+                          <Link
+                            href={`/portal/cleanups/log?wo=${wo.id}`}
+                            className="flex items-center justify-center gap-1 px-3 py-2 text-xs font-medium text-brand hover:bg-brand/5 transition-colors"
+                          >
+                            <PenLine className="w-3 h-3" />
+                            Log
+                            {wo.logCount > 0 && (
+                              <span className="text-[10px] text-muted-foreground">({wo.logCount})</span>
+                            )}
+                          </Link>
+                        </td>
+                      )}
+                      <td className="p-0">
+                        <Link
+                          href={`/portal/jobs/${wo.id}/edit`}
+                          className="flex items-center justify-center gap-1 px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                        >
+                          <Pencil className="w-3 h-3" />
+                          Edit
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

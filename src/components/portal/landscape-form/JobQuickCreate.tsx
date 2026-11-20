@@ -17,7 +17,11 @@ export interface WorkOrderItem {
   jobType: string;
   status: string;
   customerName: string;
+  foremanName: string | null;
   startDate: string | null;
+  invoiceAmount: number | null;
+  profit: number | null;
+  profitPercent: number | null;
   logCount: number;
 }
 
@@ -77,7 +81,11 @@ export function JobQuickCreate({
         jobType: wo.jobType,
         status: wo.status,
         customerName: wo.customer.name,
+        foremanName: null,
         startDate: wo.projectStartDate,
+        invoiceAmount: null,
+        profit: null,
+        profitPercent: null,
         logCount: 0,
       });
 

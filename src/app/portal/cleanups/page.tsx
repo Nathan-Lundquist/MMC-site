@@ -7,6 +7,10 @@ import { cn } from "@/lib/utils";
 import { CleanUpsWorkOrderList } from "@/components/portal/landscape-form";
 import { CLEAN_UP_CATEGORY_VALUES } from "@/lib/job-categories";
 import { MANAGER_VISIBLE_ROLES } from "@/lib/constants";
+import { PageNumbersLink as PageNumbers, PaginationLink } from "@/components/portal/PageNumbers";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+
+const PAGE_SIZE = 25;
 
 export default async function CleanUpsPage({
   searchParams,
@@ -17,21 +21,27 @@ export default async function CleanUpsPage({
   if (!session?.user) redirect("/login");
   const canSeeFinancialStatuses = (MANAGER_VISIBLE_ROLES as readonly string[]).includes(session.user.role);
 
-  const { tab: tabParam } = await searchParams;
-  const tab = tabParam === "closed" ? "closed" : "active";
+  const params = await searchParams;
+  const tab = params.tab === "closed" ? "closed" : "active";
+  const page = Math.max(1, parseInt(typeof params.page === "string" ? params.page : "1", 10) || 1);
 
   const closedStatuses: WorkOrderStatus[] = canSeeFinancialStatuses
     ? ["COMPLETED", "INVOICED", "PAID"]
     : ["COMPLETED"];
   const statusFilter: WorkOrderStatus[] = tab === "closed" ? closedStatuses : ["DRAFT", "IN_PROGRESS"];
 
-  const [workOrders, customers, activeCount, closedCount] = await Promise.all([
+  const where = {
+    status: { in: statusFilter },
+    jobCategory: { in: [...CLEAN_UP_CATEGORY_VALUES] },
+  };
+
+  const [totalCount, workOrders, customers, activeCount, closedCount] = await Promise.all([
+    prisma.workOrder.count({ where }),
     prisma.workOrder.findMany({
-      where: {
-        status: { in: statusFilter },
-        jobCategory: { in: [...CLEAN_UP_CATEGORY_VALUES] },
-      },
+      where,
       orderBy: { createdAt: "desc" },
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
       select: {
         id: true,
         workOrderNumber: true,
@@ -40,7 +50,11 @@ export default async function CleanUpsPage({
         status: true,
         notes: true,
         projectStartDate: true,
+        invoiceAmount: true,
+        profit: true,
+        profitPercent: true,
         customer: { select: { name: true } },
+        foreman: { select: { name: true } },
         _count: { select: { crewWorkLogs: true } },
       },
     }),
@@ -57,8 +71,20 @@ export default async function CleanUpsPage({
     }),
   ]);
 
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+  const startItem = totalCount === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+  const endItem = Math.min(page * PAGE_SIZE, totalCount);
+
+  function pageUrl(pageNum: number): string {
+    const p = new URLSearchParams();
+    if (tab !== "active") p.set("tab", tab);
+    if (pageNum > 1) p.set("page", String(pageNum));
+    const qs = p.toString();
+    return `/portal/cleanups${qs ? `?${qs}` : ""}`;
+  }
+
   return (
-    <div className="max-w-lg mx-auto pb-24 sm:pb-6">
+    <div className="max-w-6xl pb-24 sm:pb-6">
       <h1 className="font-display text-xl font-bold text-foreground mb-4">
         Clean Ups
       </h1>
@@ -97,11 +123,39 @@ export default async function CleanUpsPage({
           jobType: wo.jobType,
           status: wo.status,
           customerName: wo.customer.name,
+          foremanName: wo.foreman?.name ?? null,
           startDate: wo.projectStartDate?.toISOString() || null,
+          invoiceAmount: wo.invoiceAmount != null ? Number(wo.invoiceAmount) : null,
+          profit: wo.profit != null ? Number(wo.profit) : null,
+          profitPercent: wo.profitPercent != null ? Number(wo.profitPercent) : null,
           logCount: wo._count.crewWorkLogs,
         }))}
         customers={customers}
       />
+
+      {workOrders.length > 0 && (
+        <div className="flex items-center justify-between gap-4 text-sm mt-4">
+          <p className="text-muted-foreground whitespace-nowrap">
+            {startItem}–{endItem} of {totalCount.toLocaleString()}
+          </p>
+
+          <div className="flex items-center gap-1">
+            <PaginationLink href={pageUrl(1)} disabled={page <= 1} label="First page">
+              <ChevronsLeft className="w-4 h-4" />
+            </PaginationLink>
+            <PaginationLink href={pageUrl(page - 1)} disabled={page <= 1} label="Previous page">
+              <ChevronLeft className="w-4 h-4" />
+            </PaginationLink>
+            <PageNumbers currentPage={page} totalPages={totalPages} pageUrl={pageUrl} />
+            <PaginationLink href={pageUrl(page + 1)} disabled={page >= totalPages} label="Next page">
+              <ChevronRight className="w-4 h-4" />
+            </PaginationLink>
+            <PaginationLink href={pageUrl(totalPages)} disabled={page >= totalPages} label="Last page">
+              <ChevronsRight className="w-4 h-4" />
+            </PaginationLink>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
