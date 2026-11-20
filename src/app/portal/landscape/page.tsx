@@ -118,7 +118,7 @@ export default async function LandscapeJobsPage({
   const endItem = Math.min(page * PAGE_SIZE, totalCount);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-w-6xl">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -200,85 +200,101 @@ export default async function LandscapeJobsPage({
         </Card>
       ) : (
         <>
-          <div className="border border-border rounded-xl overflow-hidden">
+          <div className="border border-border rounded-sm overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-sm border-collapse">
                 <thead>
-                  <tr className="bg-secondary/50 text-left">
-                    <th className="px-4 py-3 font-medium text-muted-foreground whitespace-nowrap">
+                  <tr className="bg-secondary/60 text-left border-b border-border">
+                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap">
                       WO #
                     </th>
-                    <th className="px-4 py-3 font-medium text-muted-foreground whitespace-nowrap">
+                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap">
                       Customer
                     </th>
-                    <th className="px-4 py-3 font-medium text-muted-foreground whitespace-nowrap hidden sm:table-cell">
+                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden sm:table-cell">
                       Job Type
                     </th>
-                    <th className="px-4 py-3 font-medium text-muted-foreground whitespace-nowrap hidden md:table-cell">
+                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden md:table-cell">
                       Foreman
                     </th>
-                    <th className="px-4 py-3 font-medium text-muted-foreground whitespace-nowrap hidden md:table-cell">
+                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden md:table-cell">
                       Status
                     </th>
-                    <th className="px-4 py-3 font-medium text-muted-foreground whitespace-nowrap hidden lg:table-cell">
+                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden lg:table-cell">
                       Date
                     </th>
-                    <th className="px-4 py-3 font-medium text-muted-foreground whitespace-nowrap hidden lg:table-cell text-right">
+                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden lg:table-cell text-right">
                       Invoice
                     </th>
-                    <th className="px-4 py-3 font-medium text-muted-foreground whitespace-nowrap hidden xl:table-cell text-right">
+                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden xl:table-cell text-right">
                       Profit
                     </th>
-                    <th className="px-4 py-3 font-medium text-muted-foreground text-right whitespace-nowrap">
-                      Actions
+                    <th className="px-3 py-2 font-semibold text-muted-foreground text-right whitespace-nowrap">
+                      Edit
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border">
-                  {workOrders.map((wo) => {
+                <tbody>
+                  {workOrders.map((wo, i) => {
                     const profitNum = wo.profit !== null ? Number(wo.profit) : null;
                     const profitPctNum = wo.profitPercent !== null ? Number(wo.profitPercent) : null;
+                    const detailHref = `/portal/jobs/${wo.id}`;
 
                     return (
                       <tr
                         key={wo.id}
-                        className="hover:bg-secondary/30 transition-colors"
+                        className={cn(
+                          "border-b border-border last:border-b-0 hover:bg-brand/5",
+                          i % 2 === 1 && "bg-secondary/45"
+                        )}
                       >
-                        <td className="px-4 py-3">
-                          <Link
-                            href={`/portal/jobs/${wo.id}`}
-                            className="font-medium text-brand hover:underline"
-                          >
+                        <td className="p-0">
+                          <Link href={detailHref} className="block px-3 py-2 font-semibold text-brand">
                             {wo.workOrderNumber}
                           </Link>
                         </td>
-                        <td className="px-4 py-3 max-w-48 truncate">
-                          {wo.customer.name}
+                        <td className="p-0">
+                          <Link href={detailHref} className="block px-3 py-2 max-w-48 truncate text-foreground">
+                            {wo.customer.name}
+                          </Link>
                         </td>
-                        <td className="px-4 py-3 hidden sm:table-cell text-muted-foreground">
-                          {wo.jobType}
+                        <td className="p-0 hidden sm:table-cell">
+                          <Link href={detailHref} className="block px-3 py-2 text-muted-foreground">
+                            {wo.jobType}
+                          </Link>
                         </td>
-                        <td className="px-4 py-3 hidden md:table-cell text-muted-foreground">
-                          {wo.foreman?.name || "—"}
+                        <td className="p-0 hidden md:table-cell">
+                          <Link href={detailHref} className="block px-3 py-2 text-muted-foreground">
+                            {wo.foreman?.name || "—"}
+                          </Link>
                         </td>
-                        <td className="px-4 py-3 hidden md:table-cell">
-                          <StatusBadge status={wo.status} />
+                        <td className="p-0 hidden md:table-cell">
+                          <Link href={detailHref} className="block px-3 py-2">
+                            <StatusBadge status={wo.status} />
+                          </Link>
                         </td>
-                        <td className="px-4 py-3 hidden lg:table-cell text-muted-foreground whitespace-nowrap">
-                          {formatDate(wo.projectStartDate)}
+                        <td className="p-0 hidden lg:table-cell">
+                          <Link href={detailHref} className="block px-3 py-2 text-muted-foreground whitespace-nowrap">
+                            {formatDate(wo.projectStartDate)}
+                          </Link>
                         </td>
-                        <td className="px-4 py-3 hidden lg:table-cell text-right tabular-nums whitespace-nowrap">
-                          {formatCurrency(wo.invoiceAmount)}
+                        <td className="p-0 hidden lg:table-cell">
+                          <Link href={detailHref} className="block px-3 py-2 text-right tabular-nums whitespace-nowrap">
+                            {formatCurrency(wo.invoiceAmount)}
+                          </Link>
                         </td>
-                        <td className="px-4 py-3 hidden xl:table-cell text-right tabular-nums whitespace-nowrap">
-                          <ProfitCell profit={profitNum} profitPct={profitPctNum} />
+                        <td className="p-0 hidden xl:table-cell">
+                          <Link href={detailHref} className="block px-3 py-2 text-right tabular-nums whitespace-nowrap">
+                            <ProfitCell profit={profitNum} profitPct={profitPctNum} />
+                          </Link>
                         </td>
-                        <td className="px-4 py-3 text-right">
-                          <Link href={`/portal/jobs/${wo.id}/edit`}>
-                            <button className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors">
-                              <Pencil className="w-3 h-3" />
-                              Edit
-                            </button>
+                        <td className="p-0">
+                          <Link
+                            href={`/portal/jobs/${wo.id}/edit`}
+                            className="flex items-center justify-end gap-1 px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                          >
+                            <Pencil className="w-3 h-3" />
+                            Edit
                           </Link>
                         </td>
                       </tr>
