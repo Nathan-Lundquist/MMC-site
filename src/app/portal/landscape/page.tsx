@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { Prisma, WorkOrderStatus } from "@prisma/client";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { StatusBadge } from "@/components/portal/StatusBadge";
+import { ProfitCell } from "@/components/portal/ProfitCell";
 import { PageNumbersLink as PageNumbers, PaginationLink } from "@/components/portal/PageNumbers";
 import { CLEAN_UP_CATEGORY_VALUES } from "@/lib/job-categories";
 import { MANAGER_VISIBLE_ROLES } from "@/lib/constants";
@@ -204,7 +205,7 @@ export default async function LandscapeJobsPage({
             <div className="overflow-x-auto">
               <table className="w-full text-sm border-collapse">
                 <thead>
-                  <tr className="bg-secondary/60 text-left border-b border-border">
+                  <tr className="bg-secondary/60 text-center border-b border-border">
                     <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap">
                       WO #
                     </th>
@@ -223,13 +224,13 @@ export default async function LandscapeJobsPage({
                     <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden lg:table-cell">
                       Date
                     </th>
-                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden lg:table-cell text-right">
+                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden lg:table-cell">
                       Invoice
                     </th>
-                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden xl:table-cell text-right">
+                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden xl:table-cell">
                       Profit
                     </th>
-                    <th className="px-3 py-2 font-semibold text-muted-foreground text-right whitespace-nowrap">
+                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap">
                       Edit
                     </th>
                   </tr>
@@ -249,49 +250,49 @@ export default async function LandscapeJobsPage({
                         )}
                       >
                         <td className="p-0">
-                          <Link href={detailHref} className="block px-3 py-2 font-semibold text-brand">
+                          <Link href={detailHref} className="block px-3 py-2 text-center font-semibold text-brand">
                             {wo.workOrderNumber}
                           </Link>
                         </td>
                         <td className="p-0">
-                          <Link href={detailHref} className="block px-3 py-2 max-w-48 truncate text-foreground">
+                          <Link href={detailHref} className="block px-3 py-2 text-center max-w-48 truncate mx-auto text-foreground">
                             {wo.customer.name}
                           </Link>
                         </td>
                         <td className="p-0 hidden sm:table-cell">
-                          <Link href={detailHref} className="block px-3 py-2 text-muted-foreground">
+                          <Link href={detailHref} className="block px-3 py-2 text-center text-muted-foreground">
                             {wo.jobType}
                           </Link>
                         </td>
                         <td className="p-0 hidden md:table-cell">
-                          <Link href={detailHref} className="block px-3 py-2 text-muted-foreground">
+                          <Link href={detailHref} className="block px-3 py-2 text-center text-muted-foreground">
                             {wo.foreman?.name || "—"}
                           </Link>
                         </td>
                         <td className="p-0 hidden md:table-cell">
-                          <Link href={detailHref} className="block px-3 py-2">
+                          <Link href={detailHref} className="flex items-center justify-center px-3 py-2">
                             <StatusBadge status={wo.status} />
                           </Link>
                         </td>
                         <td className="p-0 hidden lg:table-cell">
-                          <Link href={detailHref} className="block px-3 py-2 text-muted-foreground whitespace-nowrap">
+                          <Link href={detailHref} className="block px-3 py-2 text-center text-muted-foreground whitespace-nowrap">
                             {formatDate(wo.projectStartDate)}
                           </Link>
                         </td>
                         <td className="p-0 hidden lg:table-cell">
-                          <Link href={detailHref} className="block px-3 py-2 text-right tabular-nums whitespace-nowrap">
+                          <Link href={detailHref} className="block px-3 py-2 text-center tabular-nums whitespace-nowrap">
                             {formatCurrency(wo.invoiceAmount)}
                           </Link>
                         </td>
                         <td className="p-0 hidden xl:table-cell">
-                          <Link href={detailHref} className="block px-3 py-2 text-right tabular-nums whitespace-nowrap">
+                          <Link href={detailHref} className="block px-3 py-2 text-center tabular-nums whitespace-nowrap">
                             <ProfitCell profit={profitNum} profitPct={profitPctNum} />
                           </Link>
                         </td>
                         <td className="p-0">
                           <Link
                             href={`/portal/jobs/${wo.id}/edit`}
-                            className="flex items-center justify-end gap-1 px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                            className="flex items-center justify-center gap-1 px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                           >
                             <Pencil className="w-3 h-3" />
                             Edit
@@ -330,33 +331,5 @@ export default async function LandscapeJobsPage({
         </>
       )}
     </div>
-  );
-}
-
-// ── Sub-components ──────────────────────────────────────────
-
-function ProfitCell({
-  profit,
-  profitPct,
-}: {
-  profit: number | null;
-  profitPct: number | null;
-}) {
-  if (profit === null) {
-    return <span className="text-muted-foreground">—</span>;
-  }
-
-  const isPositive = profit >= 0;
-  const colorClass = isPositive ? "text-green-600" : "text-red-600";
-
-  return (
-    <span className={cn("font-medium", colorClass)}>
-      {formatCurrency(profit)}
-      {profitPct !== null && (
-        <span className="text-xs ml-1 opacity-70">
-          ({profitPct.toFixed(1)}%)
-        </span>
-      )}
-    </span>
   );
 }

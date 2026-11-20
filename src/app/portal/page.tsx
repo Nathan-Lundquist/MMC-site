@@ -1,8 +1,28 @@
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import Link from "next/link";
-import { Sprout, Leaf, CloudSnow, ArrowUpRight } from "lucide-react";
+import {
+  Sprout,
+  Leaf,
+  CloudSnow,
+  ArrowUpRight,
+  Package,
+  Users,
+  BarChart3,
+  DollarSign,
+  FileBarChart,
+  Timer,
+  Kanban,
+  CalendarClock,
+  Tractor,
+  UserCog,
+  Settings,
+  Upload,
+  MessageSquarePlus,
+  Shield,
+} from "lucide-react";
 import { CLEAN_UP_CATEGORY_VALUES } from "@/lib/job-categories";
+import { MANAGER_VISIBLE_ROLES, CHANGE_REQUEST_ROLES } from "@/lib/constants";
 
 const ACTIVE_STATUSES = ["DRAFT", "IN_PROGRESS"] as const;
 
@@ -17,6 +37,9 @@ function currentSnowSeasonStart(now: Date): Date {
 export default async function PortalHome() {
   const session = await auth();
   const firstName = session?.user?.name?.split(" ")[0];
+  const role = session?.user?.role ?? "";
+  const isManager = (MANAGER_VISIBLE_ROLES as readonly string[]).includes(role);
+  const isAdmin = (CHANGE_REQUEST_ROLES as readonly string[]).includes(role);
 
   const seasonStart = currentSnowSeasonStart(new Date());
 
@@ -60,62 +83,76 @@ export default async function PortalHome() {
     },
   ];
 
+  const quickLinks = [
+    { href: "/portal/board", label: "Board", icon: Kanban },
+    { href: "/portal/reports", label: "Reports", icon: FileBarChart },
+    { href: "/portal/breakdown", label: "Breakdown", icon: BarChart3 },
+    { href: "/portal/costing", label: "Costing", icon: DollarSign },
+    { href: "/portal/materials", label: "Materials", icon: Package },
+    { href: "/portal/customers", label: "All Customers", icon: Users },
+    { href: "/portal/time", label: "My Clock", icon: Timer },
+    ...(isManager
+      ? [
+          { href: "/portal/time/log", label: "Time Log", icon: CalendarClock },
+          { href: "/portal/machines", label: "Maintenance", icon: Tractor },
+          { href: "/portal/employees", label: "All Employees", icon: UserCog },
+          { href: "/portal/upload", label: "Upload Data", icon: Upload },
+          { href: "/portal/admin", label: "Current Admin", icon: Shield },
+          { href: "/portal/settings", label: "Settings", icon: Settings },
+        ]
+      : []),
+    ...(isAdmin
+      ? [{ href: "/portal/change-requests", label: "Change Requests", icon: MessageSquarePlus }]
+      : []),
+  ];
+
   return (
-    <div className="-m-4 lg:-m-6">
-      <div className="relative overflow-hidden bg-[oklch(0.17_0.014_26)] min-h-[calc(100vh-3.5rem)] px-6 sm:px-10 lg:px-16 py-14 sm:py-20 flex flex-col">
-        <div
-          className="pointer-events-none absolute -top-48 -right-48 w-[620px] h-[620px] rounded-full bg-brand/25 blur-[140px]"
-          aria-hidden
-        />
-        <div
-          className="pointer-events-none absolute bottom-0 left-0 w-[2px] h-full bg-gradient-to-t from-brand/40 to-transparent"
-          aria-hidden
-        />
+    <div className="space-y-10">
+      <div className="animate-fade-in">
+        <p className="text-sm font-medium text-muted-foreground">
+          Mike&apos;s Clean Cut &mdash; Employee Portal
+        </p>
+        <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground mt-1">
+          {firstName ? `Hey ${firstName}, what's the job?` : "What's the job?"}
+        </h1>
+      </div>
 
-        <div className="relative animate-fade-in">
-          <p className="text-xs sm:text-sm font-semibold tracking-[0.3em] uppercase text-white/45">
-            Mike&apos;s Clean Cut &mdash; Dispatch
-          </p>
-          <h1 className="font-display mt-4 text-[clamp(2.75rem,7vw,5.75rem)] font-black leading-[0.95] tracking-tight text-white">
-            {firstName ? (
-              <>
-                Hey {firstName}.
-                <br />
-                What&apos;s the job?
-              </>
-            ) : (
-              "What's the job?"
-            )}
-          </h1>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {jobTypes.map((type, i) => (
+          <Link
+            key={type.href}
+            href={type.href}
+            className="group rounded-2xl border border-border bg-card p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-lg animate-fade-in"
+            style={{ animationDelay: `${i * 80}ms`, animationFillMode: "backwards" }}
+          >
+            <div className="flex items-center justify-between">
+              <div className="w-12 h-12 rounded-xl bg-brand/10 text-brand flex items-center justify-center transition-transform group-hover:scale-105">
+                <type.icon className="w-6 h-6" />
+              </div>
+              <ArrowUpRight className="w-5 h-5 text-muted-foreground transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-brand" />
+            </div>
+            <div className="mt-5 font-display text-4xl font-black tabular-nums text-foreground">
+              {type.count}
+            </div>
+            <div className="text-sm text-muted-foreground mt-0.5">{type.countLabel}</div>
+            <div className="mt-3 font-display text-lg font-bold text-foreground">{type.label}</div>
+          </Link>
+        ))}
+      </div>
 
-        <div className="relative mt-14 sm:mt-20 grid grid-cols-1 sm:grid-cols-3 gap-px rounded-2xl overflow-hidden border border-white/10 bg-white/10">
-          {jobTypes.map((type, i) => (
+      <div>
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">
+          Quick Links
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          {quickLinks.map((link) => (
             <Link
-              key={type.href}
-              href={type.href}
-              className="group relative flex min-h-[260px] flex-col justify-between bg-[oklch(0.17_0.014_26)] p-8 transition-colors duration-300 hover:bg-brand sm:min-h-[320px] sm:p-10 animate-fade-in"
-              style={{ animationDelay: `${i * 90}ms`, animationFillMode: "backwards" }}
+              key={link.href}
+              href={link.href}
+              className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:border-brand/40 hover:bg-secondary/40"
             >
-              <div className="flex items-start justify-between">
-                <type.icon
-                  className="h-8 w-8 text-brand transition-colors duration-300 group-hover:text-white"
-                  strokeWidth={1.5}
-                />
-                <ArrowUpRight className="h-6 w-6 text-white/30 transition-all duration-300 group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-white" />
-              </div>
-
-              <div>
-                <div className="font-display text-6xl font-black leading-none tabular-nums text-white sm:text-7xl">
-                  {type.count}
-                </div>
-                <div className="mt-2 text-sm text-white/55 transition-colors duration-300 group-hover:text-white/80">
-                  {type.countLabel}
-                </div>
-                <div className="mt-5 font-display text-xl font-bold text-white sm:text-2xl">
-                  {type.label}
-                </div>
-              </div>
+              <link.icon className="w-5 h-5 text-brand shrink-0" />
+              <span className="text-sm font-medium text-foreground truncate">{link.label}</span>
             </Link>
           ))}
         </div>
