@@ -10,6 +10,7 @@ import PhotosSection from "@/components/portal/PhotosSection";
 import { toReceiptDTO } from "@/lib/receipts";
 import { toPhotoDTO } from "@/lib/photos";
 import { CLEAN_UP_CATEGORY_VALUES } from "@/lib/job-categories";
+import { formatCurrency } from "@/lib/format";
 
 export default async function JobDetailPage({
   params,
@@ -56,27 +57,47 @@ export default async function JobDetailPage({
   const receipts = wo.receipts.map(toReceiptDTO);
   const photos = wo.photos.map(toPhotoDTO);
 
-  // Total hours per employee across both the main crew details and any
-  // approved additional-work crew details, for a true "hours on this job" figure.
-  const employeeHoursTotals = new Map<string, { name: string; hours: number }>();
-  function addHours(employeeId: string | null, name: string | undefined, ...amounts: unknown[]) {
+  // Total hours (+ labor cost, from each employee's hourly rate) per employee
+  // across both the main crew details and any approved additional-work crew
+  // details, for a true "hours/overhead on this job" figure.
+  const employeeHoursTotals = new Map<string, { name: string; hours: number; hourlyRate: number | null }>();
+  function addHours(
+    employeeId: string | null,
+    name: string | undefined,
+    hourlyRate: unknown,
+    ...amounts: unknown[]
+  ) {
     if (!employeeId) return;
     const total = amounts.reduce((sum: number, v) => sum + Number(v ?? 0), 0);
     const existing = employeeHoursTotals.get(employeeId);
     employeeHoursTotals.set(employeeId, {
       name: existing?.name || name || "Unknown",
       hours: (existing?.hours || 0) + total,
+      hourlyRate: existing?.hourlyRate ?? (hourlyRate != null ? Number(hourlyRate) : null),
     });
   }
   for (const cd of wo.crewDetails) {
-    addHours(cd.employeeId, cd.employee?.name, cd.jobHours, cd.setupHours, cd.travelHours, cd.unloadHours, cd.deliveryHours);
+    addHours(
+      cd.employeeId,
+      cd.employee?.name,
+      cd.employee?.hourlyRate,
+      cd.jobHours,
+      cd.setupHours,
+      cd.travelHours,
+      cd.unloadHours,
+      cd.deliveryHours
+    );
   }
   for (const aw of wo.additionalWork) {
     for (const cd of aw.crewDetails) {
-      addHours(cd.employeeId, cd.employee?.name, cd.jobHours, cd.deliveryHours);
+      addHours(cd.employeeId, cd.employee?.name, cd.employee?.hourlyRate, cd.jobHours, cd.deliveryHours);
     }
   }
-  const employeeHoursList = [...employeeHoursTotals.values()].sort((a, b) => b.hours - a.hours);
+  const employeeHoursList = [...employeeHoursTotals.values()]
+    .map((e) => ({ ...e, cost: e.hourlyRate != null ? e.hours * e.hourlyRate : null }))
+    .sort((a, b) => b.hours - a.hours);
+  const totalLaborCost = employeeHoursList.reduce((sum, e) => sum + (e.cost ?? 0), 0);
+  const hasAnyRate = employeeHoursList.some((e) => e.hourlyRate != null);
   const backHref = (CLEAN_UP_CATEGORY_VALUES as readonly string[]).includes(wo.jobCategory)
     ? "/portal/cleanups"
     : "/portal/landscape";
@@ -244,14 +265,26 @@ export default async function JobDetailPage({
       {/* Hours by Employee */}
       {employeeHoursList.length > 0 && (
         <Card className="p-4">
-          <h3 className="font-display text-sm font-semibold text-foreground mb-3">
-            Hours by Employee
-          </h3>
-          <div className="space-y-1">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-display text-sm font-semibold text-foreground">
+              Hours by Employee
+            </h3>
+            {hasAnyRate && (
+              <span className="text-xs text-muted-foreground">
+                Overhead: <span className="font-medium text-foreground">{formatCurrency(totalLaborCost)}</span>
+              </span>
+            )}
+          </div>
+          <div className="space-y-1.5">
             {employeeHoursList.map((e) => (
               <div key={e.name} className="flex items-center justify-between text-sm">
                 <span className="text-foreground">{e.name}</span>
-                <span className="font-medium tabular-nums text-foreground">{e.hours.toFixed(2)}h</span>
+                <span className="flex items-center gap-3">
+                  <span className="font-medium tabular-nums text-foreground">{e.hours.toFixed(2)}h</span>
+                  <span className="tabular-nums text-muted-foreground w-20 text-right">
+                    {e.cost !== null ? formatCurrency(e.cost) : "—"}
+                  </span>
+                </span>
               </div>
             ))}
           </div>
