@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Plus, X, Check, Pencil } from "lucide-react";
-import type { CrewRow, MachineRow } from "./types";
+import type { CrewRow, CrewEmployeeHours, MachineRow } from "./types";
 import { todayLocal, fmtDate, updateRow, removeRow } from "./helpers";
 import {
   MobileInput,
@@ -25,6 +25,17 @@ interface Props {
   setMachineRows: React.Dispatch<React.SetStateAction<MachineRow[]>>;
 }
 
+function employeeTotalHrs(emp: CrewEmployeeHours) {
+  return [emp.jobHours, emp.setupHours, emp.travelHours, emp.unloadHours, emp.deliveryHours].reduce(
+    (sum, v) => sum + (parseFloat(v) || 0),
+    0
+  );
+}
+
+function entryTotalHrs(row: CrewRow) {
+  return row.employees.reduce((sum, emp) => sum + employeeTotalHrs(emp), 0);
+}
+
 export function CrewSection({
   employees,
   crewRows,
@@ -38,7 +49,7 @@ export function CrewSection({
   const [collapsed, setCollapsed] = useState<Set<number>>(new Set());
 
   function addRow() {
-    setCrewRows((p) => [...p, { date: todayLocal(), employeeIds: [], jobHours: "", setupHours: "", travelHours: "", unloadHours: "", deliveryHours: "" }]);
+    setCrewRows((p) => [...p, { date: todayLocal(), employees: [] }]);
   }
 
   function collapse(i: number) {
@@ -86,7 +97,7 @@ export function CrewSection({
           Add Crew Entry
         </Button>
 
-        {crewRows.length === 0 && <EmptyState text="Add an entry per day — select the crew and enter hours." />}
+        {crewRows.length === 0 && <EmptyState text="Add an entry per day — add each crew member and their own hours." />}
 
         {crewRows.map((row, i) =>
           collapsed.has(i) ? (
@@ -103,6 +114,8 @@ export function CrewSection({
             />
           )
         )}
+
+        <EmployeeHoursTotals crewRows={crewRows} employees={employees} />
       </Card>
 
       <Card className="p-4 space-y-3">
@@ -128,10 +141,45 @@ export function CrewSection({
   );
 }
 
-function crewRowTotalHrs(row: CrewRow) {
-  return [row.jobHours, row.setupHours, row.travelHours, row.unloadHours, row.deliveryHours].reduce(
-    (sum, v) => sum + (parseFloat(v) || 0),
-    0
+/** Live running total of hours per employee, across every crew entry on this job. */
+function EmployeeHoursTotals({
+  crewRows,
+  employees,
+}: {
+  crewRows: CrewRow[];
+  employees: { id: string; name: string }[];
+}) {
+  const totals = new Map<string, number>();
+  for (const row of crewRows) {
+    for (const emp of row.employees) {
+      if (!emp.employeeId) continue;
+      totals.set(emp.employeeId, (totals.get(emp.employeeId) || 0) + employeeTotalHrs(emp));
+    }
+  }
+
+  if (totals.size === 0) return null;
+
+  const sorted = [...totals.entries()]
+    .map(([employeeId, hours]) => ({
+      name: employees.find((e) => e.id === employeeId)?.name || "Unknown",
+      hours,
+    }))
+    .sort((a, b) => b.hours - a.hours);
+
+  return (
+    <div className="pt-1 border-t border-border">
+      <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mt-3 mb-2">
+        Hours by Employee
+      </h4>
+      <div className="space-y-1">
+        {sorted.map((e) => (
+          <div key={e.name} className="flex items-center justify-between text-sm">
+            <span className="text-foreground">{e.name}</span>
+            <span className="font-medium tabular-nums text-foreground">{e.hours.toFixed(2)}h</span>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -147,9 +195,10 @@ function CrewRowSummary({
   onEdit: () => void;
   onDelete: () => void;
 }) {
-  const selectedNames = employees.filter((e) => row.employeeIds.includes(e.id)).map((e) => e.name);
-  const totalHrs = crewRowTotalHrs(row);
-  const peopleCount = row.employeeIds.length || 1;
+  const names = row.employees.map(
+    (emp) => employees.find((e) => e.id === emp.employeeId)?.name || "—"
+  );
+  const totalHrs = entryTotalHrs(row);
 
   return (
     <div className="w-full flex items-center justify-between gap-2 p-3 border border-border rounded-lg hover:bg-secondary/30 transition-colors">
@@ -162,11 +211,11 @@ function CrewRowSummary({
           {row.date ? fmtDate(row.date) : "No date"}
         </span>
         <span className="text-xs text-muted-foreground truncate">
-          {selectedNames.length > 0 ? selectedNames.join(", ") : "No crew selected"}
+          {names.length > 0 ? names.join(", ") : "No crew selected"}
         </span>
         {totalHrs > 0 && (
           <span className="text-[11px] font-medium bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded shrink-0">
-            {(totalHrs * peopleCount).toFixed(1)} man-hrs
+            {totalHrs.toFixed(1)} man-hrs
           </span>
         )}
       </button>
@@ -179,6 +228,8 @@ function CrewRowSummary({
     </div>
   );
 }
+
+const BLANK_HOURS = { jobHours: "", setupHours: "", travelHours: "", unloadHours: "", deliveryHours: "" };
 
 function CrewRowCard({
   index: i,
@@ -195,23 +246,37 @@ function CrewRowCard({
   onSave: () => void;
   onDelete: () => void;
 }) {
-  const selectedNames = employees
-    .filter((e) => row.employeeIds.includes(e.id))
-    .map((e) => e.name);
-  const totalHrs = crewRowTotalHrs(row);
-  const peopleCount = row.employeeIds.length || 1;
-  const available = employees.filter((e) => !row.employeeIds.includes(e.id));
+  const totalHrs = entryTotalHrs(row);
+  const selectedIds = row.employees.map((e) => e.employeeId);
+  const available = employees.filter((e) => !selectedIds.includes(e.id));
 
   function addEmployee(empId: string) {
     setCrewRows((prev) =>
-      prev.map((r, idx) => (idx === i ? { ...r, employeeIds: [...r.employeeIds, empId] } : r))
+      prev.map((r, idx) =>
+        idx === i ? { ...r, employees: [...r.employees, { employeeId: empId, ...BLANK_HOURS }] } : r
+      )
     );
   }
 
-  function removeEmployee(empId: string) {
+  function removeEmployee(empIdx: number) {
     setCrewRows((prev) =>
       prev.map((r, idx) =>
-        idx === i ? { ...r, employeeIds: r.employeeIds.filter((id) => id !== empId) } : r
+        idx === i ? { ...r, employees: r.employees.filter((_, eIdx) => eIdx !== empIdx) } : r
+      )
+    );
+  }
+
+  function updateEmployeeHours(empIdx: number, field: keyof CrewEmployeeHours, value: string) {
+    setCrewRows((prev) =>
+      prev.map((r, idx) =>
+        idx === i
+          ? {
+              ...r,
+              employees: r.employees.map((emp, eIdx) =>
+                eIdx === empIdx ? { ...emp, [field]: value } : emp
+              ),
+            }
+          : r
       )
     );
   }
@@ -225,7 +290,7 @@ function CrewRowCard({
           </span>
           {totalHrs > 0 && (
             <span className="text-[11px] font-medium bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded">
-              {totalHrs.toFixed(1)}h each &times; {peopleCount} = {(totalHrs * peopleCount).toFixed(1)} man-hrs
+              {totalHrs.toFixed(1)} man-hrs
             </span>
           )}
         </div>
@@ -236,58 +301,88 @@ function CrewRowCard({
         <MobileInput type="date" value={row.date} onChange={(e) => updateRow(setCrewRows, i, "date", e.target.value)} />
       </Field>
 
-      <Field label="Employees">
-        <div className="flex flex-wrap gap-1.5">
-          {selectedNames.map((name, idx) => {
-            const empId = row.employeeIds[idx];
-            return (
-              <span
-                key={empId}
-                className="inline-flex items-center gap-1 pl-2.5 pr-1 py-1 rounded-full text-xs font-medium bg-brand/10 text-brand"
-              >
-                {name}
-                <button
-                  type="button"
-                  onClick={() => removeEmployee(empId)}
-                  className="p-0.5 rounded-full hover:bg-brand/20"
-                  title={`Remove ${name}`}
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </span>
-            );
-          })}
-
-          {available.length > 0 && (
-            <div className="w-full sm:w-auto sm:min-w-[160px]">
-              <MobileSelect value="" onChange={(v) => v && addEmployee(v)}>
-                <option value="">+ Add employee...</option>
-                {available.map((emp) => (
-                  <option key={emp.id} value={emp.id}>{emp.name}</option>
-                ))}
-              </MobileSelect>
+      <div className="space-y-2">
+        {row.employees.map((emp, eIdx) => {
+          const name = employees.find((e) => e.id === emp.employeeId)?.name || "Unknown";
+          const empTotal = employeeTotalHrs(emp);
+          return (
+            <div key={eIdx} className="p-2.5 border border-border rounded-md bg-secondary/20 space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-sm font-medium text-foreground">{name}</span>
+                <div className="flex items-center gap-2">
+                  {empTotal > 0 && (
+                    <span className="text-[11px] text-muted-foreground">{empTotal.toFixed(2)}h</span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => removeEmployee(eIdx)}
+                    className="p-1 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                    title={`Remove ${name}`}
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                <Field label="Job">
+                  <MobileInput
+                    type="number"
+                    inputMode="decimal"
+                    step="0.25"
+                    value={emp.jobHours}
+                    onChange={(e) => updateEmployeeHours(eIdx, "jobHours", e.target.value)}
+                  />
+                </Field>
+                <Field label="Setup">
+                  <MobileInput
+                    type="number"
+                    inputMode="decimal"
+                    step="0.25"
+                    value={emp.setupHours}
+                    onChange={(e) => updateEmployeeHours(eIdx, "setupHours", e.target.value)}
+                  />
+                </Field>
+                <Field label="Travel">
+                  <MobileInput
+                    type="number"
+                    inputMode="decimal"
+                    step="0.25"
+                    value={emp.travelHours}
+                    onChange={(e) => updateEmployeeHours(eIdx, "travelHours", e.target.value)}
+                  />
+                </Field>
+                <Field label="Unload">
+                  <MobileInput
+                    type="number"
+                    inputMode="decimal"
+                    step="0.25"
+                    value={emp.unloadHours}
+                    onChange={(e) => updateEmployeeHours(eIdx, "unloadHours", e.target.value)}
+                  />
+                </Field>
+                <Field label="Delivery">
+                  <MobileInput
+                    type="number"
+                    inputMode="decimal"
+                    step="0.25"
+                    value={emp.deliveryHours}
+                    onChange={(e) => updateEmployeeHours(eIdx, "deliveryHours", e.target.value)}
+                  />
+                </Field>
+              </div>
             </div>
-          )}
-        </div>
-      </Field>
-
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        <Field label="Job Hrs">
-          <MobileInput type="number" inputMode="decimal" step="0.25" value={row.jobHours} onChange={(e) => updateRow(setCrewRows, i, "jobHours", e.target.value)} />
-        </Field>
-        <Field label="Setup Hrs">
-          <MobileInput type="number" inputMode="decimal" step="0.25" value={row.setupHours} onChange={(e) => updateRow(setCrewRows, i, "setupHours", e.target.value)} />
-        </Field>
-        <Field label="Travel Hrs">
-          <MobileInput type="number" inputMode="decimal" step="0.25" value={row.travelHours} onChange={(e) => updateRow(setCrewRows, i, "travelHours", e.target.value)} />
-        </Field>
-        <Field label="Unload Hrs">
-          <MobileInput type="number" inputMode="decimal" step="0.25" value={row.unloadHours} onChange={(e) => updateRow(setCrewRows, i, "unloadHours", e.target.value)} />
-        </Field>
-        <Field label="Delivery Hrs">
-          <MobileInput type="number" inputMode="decimal" step="0.25" value={row.deliveryHours} onChange={(e) => updateRow(setCrewRows, i, "deliveryHours", e.target.value)} />
-        </Field>
+          );
+        })}
       </div>
+
+      {available.length > 0 && (
+        <MobileSelect value="" onChange={(v) => v && addEmployee(v)}>
+          <option value="">+ Add employee...</option>
+          {available.map((emp) => (
+            <option key={emp.id} value={emp.id}>{emp.name}</option>
+          ))}
+        </MobileSelect>
+      )}
 
       <Button type="button" variant="outline" onClick={onSave} className="w-full h-10 text-sm font-medium gap-2">
         <Check className="w-4 h-4" />

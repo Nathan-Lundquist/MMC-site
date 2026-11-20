@@ -106,17 +106,15 @@ export function WorkOrderForm({ customers, employees, materialCatalog, initialDa
           payments: paymentRows,
           machines: machineRows,
           crewDetails: crewRows.flatMap((row) =>
-            row.employeeIds.length > 0
-              ? row.employeeIds.map((eid) => ({
-                  date: row.date,
-                  employeeId: eid,
-                  jobHours: row.jobHours,
-                  setupHours: row.setupHours,
-                  travelHours: row.travelHours,
-                  unloadHours: row.unloadHours,
-                  deliveryHours: row.deliveryHours,
-                }))
-              : [{ date: row.date, employeeId: "", jobHours: row.jobHours, setupHours: row.setupHours, travelHours: row.travelHours, unloadHours: row.unloadHours, deliveryHours: row.deliveryHours }]
+            row.employees.map((emp) => ({
+              date: row.date,
+              employeeId: emp.employeeId,
+              jobHours: emp.jobHours,
+              setupHours: emp.setupHours,
+              travelHours: emp.travelHours,
+              unloadHours: emp.unloadHours,
+              deliveryHours: emp.deliveryHours,
+            }))
           ),
           debris: debrisRows,
           weeding: weedingRows,

@@ -55,36 +55,25 @@ export default async function EditJobPage({
 
   if (!wo) return notFound();
 
-  // Group crew details by date+hours to reconstruct multi-employee rows
-  const crewGroupKey = (c: {
-    date: Date;
-    jobHours: unknown;
-    setupHours: unknown;
-    travelHours: unknown;
-    unloadHours: unknown;
-    deliveryHours: unknown;
-  }) =>
-    `${fmtDate(c.date)}|${c.jobHours}|${c.setupHours}|${c.travelHours}|${c.unloadHours}|${c.deliveryHours}`;
-
+  // Group crew details by date — each one already carries its own employee + hours.
   const crewGroups = new Map<
     string,
-    { date: string; employeeIds: string[]; jobHours: string; setupHours: string; travelHours: string; unloadHours: string; deliveryHours: string }
+    { date: string; employees: { employeeId: string; jobHours: string; setupHours: string; travelHours: string; unloadHours: string; deliveryHours: string }[] }
   >();
   for (const c of wo.crewDetails) {
-    const key = crewGroupKey(c);
-    if (!crewGroups.has(key)) {
-      crewGroups.set(key, {
-        date: fmtDate(c.date),
-        employeeIds: [],
+    const dateKey = fmtDate(c.date);
+    if (!crewGroups.has(dateKey)) {
+      crewGroups.set(dateKey, { date: dateKey, employees: [] });
+    }
+    if (c.employeeId) {
+      crewGroups.get(dateKey)!.employees.push({
+        employeeId: c.employeeId,
         jobHours: String(Number(c.jobHours)),
         setupHours: String(Number(c.setupHours)),
         travelHours: String(Number(c.travelHours)),
         unloadHours: String(Number(c.unloadHours)),
         deliveryHours: String(Number(c.deliveryHours)),
       });
-    }
-    if (c.employeeId) {
-      crewGroups.get(key)!.employeeIds.push(c.employeeId);
     }
   }
 

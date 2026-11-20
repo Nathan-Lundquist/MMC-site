@@ -12,14 +12,17 @@ export interface MachineRow {
   vehicleInfo: string;
   hours: string;
 }
-export interface CrewRow {
-  date: string;
-  employeeIds: string[];
+export interface CrewEmployeeHours {
+  employeeId: string;
   jobHours: string;
   setupHours: string;
   travelHours: string;
   unloadHours: string;
   deliveryHours: string;
+}
+export interface CrewRow {
+  date: string;
+  employees: CrewEmployeeHours[];
 }
 export interface DebrisRow {
   date: string;
