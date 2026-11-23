@@ -102,6 +102,7 @@ export interface WorkOrderInitialData {
   estimateNumber: string;
   pctComplete: string;
   totalHours: string;
+  estimatedHours: string;
   notes: string;
   materialsNotUsed: string;
   timeRows: TimeRow[];

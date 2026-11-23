@@ -105,6 +105,7 @@ model WorkOrder {
   projectEndDate   DateTime?       @map("end_date")
   percentCompleted Decimal         @default(0) @db.Decimal(5, 2) @map("pct_complete")
   totalManHours    Decimal         @default(0) @db.Decimal(8, 2) @map("total_hours")
+  estimatedHours   Decimal?        @db.Decimal(8, 2) @map("estimated_hours")
   notes            String?
   materialsNotUsed String?         @map("materials_not_used")
   status           WorkOrderStatus @default(DRAFT)

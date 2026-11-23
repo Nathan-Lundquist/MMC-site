@@ -87,6 +87,7 @@ export default async function EditJobPage({
     estimateNumber: wo.estimateNumber || "",
     pctComplete: String(Number(wo.percentCompleted)),
     totalHours: String(Number(wo.totalManHours)),
+    estimatedHours: wo.estimatedHours != null ? String(Number(wo.estimatedHours)) : "",
     notes: wo.notes || "",
     materialsNotUsed: wo.materialsNotUsed || "",
 

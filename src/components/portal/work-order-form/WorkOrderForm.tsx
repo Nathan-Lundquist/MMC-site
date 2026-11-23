@@ -46,6 +46,7 @@ export function WorkOrderForm({ customers, employees, materialCatalog, initialDa
   const [estimateNumber, setEstimateNumber] = useState(initialData?.estimateNumber || "");
   const [pctComplete, setPctComplete] = useState(initialData?.pctComplete || "0");
   const [totalHours, setTotalHours] = useState(initialData?.totalHours || "0");
+  const [estimatedHours, setEstimatedHours] = useState(initialData?.estimatedHours || "");
 
   const [timeRows, setTimeRows] = useState<TimeRow[]>(initialData?.timeRows || []);
   const [paymentRows, setPaymentRows] = useState<PaymentRow[]>(initialData?.paymentRows || []);
@@ -97,6 +98,7 @@ export function WorkOrderForm({ customers, employees, materialCatalog, initialDa
           estimateNumber,
           pctComplete: parseFloat(pctComplete) || 0,
           totalHours: parseFloat(totalHours) || 0,
+          estimatedHours: estimatedHours.trim() ? parseFloat(estimatedHours) : null,
           notes,
           materialsNotUsed,
           timeEntries: timeRows.map((t) => ({
@@ -169,6 +171,8 @@ export function WorkOrderForm({ customers, employees, materialCatalog, initialDa
         setPctComplete={setPctComplete}
         totalHours={totalHours}
         setTotalHours={setTotalHours}
+        estimatedHours={estimatedHours}
+        setEstimatedHours={setEstimatedHours}
       />
 
       <ProjectDaysSection timeRows={timeRows} setTimeRows={setTimeRows} />

@@ -98,6 +98,8 @@ export default async function JobDetailPage({
     .sort((a, b) => b.hours - a.hours);
   const totalLaborCost = employeeHoursList.reduce((sum, e) => sum + (e.cost ?? 0), 0);
   const hasAnyRate = employeeHoursList.some((e) => e.hourlyRate != null);
+  const actualHoursTotal = employeeHoursList.reduce((sum, e) => sum + e.hours, 0);
+  const estimatedHoursNum = wo.estimatedHours != null ? Number(wo.estimatedHours) : null;
   const backHref = (CLEAN_UP_CATEGORY_VALUES as readonly string[]).includes(wo.jobCategory)
     ? "/portal/cleanups"
     : "/portal/landscape";
@@ -198,6 +200,41 @@ export default async function JobDetailPage({
           </div>
         </div>
       </Card>
+
+      {/* Estimated vs. Actual Hours */}
+      {estimatedHoursNum !== null && estimatedHoursNum > 0 && (
+        <Card className="p-4">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-display text-sm font-semibold text-foreground">
+              Crew Hours Budget
+            </h3>
+            <span className="text-xs text-muted-foreground">
+              {actualHoursTotal.toFixed(2)}h used of {estimatedHoursNum.toFixed(2)}h estimated
+            </span>
+          </div>
+          {(() => {
+            const pct = Math.min((actualHoursTotal / estimatedHoursNum) * 100, 100);
+            const over = actualHoursTotal > estimatedHoursNum;
+            const barColor = over ? "bg-destructive" : pct > 85 ? "bg-amber-500" : "bg-green-600";
+            const remaining = estimatedHoursNum - actualHoursTotal;
+            return (
+              <>
+                <div className="h-2.5 w-full rounded-full bg-secondary overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all ${barColor}`}
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+                <p className={`text-xs mt-1.5 ${over ? "text-destructive font-medium" : "text-muted-foreground"}`}>
+                  {over
+                    ? `${Math.abs(remaining).toFixed(2)}h over budget`
+                    : `${remaining.toFixed(2)}h remaining`}
+                </p>
+              </>
+            );
+          })()}
+        </Card>
+      )}
 
       {/* Notes */}
       {(wo.notes || wo.materialsNotUsed) && (

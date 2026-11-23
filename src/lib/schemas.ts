@@ -111,6 +111,7 @@ export const workOrderBodySchema = z.object({
   estimateNumber: z.string().optional().default(""),
   pctComplete: z.number().min(0).max(100).optional().default(0),
   totalHours: z.number().min(0).optional().default(0),
+  estimatedHours: z.number().min(0).nullable().optional(),
   notes: z.string().optional().default(""),
   materialsNotUsed: z.string().optional().default(""),
   timeEntries: z.array(timeEntrySchema).optional().default([]),

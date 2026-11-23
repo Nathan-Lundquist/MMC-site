@@ -25,6 +25,8 @@ interface Props {
   setPctComplete: (v: string) => void;
   totalHours: string;
   setTotalHours: (v: string) => void;
+  estimatedHours: string;
+  setEstimatedHours: (v: string) => void;
 }
 
 export function JobInfoSection({
@@ -47,6 +49,8 @@ export function JobInfoSection({
   setPctComplete,
   totalHours,
   setTotalHours,
+  estimatedHours,
+  setEstimatedHours,
 }: Props) {
   return (
     <Card className="p-4 space-y-4">
@@ -119,6 +123,17 @@ export function JobInfoSection({
             step="0.01"
             value={totalHours}
             onChange={(e) => setTotalHours(e.target.value)}
+          />
+        </Field>
+
+        <Field label="Estimated Hours">
+          <MobileInput
+            type="number"
+            min="0"
+            step="0.01"
+            placeholder="Budgeted crew hours"
+            value={estimatedHours}
+            onChange={(e) => setEstimatedHours(e.target.value)}
           />
         </Field>
       </div>

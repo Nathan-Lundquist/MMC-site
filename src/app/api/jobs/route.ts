@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
       estimateNumber,
       pctComplete,
       totalHours,
+      estimatedHours,
       notes,
       materialsNotUsed,
     } = body;
@@ -53,6 +54,7 @@ export async function POST(req: NextRequest) {
           estimateNumber: estimateNumber || null,
           percentCompleted: pctComplete,
           totalManHours: totalHours,
+          estimatedHours: estimatedHours ?? null,
           notes: notes || null,
           materialsNotUsed: materialsNotUsed || null,
           status: "DRAFT",
