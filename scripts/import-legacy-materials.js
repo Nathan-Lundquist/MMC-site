@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// One-time import of the legacy Zoho Creator "Landscape Material" catalog
-// (scraped 2026-11-20 — 95 of 128 rows; the rest were cut off by a Zoho
-// sign-in rate limit mid-scrape and can be imported later with this same
-// script once re-extracted).
+// One-time import of the legacy Zoho Creator "Landscape Material" catalog.
+// Idempotent (skips names that already exist), so this can just be re-run
+// with the full 128-row extract — originally only got 95 rows out before
+// hitting a Zoho sign-in rate limit, finished later with the rest.
 // Usage: node scripts/import-legacy-materials.js
 
 const fs = require("fs");
@@ -43,6 +43,12 @@ const UNIT_MAP = {
   "per yard": "Yards",
   "per ton": "Tons",
   "per bottle": "Bottles",
+  "per stick": "Sticks",
+  "per kit": "Kits",
+  "per bale": "Bales",
+  "per lbs": "Lbs",
+  "per 50 lbs": "50 lb Bags",
+  "per 50lbs": "50 lb Bags",
 };
 
 function normalizeUnit(raw) {
@@ -52,6 +58,16 @@ function normalizeUnit(raw) {
 
 function normalizeCategory(raw) {
   return CATEGORY_MAP[raw] || null;
+}
+
+// Fix a known typo in the legacy data so it doesn't fracture supplier grouping.
+const SUPPLIER_FIXES = {
+  "Centrail Irrigation": "Central Irrigation",
+};
+
+function normalizeSupplier(raw) {
+  if (!raw) return null;
+  return SUPPLIER_FIXES[raw] || raw;
 }
 
 async function main() {
@@ -78,7 +94,7 @@ async function main() {
         name,
         unit: normalizeUnit(row.unit),
         category: normalizeCategory(row.materialType),
-        supplier: row.supplier || null,
+        supplier: normalizeSupplier(row.supplier),
         defaultPrice: price != null && !isNaN(price) ? price : null,
         kind: "IN_HOUSE",
       },
