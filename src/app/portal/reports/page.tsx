@@ -151,7 +151,7 @@ async function SnowReport() {
     <div className="space-y-3">
       {seasons.map(([key, data]) => (
         <Link key={key} href={`/portal/reports/snow/${key}`} className="block group">
-          <div className="border border-border rounded-xl overflow-hidden hover:border-brand/40 hover:shadow-sm transition-all">
+          <div className="border border-border rounded-sm overflow-hidden hover:border-brand/40 hover:shadow-sm transition-all">
             <div className="bg-secondary/50 px-4 py-2.5 flex items-center justify-between">
               <span className="font-display font-semibold text-sm text-foreground group-hover:text-brand transition-colors">
                 {key} Season
@@ -172,7 +172,7 @@ async function SnowReport() {
       ))}
 
       {seasons.length > 1 && (
-        <div className="border border-brand/30 rounded-xl overflow-hidden bg-brand/5">
+        <div className="border border-brand/30 rounded-sm overflow-hidden bg-brand/5">
           <div className="px-4 py-2.5 flex items-center justify-between">
             <span className="font-display font-semibold text-sm text-foreground">All Seasons</span>
             <span className="text-xs text-muted-foreground">{grand.storms} storms · {grand.sites} visits</span>
@@ -220,35 +220,38 @@ async function LandscapeReport({ season }: { season: "spring" | "summer" | "fall
   }
 
   return (
-    <div className="border border-border rounded-xl overflow-hidden">
+    <div className="border border-border rounded-sm overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm border-collapse">
           <thead>
-            <tr className="bg-secondary/50 text-left">
-              <th className="px-4 py-3 font-medium text-muted-foreground">Year</th>
-              <th className="px-4 py-3 font-medium text-muted-foreground text-right">Jobs</th>
-              <th className="px-4 py-3 font-medium text-muted-foreground text-right">Revenue</th>
-              <th className="px-4 py-3 font-medium text-muted-foreground text-right hidden sm:table-cell">Profit</th>
-              <th className="px-4 py-3 font-medium text-muted-foreground text-right hidden sm:table-cell">Margin</th>
-              <th className="px-4 py-3 w-8" />
+            <tr className="bg-secondary/60 text-center border-b border-border">
+              <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">Year</th>
+              <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">Jobs</th>
+              <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">Revenue</th>
+              <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground hidden sm:table-cell">Profit</th>
+              <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground hidden sm:table-cell">Margin</th>
+              <th className="px-3 py-1.5 w-8" />
             </tr>
           </thead>
-          <tbody className="divide-y divide-border">
-            {years.map(([year, data]) => (
-              <tr key={year} className="hover:bg-secondary/30 transition-colors cursor-pointer group">
-                <td className="px-4 py-3">
-                  <Link href={`/portal/reports/${season}/${year}`} className="font-medium text-foreground group-hover:text-brand transition-colors block">
+          <tbody>
+            {years.map(([year, data], i) => (
+              <tr
+                key={year}
+                className={`border-b border-border last:border-b-0 hover:bg-brand/5 transition-colors cursor-pointer group ${i % 2 === 1 ? "bg-secondary/45" : ""}`}
+              >
+                <td className="p-0">
+                  <Link href={`/portal/reports/${season}/${year}`} className="block px-3 py-1.5 text-center font-medium text-foreground group-hover:text-brand transition-colors">
                     {SEASON_LABEL[season]} {year}
                   </Link>
                 </td>
-                <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">{data.jobs}</td>
-                <td className="px-4 py-3 text-right tabular-nums font-medium">{formatCurrency(data.revenue)}</td>
-                <td className="px-4 py-3 text-right tabular-nums hidden sm:table-cell">{data.profit ? formatCurrency(data.profit) : "—"}</td>
-                <td className="px-4 py-3 text-right tabular-nums hidden sm:table-cell text-muted-foreground">
+                <td className="px-3 py-1.5 text-center tabular-nums text-muted-foreground">{data.jobs}</td>
+                <td className="px-3 py-1.5 text-center tabular-nums font-medium">{formatCurrency(data.revenue)}</td>
+                <td className="px-3 py-1.5 text-center tabular-nums hidden sm:table-cell">{data.profit ? formatCurrency(data.profit) : "—"}</td>
+                <td className="px-3 py-1.5 text-center tabular-nums hidden sm:table-cell text-muted-foreground">
                   {data.profit && data.revenue ? pct(data.profit, data.revenue) : "—"}
                 </td>
-                <td className="px-4 py-3">
-                  <Link href={`/portal/reports/${season}/${year}`}>
+                <td className="p-0">
+                  <Link href={`/portal/reports/${season}/${year}`} className="flex items-center justify-center px-3 py-1.5">
                     <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-brand transition-colors" />
                   </Link>
                 </td>
@@ -256,13 +259,13 @@ async function LandscapeReport({ season }: { season: "spring" | "summer" | "fall
             ))}
           </tbody>
           <tfoot>
-            <tr className="bg-secondary/50 border-t border-border font-semibold">
-              <td className="px-4 py-3 text-foreground">Total</td>
-              <td className="px-4 py-3 text-right text-muted-foreground">{years.reduce((s, [, d]) => s + d.jobs, 0)}</td>
-              <td className="px-4 py-3 text-right tabular-nums">{formatCurrency(years.reduce((s, [, d]) => s + d.revenue, 0))}</td>
-              <td className="px-4 py-3 text-right tabular-nums hidden sm:table-cell">{formatCurrency(years.reduce((s, [, d]) => s + d.profit, 0))}</td>
-              <td className="px-4 py-3 hidden sm:table-cell" />
-              <td className="px-4 py-3" />
+            <tr className="bg-secondary/60 border-t border-border font-semibold">
+              <td className="px-3 py-1.5 text-center text-foreground">Total</td>
+              <td className="px-3 py-1.5 text-center text-muted-foreground">{years.reduce((s, [, d]) => s + d.jobs, 0)}</td>
+              <td className="px-3 py-1.5 text-center tabular-nums">{formatCurrency(years.reduce((s, [, d]) => s + d.revenue, 0))}</td>
+              <td className="px-3 py-1.5 text-center tabular-nums hidden sm:table-cell">{formatCurrency(years.reduce((s, [, d]) => s + d.profit, 0))}</td>
+              <td className="px-3 py-1.5 hidden sm:table-cell" />
+              <td className="px-3 py-1.5" />
             </tr>
           </tfoot>
         </table>
@@ -332,7 +335,7 @@ async function LandscapeAnnualReport() {
         });
 
         return (
-          <div key={year} className="border border-border rounded-xl overflow-hidden">
+          <div key={year} className="border border-border rounded-sm overflow-hidden">
             {/* Year header */}
             <div className="bg-secondary/50 px-4 py-2.5 flex items-center justify-between">
               <span className="font-display font-semibold text-sm text-foreground">{year} Landscape Season</span>
@@ -439,42 +442,42 @@ async function AnnualReport() {
   return (
     <div className="space-y-5">
       {/* Year-over-year table */}
-      <div className="border border-border rounded-xl overflow-hidden">
+      <div className="border border-border rounded-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm border-collapse">
             <thead>
-              <tr className="bg-secondary/50 text-left">
-                <th className="px-4 py-3 font-medium text-muted-foreground">Year</th>
-                <th className="px-4 py-3 font-medium text-muted-foreground text-right hidden sm:table-cell">L Jobs</th>
-                <th className="px-4 py-3 font-medium text-muted-foreground text-right">Landscape Rev</th>
-                <th className="px-4 py-3 font-medium text-muted-foreground text-right hidden md:table-cell">L Profit</th>
-                <th className="px-4 py-3 font-medium text-muted-foreground text-right hidden sm:table-cell">Snow Storms</th>
-                <th className="px-4 py-3 font-medium text-muted-foreground text-right hidden lg:table-cell">Snow Cost</th>
-                <th className="px-4 py-3 font-medium text-muted-foreground text-right">Total Rev/Cost</th>
+              <tr className="bg-secondary/60 text-center border-b border-border">
+                <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">Year</th>
+                <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground hidden sm:table-cell">L Jobs</th>
+                <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">Landscape Rev</th>
+                <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground hidden md:table-cell">L Profit</th>
+                <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground hidden sm:table-cell">Snow Storms</th>
+                <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground hidden lg:table-cell">Snow Cost</th>
+                <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">Total Rev/Cost</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
-              {years.map(([year, d]) => (
-                <tr key={year} className="hover:bg-secondary/30 transition-colors">
-                  <td className="px-4 py-3 font-medium text-foreground">{year}</td>
-                  <td className="px-4 py-3 text-right text-muted-foreground hidden sm:table-cell">{d.landscapeJobs}</td>
-                  <td className="px-4 py-3 text-right tabular-nums">{formatCurrency(d.landscapeRevenue)}</td>
-                  <td className="px-4 py-3 text-right tabular-nums hidden md:table-cell">{d.landscapeProfit ? formatCurrency(d.landscapeProfit) : "—"}</td>
-                  <td className="px-4 py-3 text-right text-muted-foreground hidden sm:table-cell">{d.snowStorms}</td>
-                  <td className="px-4 py-3 text-right tabular-nums hidden lg:table-cell">{formatCurrency(d.snowCost)}</td>
-                  <td className="px-4 py-3 text-right tabular-nums font-medium">{formatCurrency(d.landscapeRevenue + d.snowCost)}</td>
+            <tbody>
+              {years.map(([year, d], i) => (
+                <tr key={year} className={`border-b border-border last:border-b-0 hover:bg-brand/5 transition-colors ${i % 2 === 1 ? "bg-secondary/45" : ""}`}>
+                  <td className="px-3 py-1.5 text-center font-medium text-foreground">{year}</td>
+                  <td className="px-3 py-1.5 text-center text-muted-foreground hidden sm:table-cell">{d.landscapeJobs}</td>
+                  <td className="px-3 py-1.5 text-center tabular-nums">{formatCurrency(d.landscapeRevenue)}</td>
+                  <td className="px-3 py-1.5 text-center tabular-nums hidden md:table-cell">{d.landscapeProfit ? formatCurrency(d.landscapeProfit) : "—"}</td>
+                  <td className="px-3 py-1.5 text-center text-muted-foreground hidden sm:table-cell">{d.snowStorms}</td>
+                  <td className="px-3 py-1.5 text-center tabular-nums hidden lg:table-cell">{formatCurrency(d.snowCost)}</td>
+                  <td className="px-3 py-1.5 text-center tabular-nums font-medium">{formatCurrency(d.landscapeRevenue + d.snowCost)}</td>
                 </tr>
               ))}
             </tbody>
             <tfoot>
-              <tr className="bg-secondary/50 border-t border-border font-semibold">
-                <td className="px-4 py-3 text-foreground">Total</td>
-                <td className="px-4 py-3 text-right text-muted-foreground hidden sm:table-cell">{years.reduce((s, [, d]) => s + d.landscapeJobs, 0)}</td>
-                <td className="px-4 py-3 text-right tabular-nums">{formatCurrency(years.reduce((s, [, d]) => s + d.landscapeRevenue, 0))}</td>
-                <td className="px-4 py-3 text-right tabular-nums hidden md:table-cell">{formatCurrency(years.reduce((s, [, d]) => s + d.landscapeProfit, 0))}</td>
-                <td className="px-4 py-3 text-right text-muted-foreground hidden sm:table-cell">{years.reduce((s, [, d]) => s + d.snowStorms, 0)}</td>
-                <td className="px-4 py-3 text-right tabular-nums hidden lg:table-cell">{formatCurrency(years.reduce((s, [, d]) => s + d.snowCost, 0))}</td>
-                <td className="px-4 py-3 text-right tabular-nums">{formatCurrency(years.reduce((s, [, d]) => s + d.landscapeRevenue + d.snowCost, 0))}</td>
+              <tr className="bg-secondary/60 border-t border-border font-semibold">
+                <td className="px-3 py-1.5 text-center text-foreground">Total</td>
+                <td className="px-3 py-1.5 text-center text-muted-foreground hidden sm:table-cell">{years.reduce((s, [, d]) => s + d.landscapeJobs, 0)}</td>
+                <td className="px-3 py-1.5 text-center tabular-nums">{formatCurrency(years.reduce((s, [, d]) => s + d.landscapeRevenue, 0))}</td>
+                <td className="px-3 py-1.5 text-center tabular-nums hidden md:table-cell">{formatCurrency(years.reduce((s, [, d]) => s + d.landscapeProfit, 0))}</td>
+                <td className="px-3 py-1.5 text-center text-muted-foreground hidden sm:table-cell">{years.reduce((s, [, d]) => s + d.snowStorms, 0)}</td>
+                <td className="px-3 py-1.5 text-center tabular-nums hidden lg:table-cell">{formatCurrency(years.reduce((s, [, d]) => s + d.snowCost, 0))}</td>
+                <td className="px-3 py-1.5 text-center tabular-nums">{formatCurrency(years.reduce((s, [, d]) => s + d.landscapeRevenue + d.snowCost, 0))}</td>
               </tr>
             </tfoot>
           </table>
@@ -500,7 +503,7 @@ async function AnnualReport() {
             });
 
             return (
-              <div key={year} className="border border-border rounded-xl overflow-hidden">
+              <div key={year} className="border border-border rounded-sm overflow-hidden">
                 <div className="bg-secondary/50 px-4 py-2.5 flex items-center justify-between">
                   <span className="font-display font-semibold text-sm text-foreground">{year}</span>
                   <div className="flex items-center gap-4 text-xs text-muted-foreground">
@@ -628,25 +631,25 @@ async function HoursReport({ week }: { week?: string }) {
           <p className="text-sm text-muted-foreground">No crew hours logged this week</p>
         </Card>
       ) : (
-        <Card className="overflow-hidden">
+        <div className="border border-border rounded-sm overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm border-collapse">
               <thead>
-                <tr className="bg-secondary/50 text-left">
-                  <th className="px-4 py-2.5 font-medium text-muted-foreground">Employee</th>
-                  <th className="px-4 py-2.5 font-medium text-muted-foreground text-right">Jobs</th>
-                  <th className="px-4 py-2.5 font-medium text-muted-foreground text-right">Hours</th>
-                  {hasAnyRate && <th className="px-4 py-2.5 font-medium text-muted-foreground text-right">Cost</th>}
+                <tr className="bg-secondary/60 text-center border-b border-border">
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">Employee</th>
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">Jobs</th>
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">Hours</th>
+                  {hasAnyRate && <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">Cost</th>}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
-                {rows.map((r) => (
-                  <tr key={r.employeeId}>
-                    <td className="px-4 py-2.5 font-medium">{r.name}</td>
-                    <td className="px-4 py-2.5 text-right text-muted-foreground tabular-nums">{r.jobCount}</td>
-                    <td className="px-4 py-2.5 text-right tabular-nums">{r.hours.toFixed(1)}</td>
+              <tbody>
+                {rows.map((r, i) => (
+                  <tr key={r.employeeId} className={`border-b border-border last:border-b-0 ${i % 2 === 1 ? "bg-secondary/45" : ""}`}>
+                    <td className="px-3 py-1.5 text-center font-medium">{r.name}</td>
+                    <td className="px-3 py-1.5 text-center text-muted-foreground tabular-nums">{r.jobCount}</td>
+                    <td className="px-3 py-1.5 text-center tabular-nums">{r.hours.toFixed(1)}</td>
                     {hasAnyRate && (
-                      <td className="px-4 py-2.5 text-right tabular-nums">
+                      <td className="px-3 py-1.5 text-center tabular-nums">
                         {r.cost != null ? formatCurrency(r.cost) : "—"}
                       </td>
                     )}
@@ -654,16 +657,16 @@ async function HoursReport({ week }: { week?: string }) {
                 ))}
               </tbody>
               <tfoot>
-                <tr className="border-t border-border font-medium bg-secondary/30">
-                  <td className="px-4 py-2.5">Total</td>
-                  <td className="px-4 py-2.5 text-right tabular-nums">{entries.length ? new Set(entries.map((e) => e.workOrder.workOrderNumber)).size : 0}</td>
-                  <td className="px-4 py-2.5 text-right tabular-nums">{grandHours.toFixed(1)}</td>
-                  {hasAnyRate && <td className="px-4 py-2.5 text-right tabular-nums">{formatCurrency(grandCost)}</td>}
+                <tr className="border-t border-border font-medium bg-secondary/60">
+                  <td className="px-3 py-1.5 text-center">Total</td>
+                  <td className="px-3 py-1.5 text-center tabular-nums">{entries.length ? new Set(entries.map((e) => e.workOrder.workOrderNumber)).size : 0}</td>
+                  <td className="px-3 py-1.5 text-center tabular-nums">{grandHours.toFixed(1)}</td>
+                  {hasAnyRate && <td className="px-3 py-1.5 text-center tabular-nums">{formatCurrency(grandCost)}</td>}
                 </tr>
               </tfoot>
             </table>
           </div>
-        </Card>
+        </div>
       )}
 
       {!hasAnyRate && (

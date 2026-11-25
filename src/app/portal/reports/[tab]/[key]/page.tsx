@@ -230,35 +230,37 @@ async function SnowSeasonDetail({ season, spage }: { season: string; spage?: str
 
       {/* Storm List */}
       <Section title="All Storms">
-        <div className="overflow-x-auto -mx-4 sm:mx-0">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border text-left">
-                <th className="pb-2 pr-3 font-medium text-muted-foreground">Storm</th>
-                <th className="pb-2 pr-3 font-medium text-muted-foreground whitespace-nowrap">Date</th>
-                <th className="pb-2 pr-3 font-medium text-muted-foreground text-right whitespace-nowrap hidden sm:table-cell">Sites</th>
-                <th className="pb-2 pr-3 font-medium text-muted-foreground text-right whitespace-nowrap hidden md:table-cell">Labor</th>
-                <th className="pb-2 pr-3 font-medium text-muted-foreground text-right whitespace-nowrap hidden md:table-cell">Sub</th>
-                <th className="pb-2 font-medium text-muted-foreground text-right whitespace-nowrap">Total</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/50">
-              {storms.map((s) => (
-                <tr key={s.id} className="hover:bg-secondary/20 transition-colors">
-                  <td className="py-2.5 pr-3 max-w-[200px]">
-                    <Link href={`/portal/snow/${s.id}`} className="text-brand hover:underline line-clamp-1 text-sm">
-                      {s.description}
-                    </Link>
-                  </td>
-                  <td className="py-2.5 pr-3 text-muted-foreground whitespace-nowrap text-sm">{formatDate(s.eventStart)}</td>
-                  <td className="py-2.5 pr-3 text-right text-muted-foreground hidden sm:table-cell">{s._count.siteServices}</td>
-                  <td className="py-2.5 pr-3 text-right tabular-nums hidden md:table-cell">{formatCurrency(s.laborCost)}</td>
-                  <td className="py-2.5 pr-3 text-right tabular-nums hidden md:table-cell">{formatCurrency(s.subCost)}</td>
-                  <td className="py-2.5 text-right tabular-nums font-medium">{formatCurrency(s.totalCost)}</td>
+        <div className="border border-border rounded-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="bg-secondary/60 text-center border-b border-border">
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">Storm</th>
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap">Date</th>
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap hidden sm:table-cell">Sites</th>
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap hidden md:table-cell">Labor</th>
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap hidden md:table-cell">Sub</th>
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap">Total</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {storms.map((s, i) => (
+                  <tr key={s.id} className={`border-b border-border last:border-b-0 hover:bg-brand/5 transition-colors ${i % 2 === 1 ? "bg-secondary/45" : ""}`}>
+                    <td className="p-0 max-w-[200px]">
+                      <Link href={`/portal/snow/${s.id}`} className="block px-3 py-1.5 text-center text-brand hover:underline line-clamp-1 text-sm">
+                        {s.description}
+                      </Link>
+                    </td>
+                    <td className="px-3 py-1.5 text-center text-muted-foreground whitespace-nowrap text-sm">{formatDate(s.eventStart)}</td>
+                    <td className="px-3 py-1.5 text-center text-muted-foreground hidden sm:table-cell">{s._count.siteServices}</td>
+                    <td className="px-3 py-1.5 text-center tabular-nums hidden md:table-cell">{formatCurrency(s.laborCost)}</td>
+                    <td className="px-3 py-1.5 text-center tabular-nums hidden md:table-cell">{formatCurrency(s.subCost)}</td>
+                    <td className="px-3 py-1.5 text-center tabular-nums font-medium">{formatCurrency(s.totalCost)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </Section>
 
@@ -272,37 +274,39 @@ async function SnowSeasonDetail({ season, spage }: { season: string; spage?: str
       {/* All Site Visits — paginated */}
       {totalVisits > 0 && (
         <Section title={`All Site Visits (${totalVisits.toLocaleString()})`}>
-          <div className="overflow-x-auto -mx-4 sm:mx-0">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border text-left">
-                  <th className="pb-2 pr-3 font-medium text-muted-foreground whitespace-nowrap">Date</th>
-                  <th className="pb-2 pr-3 font-medium text-muted-foreground min-w-[140px]">Site</th>
-                  <th className="pb-2 pr-3 font-medium text-muted-foreground hidden sm:table-cell">Services</th>
-                  <th className="pb-2 pr-3 font-medium text-muted-foreground hidden md:table-cell">Worker</th>
-                  <th className="pb-2 pr-3 font-medium text-muted-foreground text-right whitespace-nowrap hidden lg:table-cell">Labor</th>
-                  <th className="pb-2 pr-3 font-medium text-muted-foreground text-right whitespace-nowrap hidden lg:table-cell">Sub</th>
-                  <th className="pb-2 pr-3 font-medium text-muted-foreground text-right whitespace-nowrap hidden md:table-cell">Direct</th>
-                  <th className="pb-2 font-medium text-muted-foreground text-right whitespace-nowrap">Total</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/50">
-                {visits.map((svc, i) => (
-                  <tr key={i} className="hover:bg-secondary/20 transition-colors">
-                    <td className="py-1.5 pr-3 text-muted-foreground whitespace-nowrap text-xs">
-                      {svc.startTime.toLocaleDateString("en-US", { timeZone: "UTC", month: "short", day: "numeric" })}
-                    </td>
-                    <td className="py-1.5 pr-3 font-medium text-foreground text-xs">{svc.siteName}</td>
-                    <td className="py-1.5 pr-3 text-muted-foreground text-xs hidden sm:table-cell max-w-[200px] truncate">{svc.servicesPerformed}</td>
-                    <td className="py-1.5 pr-3 text-muted-foreground text-xs hidden md:table-cell">{svc.workerName ?? "—"}</td>
-                    <td className="py-1.5 pr-3 text-right tabular-nums text-xs hidden lg:table-cell">{formatCurrency(svc.employeeCost)}</td>
-                    <td className="py-1.5 pr-3 text-right tabular-nums text-xs hidden lg:table-cell">{formatCurrency(svc.subCost)}</td>
-                    <td className="py-1.5 pr-3 text-right tabular-nums text-xs hidden md:table-cell">{formatCurrency(svc.totalDirect)}</td>
-                    <td className="py-1.5 text-right tabular-nums text-xs font-medium">{formatCurrency(n(svc.totalDirect) + n(svc.totalIndirect))}</td>
+          <div className="border border-border rounded-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm border-collapse">
+                <thead>
+                  <tr className="bg-secondary/60 text-center border-b border-border">
+                    <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap">Date</th>
+                    <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground min-w-[140px]">Site</th>
+                    <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground hidden sm:table-cell">Services</th>
+                    <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground hidden md:table-cell">Worker</th>
+                    <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap hidden lg:table-cell">Labor</th>
+                    <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap hidden lg:table-cell">Sub</th>
+                    <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap hidden md:table-cell">Direct</th>
+                    <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap">Total</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {visits.map((svc, i) => (
+                    <tr key={i} className={`border-b border-border last:border-b-0 hover:bg-brand/5 transition-colors ${i % 2 === 1 ? "bg-secondary/45" : ""}`}>
+                      <td className="px-3 py-1 text-center text-muted-foreground whitespace-nowrap text-xs">
+                        {svc.startTime.toLocaleDateString("en-US", { timeZone: "UTC", month: "short", day: "numeric" })}
+                      </td>
+                      <td className="px-3 py-1 text-center font-medium text-foreground text-xs">{svc.siteName}</td>
+                      <td className="px-3 py-1 text-center text-muted-foreground text-xs hidden sm:table-cell max-w-[200px] truncate">{svc.servicesPerformed}</td>
+                      <td className="px-3 py-1 text-center text-muted-foreground text-xs hidden md:table-cell">{svc.workerName ?? "—"}</td>
+                      <td className="px-3 py-1 text-center tabular-nums text-xs hidden lg:table-cell">{formatCurrency(svc.employeeCost)}</td>
+                      <td className="px-3 py-1 text-center tabular-nums text-xs hidden lg:table-cell">{formatCurrency(svc.subCost)}</td>
+                      <td className="px-3 py-1 text-center tabular-nums text-xs hidden md:table-cell">{formatCurrency(svc.totalDirect)}</td>
+                      <td className="px-3 py-1 text-center tabular-nums text-xs font-medium">{formatCurrency(n(svc.totalDirect) + n(svc.totalIndirect))}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
           {totalPages > 1 && (
             <div className="flex items-center justify-between pt-3 border-t border-border mt-2">
@@ -491,23 +495,23 @@ async function LandscapeDetail({ tab, year, lpage }: { tab: string; year: number
           </div>
 
           {/* Month table */}
-          <div className="mt-4 border-t border-border pt-4">
-            <table className="w-full text-sm">
+          <div className="mt-4 border border-border rounded-sm overflow-hidden">
+            <table className="w-full text-sm border-collapse">
               <thead>
-                <tr className="text-left">
-                  <th className="pb-1.5 font-medium text-muted-foreground">Month</th>
-                  <th className="pb-1.5 font-medium text-muted-foreground text-right">Jobs</th>
-                  <th className="pb-1.5 font-medium text-muted-foreground text-right">Revenue</th>
-                  <th className="pb-1.5 font-medium text-muted-foreground text-right">Profit</th>
+                <tr className="bg-secondary/60 text-center border-b border-border">
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">Month</th>
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">Jobs</th>
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">Revenue</th>
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">Profit</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border/50">
-                {monthBreakdown.map((m) => (
-                  <tr key={m.label}>
-                    <td className="py-1.5 text-foreground">{m.label}</td>
-                    <td className="py-1.5 text-right text-muted-foreground">{m.jobs}</td>
-                    <td className="py-1.5 text-right tabular-nums">{formatCurrency(m.revenue)}</td>
-                    <td className="py-1.5 text-right tabular-nums text-muted-foreground">
+              <tbody>
+                {monthBreakdown.map((m, i) => (
+                  <tr key={m.label} className={`border-b border-border last:border-b-0 ${i % 2 === 1 ? "bg-secondary/45" : ""}`}>
+                    <td className="px-3 py-1.5 text-center text-foreground">{m.label}</td>
+                    <td className="px-3 py-1.5 text-center text-muted-foreground">{m.jobs}</td>
+                    <td className="px-3 py-1.5 text-center tabular-nums">{formatCurrency(m.revenue)}</td>
+                    <td className="px-3 py-1.5 text-center tabular-nums text-muted-foreground">
                       {m.profit ? formatCurrency(m.profit) : "—"}
                     </td>
                   </tr>
@@ -520,49 +524,51 @@ async function LandscapeDetail({ tab, year, lpage }: { tab: string; year: number
 
       {/* Category table */}
       <Section title="Category Breakdown">
-        <div className="overflow-x-auto -mx-4 sm:mx-0">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border text-left">
-                <th className="pb-2 pr-3 font-medium text-muted-foreground">Category</th>
-                <th className="pb-2 pr-3 font-medium text-muted-foreground text-right">Jobs</th>
-                <th className="pb-2 pr-3 font-medium text-muted-foreground text-right">Revenue</th>
-                <th className="pb-2 pr-3 font-medium text-muted-foreground text-right hidden sm:table-cell">Profit</th>
-                <th className="pb-2 pr-3 font-medium text-muted-foreground text-right hidden sm:table-cell">Margin</th>
-                <th className="pb-2 font-medium text-muted-foreground text-right">% of Rev</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/50">
-              {categories.map((c) => (
-                <tr key={c.cat} className="hover:bg-secondary/20 transition-colors">
-                  <td className="py-2.5 pr-3 font-medium text-foreground">{catLabel(c.cat)}</td>
-                  <td className="py-2.5 pr-3 text-right text-muted-foreground">{c.jobs}</td>
-                  <td className="py-2.5 pr-3 text-right tabular-nums">{formatCurrency(c.revenue)}</td>
-                  <td className="py-2.5 pr-3 text-right tabular-nums hidden sm:table-cell">
-                    {c.profit ? formatCurrency(c.profit) : "—"}
-                  </td>
-                  <td className="py-2.5 pr-3 text-right tabular-nums hidden sm:table-cell">
-                    {c.profit && c.revenue ? pct(c.profit, c.revenue) : "—"}
-                  </td>
-                  <td className="py-2.5 text-right tabular-nums text-muted-foreground">
-                    {pct(c.revenue, totals.revenue)}
-                  </td>
+        <div className="border border-border rounded-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="bg-secondary/60 text-center border-b border-border">
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">Category</th>
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">Jobs</th>
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">Revenue</th>
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground hidden sm:table-cell">Profit</th>
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground hidden sm:table-cell">Margin</th>
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">% of Rev</th>
                 </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr className="border-t border-border font-semibold">
-                <td className="pt-2.5 pr-3 text-foreground">Total</td>
-                <td className="pt-2.5 pr-3 text-right text-muted-foreground">{totals.jobs}</td>
-                <td className="pt-2.5 pr-3 text-right tabular-nums">{formatCurrency(totals.revenue)}</td>
-                <td className="pt-2.5 pr-3 text-right tabular-nums hidden sm:table-cell">
-                  {totals.profit ? formatCurrency(totals.profit) : "—"}
-                </td>
-                <td className="pt-2.5 pr-3 hidden sm:table-cell" />
-                <td className="pt-2.5 text-right text-muted-foreground">100%</td>
-              </tr>
-            </tfoot>
-          </table>
+              </thead>
+              <tbody>
+                {categories.map((c, i) => (
+                  <tr key={c.cat} className={`border-b border-border last:border-b-0 hover:bg-brand/5 transition-colors ${i % 2 === 1 ? "bg-secondary/45" : ""}`}>
+                    <td className="px-3 py-1.5 text-center font-medium text-foreground">{catLabel(c.cat)}</td>
+                    <td className="px-3 py-1.5 text-center text-muted-foreground">{c.jobs}</td>
+                    <td className="px-3 py-1.5 text-center tabular-nums">{formatCurrency(c.revenue)}</td>
+                    <td className="px-3 py-1.5 text-center tabular-nums hidden sm:table-cell">
+                      {c.profit ? formatCurrency(c.profit) : "—"}
+                    </td>
+                    <td className="px-3 py-1.5 text-center tabular-nums hidden sm:table-cell">
+                      {c.profit && c.revenue ? pct(c.profit, c.revenue) : "—"}
+                    </td>
+                    <td className="px-3 py-1.5 text-center tabular-nums text-muted-foreground">
+                      {pct(c.revenue, totals.revenue)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="border-t border-border font-semibold bg-secondary/60">
+                  <td className="px-3 py-1.5 text-center text-foreground">Total</td>
+                  <td className="px-3 py-1.5 text-center text-muted-foreground">{totals.jobs}</td>
+                  <td className="px-3 py-1.5 text-center tabular-nums">{formatCurrency(totals.revenue)}</td>
+                  <td className="px-3 py-1.5 text-center tabular-nums hidden sm:table-cell">
+                    {totals.profit ? formatCurrency(totals.profit) : "—"}
+                  </td>
+                  <td className="px-3 py-1.5 hidden sm:table-cell" />
+                  <td className="px-3 py-1.5 text-center text-muted-foreground">100%</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
         </div>
       </Section>
 
@@ -617,65 +623,67 @@ async function LandscapeDetail({ tab, year, lpage }: { tab: string; year: number
 
           {/* Per-category comparison table */}
           {categories.some((c) => c.estHours > 0 || c.estCrew > 0) && (
-            <div className="mt-5 border-t border-border pt-4 overflow-x-auto -mx-4 sm:mx-0">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border text-left">
-                    <th className="pb-2 pr-3 font-medium text-muted-foreground">Category</th>
-                    {categories.some((c) => c.estHours > 0) && (
-                      <>
-                        <th className="pb-2 pr-3 font-medium text-muted-foreground text-right whitespace-nowrap">Est Hrs</th>
-                        <th className="pb-2 pr-3 font-medium text-muted-foreground text-right whitespace-nowrap">Act Hrs</th>
-                        <th className="pb-2 pr-3 font-medium text-muted-foreground text-right whitespace-nowrap">Var</th>
-                      </>
-                    )}
-                    {categories.some((c) => c.estCrew > 0) && (
-                      <>
-                        <th className="pb-2 pr-3 font-medium text-muted-foreground text-right whitespace-nowrap hidden sm:table-cell">Est Crew</th>
-                        <th className="pb-2 pr-3 font-medium text-muted-foreground text-right whitespace-nowrap hidden sm:table-cell">Act Crew</th>
-                        <th className="pb-2 font-medium text-muted-foreground text-right whitespace-nowrap hidden sm:table-cell">Var</th>
-                      </>
-                    )}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/50">
-                  {categories.filter((c) => c.estHours > 0 || c.estCrew > 0).map((c) => {
-                    const hrsDiff = c.actualHours - c.estHours;
-                    const crewDiff = c.actualCrew - c.estCrew;
-                    return (
-                      <tr key={c.cat} className="hover:bg-secondary/20 transition-colors">
-                        <td className="py-2 pr-3 font-medium text-foreground">{catLabel(c.cat)}</td>
-                        {categories.some((x) => x.estHours > 0) && (
-                          <>
-                            <td className="py-2 pr-3 text-right tabular-nums text-muted-foreground">{c.estHours > 0 ? `${c.estHours.toFixed(0)}h` : "—"}</td>
-                            <td className="py-2 pr-3 text-right tabular-nums">{c.actualHours > 0 ? `${c.actualHours.toFixed(0)}h` : "—"}</td>
-                            <td className="py-2 pr-3 text-right tabular-nums">
-                              {c.estHours > 0 && c.actualHours > 0 ? (
-                                <span className={hrsDiff > 0 ? "text-rose-500" : "text-green-600"}>
-                                  {hrsDiff > 0 ? "+" : ""}{hrsDiff.toFixed(0)}h
-                                </span>
-                              ) : "—"}
-                            </td>
-                          </>
-                        )}
-                        {categories.some((x) => x.estCrew > 0) && (
-                          <>
-                            <td className="py-2 pr-3 text-right tabular-nums text-muted-foreground hidden sm:table-cell">{c.estCrew > 0 ? formatCurrency(c.estCrew) : "—"}</td>
-                            <td className="py-2 pr-3 text-right tabular-nums hidden sm:table-cell">{c.actualCrew > 0 ? formatCurrency(c.actualCrew) : "—"}</td>
-                            <td className="py-2 text-right tabular-nums hidden sm:table-cell">
-                              {c.estCrew > 0 && c.actualCrew > 0 ? (
-                                <span className={crewDiff > 0 ? "text-rose-500" : "text-green-600"}>
-                                  {crewDiff > 0 ? "+" : ""}{formatCurrency(crewDiff)}
-                                </span>
-                              ) : "—"}
-                            </td>
-                          </>
-                        )}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+            <div className="mt-5 border border-border rounded-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm border-collapse">
+                  <thead>
+                    <tr className="bg-secondary/60 text-center border-b border-border">
+                      <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">Category</th>
+                      {categories.some((c) => c.estHours > 0) && (
+                        <>
+                          <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap">Est Hrs</th>
+                          <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap">Act Hrs</th>
+                          <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap">Var</th>
+                        </>
+                      )}
+                      {categories.some((c) => c.estCrew > 0) && (
+                        <>
+                          <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap hidden sm:table-cell">Est Crew</th>
+                          <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap hidden sm:table-cell">Act Crew</th>
+                          <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap hidden sm:table-cell">Var</th>
+                        </>
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {categories.filter((c) => c.estHours > 0 || c.estCrew > 0).map((c, i) => {
+                      const hrsDiff = c.actualHours - c.estHours;
+                      const crewDiff = c.actualCrew - c.estCrew;
+                      return (
+                        <tr key={c.cat} className={`border-b border-border last:border-b-0 hover:bg-brand/5 transition-colors ${i % 2 === 1 ? "bg-secondary/45" : ""}`}>
+                          <td className="px-3 py-1.5 text-center font-medium text-foreground">{catLabel(c.cat)}</td>
+                          {categories.some((x) => x.estHours > 0) && (
+                            <>
+                              <td className="px-3 py-1.5 text-center tabular-nums text-muted-foreground">{c.estHours > 0 ? `${c.estHours.toFixed(0)}h` : "—"}</td>
+                              <td className="px-3 py-1.5 text-center tabular-nums">{c.actualHours > 0 ? `${c.actualHours.toFixed(0)}h` : "—"}</td>
+                              <td className="px-3 py-1.5 text-center tabular-nums">
+                                {c.estHours > 0 && c.actualHours > 0 ? (
+                                  <span className={hrsDiff > 0 ? "text-rose-500" : "text-green-600"}>
+                                    {hrsDiff > 0 ? "+" : ""}{hrsDiff.toFixed(0)}h
+                                  </span>
+                                ) : "—"}
+                              </td>
+                            </>
+                          )}
+                          {categories.some((x) => x.estCrew > 0) && (
+                            <>
+                              <td className="px-3 py-1.5 text-center tabular-nums text-muted-foreground hidden sm:table-cell">{c.estCrew > 0 ? formatCurrency(c.estCrew) : "—"}</td>
+                              <td className="px-3 py-1.5 text-center tabular-nums hidden sm:table-cell">{c.actualCrew > 0 ? formatCurrency(c.actualCrew) : "—"}</td>
+                              <td className="px-3 py-1.5 text-center tabular-nums hidden sm:table-cell">
+                                {c.estCrew > 0 && c.actualCrew > 0 ? (
+                                  <span className={crewDiff > 0 ? "text-rose-500" : "text-green-600"}>
+                                    {crewDiff > 0 ? "+" : ""}{formatCurrency(crewDiff)}
+                                  </span>
+                                ) : "—"}
+                              </td>
+                            </>
+                          )}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </Section>
@@ -684,64 +692,68 @@ async function LandscapeDetail({ tab, year, lpage }: { tab: string; year: number
       {/* Top Customers */}
       {topCustomers.length > 0 && (
         <Section title="Top Customers">
-          <div className="overflow-x-auto -mx-4 sm:mx-0">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border text-left">
-                  <th className="pb-2 pr-3 font-medium text-muted-foreground">Customer</th>
-                  <th className="pb-2 pr-3 font-medium text-muted-foreground text-right">Jobs</th>
-                  <th className="pb-2 font-medium text-muted-foreground text-right">Revenue</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/50">
-                {topCustomers.map((c) => (
-                  <tr key={c.name} className="hover:bg-secondary/20 transition-colors">
-                    <td className="py-2.5 pr-3 font-medium text-foreground">{c.name}</td>
-                    <td className="py-2.5 pr-3 text-right text-muted-foreground">{c.jobs}</td>
-                    <td className="py-2.5 text-right tabular-nums">{formatCurrency(c.revenue)}</td>
+          <div className="border border-border rounded-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm border-collapse">
+                <thead>
+                  <tr className="bg-secondary/60 text-center border-b border-border">
+                    <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">Customer</th>
+                    <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">Jobs</th>
+                    <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">Revenue</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {topCustomers.map((c, i) => (
+                    <tr key={c.name} className={`border-b border-border last:border-b-0 hover:bg-brand/5 transition-colors ${i % 2 === 1 ? "bg-secondary/45" : ""}`}>
+                      <td className="px-3 py-1.5 text-center font-medium text-foreground">{c.name}</td>
+                      <td className="px-3 py-1.5 text-center text-muted-foreground">{c.jobs}</td>
+                      <td className="px-3 py-1.5 text-center tabular-nums">{formatCurrency(c.revenue)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </Section>
       )}
 
       {/* All Jobs — paginated */}
       <Section title={`All Jobs (${totalJobs.toLocaleString()})`}>
-        <div className="overflow-x-auto -mx-4 sm:mx-0">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border text-left">
-                <th className="pb-2 pr-3 font-medium text-muted-foreground whitespace-nowrap">Date</th>
-                <th className="pb-2 pr-3 font-medium text-muted-foreground">Customer</th>
-                <th className="pb-2 pr-3 font-medium text-muted-foreground hidden sm:table-cell">Type</th>
-                <th className="pb-2 pr-3 font-medium text-muted-foreground hidden md:table-cell">Category</th>
-                <th className="pb-2 pr-3 font-medium text-muted-foreground text-right hidden sm:table-cell">Profit</th>
-                <th className="pb-2 font-medium text-muted-foreground text-right">Revenue</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/50">
-              {jobs.map((j, i) => (
-                <tr key={i} className="hover:bg-secondary/20 transition-colors">
-                  <td className="py-1.5 pr-3 text-muted-foreground whitespace-nowrap text-xs">
-                    {j.projectStartDate
-                      ? j.projectStartDate.toLocaleDateString("en-US", { timeZone: "UTC", month: "short", day: "numeric" })
-                      : "—"}
-                  </td>
-                  <td className="py-1.5 pr-3 font-medium text-foreground text-xs">{j.customer.name}</td>
-                  <td className="py-1.5 pr-3 text-muted-foreground text-xs hidden sm:table-cell max-w-[160px] truncate">{j.jobType}</td>
-                  <td className="py-1.5 pr-3 text-muted-foreground text-xs hidden md:table-cell">{catLabel(j.jobCategory)}</td>
-                  <td className="py-1.5 pr-3 text-right tabular-nums text-xs hidden sm:table-cell">
-                    {j.profit ? formatCurrency(j.profit) : "—"}
-                  </td>
-                  <td className="py-1.5 text-right tabular-nums text-xs font-medium">
-                    {j.invoiceAmount ? formatCurrency(j.invoiceAmount) : "—"}
-                  </td>
+        <div className="border border-border rounded-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="bg-secondary/60 text-center border-b border-border">
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap">Date</th>
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">Customer</th>
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground hidden sm:table-cell">Type</th>
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground hidden md:table-cell">Category</th>
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground hidden sm:table-cell">Profit</th>
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">Revenue</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {jobs.map((j, i) => (
+                  <tr key={i} className={`border-b border-border last:border-b-0 hover:bg-brand/5 transition-colors ${i % 2 === 1 ? "bg-secondary/45" : ""}`}>
+                    <td className="px-3 py-1 text-center text-muted-foreground whitespace-nowrap text-xs">
+                      {j.projectStartDate
+                        ? j.projectStartDate.toLocaleDateString("en-US", { timeZone: "UTC", month: "short", day: "numeric" })
+                        : "—"}
+                    </td>
+                    <td className="px-3 py-1 text-center font-medium text-foreground text-xs">{j.customer.name}</td>
+                    <td className="px-3 py-1 text-center text-muted-foreground text-xs hidden sm:table-cell max-w-[160px] truncate">{j.jobType}</td>
+                    <td className="px-3 py-1 text-center text-muted-foreground text-xs hidden md:table-cell">{catLabel(j.jobCategory)}</td>
+                    <td className="px-3 py-1 text-center tabular-nums text-xs hidden sm:table-cell">
+                      {j.profit ? formatCurrency(j.profit) : "—"}
+                    </td>
+                    <td className="px-3 py-1 text-center tabular-nums text-xs font-medium">
+                      {j.invoiceAmount ? formatCurrency(j.invoiceAmount) : "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
         {totalPages > 1 && (
           <div className="flex items-center justify-between pt-3 border-t border-border mt-2">

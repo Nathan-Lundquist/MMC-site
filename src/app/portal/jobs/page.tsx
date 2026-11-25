@@ -207,36 +207,36 @@ export default async function AllJobsPage({
               <table className="w-full text-sm border-collapse">
                 <thead>
                   <tr className="bg-secondary/60 text-center border-b border-border">
-                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap">
+                    <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap">
                       WO #
                     </th>
-                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap">
+                    <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap">
                       Customer
                     </th>
-                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden sm:table-cell">
+                    <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap hidden sm:table-cell">
                       Job Type
                     </th>
-                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden md:table-cell">
+                    <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap hidden md:table-cell">
                       Foreman
                     </th>
-                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden md:table-cell">
+                    <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap hidden md:table-cell">
                       Status
                     </th>
-                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden lg:table-cell">
+                    <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap hidden lg:table-cell">
                       Date
                     </th>
-                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden lg:table-cell">
+                    <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap hidden lg:table-cell">
                       Invoice
                     </th>
-                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden xl:table-cell">
+                    <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap hidden xl:table-cell">
                       Profit
                     </th>
                     {tab === "active" && (
-                      <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap">
+                      <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap">
                         Log
                       </th>
                     )}
-                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap">
+                    <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap">
                       Edit
                     </th>
                   </tr>
@@ -260,42 +260,42 @@ export default async function AllJobsPage({
                         )}
                       >
                         <td className="p-0">
-                          <Link href={detailHref} className="block px-3 py-2 text-center font-semibold text-brand">
+                          <Link href={detailHref} className="block px-3 py-1.5 text-center font-semibold text-brand">
                             {wo.workOrderNumber}
                           </Link>
                         </td>
                         <td className="p-0">
-                          <Link href={detailHref} className="block px-3 py-2 text-center max-w-48 truncate mx-auto text-foreground">
+                          <Link href={detailHref} className="block px-3 py-1.5 text-center max-w-48 truncate mx-auto text-foreground">
                             {wo.customer.name}
                           </Link>
                         </td>
                         <td className="p-0 hidden sm:table-cell">
-                          <Link href={detailHref} className="block px-3 py-2 text-center text-muted-foreground">
+                          <Link href={detailHref} className="block px-3 py-1.5 text-center text-muted-foreground">
                             {wo.jobType}
                           </Link>
                         </td>
                         <td className="p-0 hidden md:table-cell">
-                          <Link href={detailHref} className="block px-3 py-2 text-center text-muted-foreground">
+                          <Link href={detailHref} className="block px-3 py-1.5 text-center text-muted-foreground">
                             {wo.foreman?.name || "—"}
                           </Link>
                         </td>
                         <td className="p-0 hidden md:table-cell">
-                          <Link href={detailHref} className="flex items-center justify-center px-3 py-2">
+                          <Link href={detailHref} className="flex items-center justify-center px-3 py-1.5">
                             <StatusBadge status={wo.status} />
                           </Link>
                         </td>
                         <td className="p-0 hidden lg:table-cell">
-                          <Link href={detailHref} className="block px-3 py-2 text-center text-muted-foreground whitespace-nowrap">
+                          <Link href={detailHref} className="block px-3 py-1.5 text-center text-muted-foreground whitespace-nowrap">
                             {formatDate(wo.projectStartDate)}
                           </Link>
                         </td>
                         <td className="p-0 hidden lg:table-cell">
-                          <Link href={detailHref} className="block px-3 py-2 text-center tabular-nums whitespace-nowrap">
+                          <Link href={detailHref} className="block px-3 py-1.5 text-center tabular-nums whitespace-nowrap">
                             {formatCurrency(wo.invoiceAmount)}
                           </Link>
                         </td>
                         <td className="p-0 hidden xl:table-cell">
-                          <Link href={detailHref} className="block px-3 py-2 text-center tabular-nums whitespace-nowrap">
+                          <Link href={detailHref} className="block px-3 py-1.5 text-center tabular-nums whitespace-nowrap">
                             <ProfitCell profit={profitNum} profitPct={profitPctNum} />
                           </Link>
                         </td>
@@ -303,7 +303,7 @@ export default async function AllJobsPage({
                           <td className="p-0">
                             <Link
                               href={logHref}
-                              className="flex items-center justify-center gap-1 px-3 py-2 text-xs font-medium text-brand hover:bg-brand/5 transition-colors"
+                              className="flex items-center justify-center gap-1 px-3 py-1.5 text-xs font-medium text-brand hover:bg-brand/5 transition-colors"
                             >
                               <PenLine className="w-3 h-3" />
                               Log
@@ -316,7 +316,7 @@ export default async function AllJobsPage({
                         <td className="p-0">
                           <Link
                             href={`/portal/jobs/${wo.id}/edit`}
-                            className="flex items-center justify-center gap-1 px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                            className="flex items-center justify-center gap-1 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                           >
                             <Pencil className="w-3 h-3" />
                             Edit

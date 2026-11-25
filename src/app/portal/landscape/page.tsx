@@ -250,49 +250,49 @@ export default async function LandscapeJobsPage({
                         )}
                       >
                         <td className="p-0">
-                          <Link href={detailHref} className="block px-3 py-2 text-center font-semibold text-brand">
+                          <Link href={detailHref} className="block px-3 py-1.5 text-center font-semibold text-brand">
                             {wo.workOrderNumber}
                           </Link>
                         </td>
                         <td className="p-0">
-                          <Link href={detailHref} className="block px-3 py-2 text-center max-w-48 truncate mx-auto text-foreground">
+                          <Link href={detailHref} className="block px-3 py-1.5 text-center max-w-48 truncate mx-auto text-foreground">
                             {wo.customer.name}
                           </Link>
                         </td>
                         <td className="p-0 hidden sm:table-cell">
-                          <Link href={detailHref} className="block px-3 py-2 text-center text-muted-foreground">
+                          <Link href={detailHref} className="block px-3 py-1.5 text-center text-muted-foreground">
                             {wo.jobType}
                           </Link>
                         </td>
                         <td className="p-0 hidden md:table-cell">
-                          <Link href={detailHref} className="block px-3 py-2 text-center text-muted-foreground">
+                          <Link href={detailHref} className="block px-3 py-1.5 text-center text-muted-foreground">
                             {wo.foreman?.name || "—"}
                           </Link>
                         </td>
                         <td className="p-0 hidden md:table-cell">
-                          <Link href={detailHref} className="flex items-center justify-center px-3 py-2">
+                          <Link href={detailHref} className="flex items-center justify-center px-3 py-1.5">
                             <StatusBadge status={wo.status} />
                           </Link>
                         </td>
                         <td className="p-0 hidden lg:table-cell">
-                          <Link href={detailHref} className="block px-3 py-2 text-center text-muted-foreground whitespace-nowrap">
+                          <Link href={detailHref} className="block px-3 py-1.5 text-center text-muted-foreground whitespace-nowrap">
                             {formatDate(wo.projectStartDate)}
                           </Link>
                         </td>
                         <td className="p-0 hidden lg:table-cell">
-                          <Link href={detailHref} className="block px-3 py-2 text-center tabular-nums whitespace-nowrap">
+                          <Link href={detailHref} className="block px-3 py-1.5 text-center tabular-nums whitespace-nowrap">
                             {formatCurrency(wo.invoiceAmount)}
                           </Link>
                         </td>
                         <td className="p-0 hidden xl:table-cell">
-                          <Link href={detailHref} className="block px-3 py-2 text-center tabular-nums whitespace-nowrap">
+                          <Link href={detailHref} className="block px-3 py-1.5 text-center tabular-nums whitespace-nowrap">
                             <ProfitCell profit={profitNum} profitPct={profitPctNum} />
                           </Link>
                         </td>
                         <td className="p-0">
                           <Link
                             href={`/portal/jobs/${wo.id}/edit`}
-                            className="flex items-center justify-center gap-1 px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                            className="flex items-center justify-center gap-1 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                           >
                             <Pencil className="w-3 h-3" />
                             Edit
