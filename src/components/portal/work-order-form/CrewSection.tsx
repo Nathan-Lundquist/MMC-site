@@ -15,6 +15,11 @@ import {
   RowDelete,
   EmptyState,
   GroupHeading,
+  DenseTable,
+  TableInput,
+  TableSelect,
+  TableRowDelete,
+  TableAddRow,
 } from "./form-ui";
 
 interface Props {
@@ -24,6 +29,8 @@ interface Props {
   machineRows: MachineRow[];
   setMachineRows: React.Dispatch<React.SetStateAction<MachineRow[]>>;
 }
+
+const BLANK_HOURS = { jobHours: "", setupHours: "", travelHours: "", unloadHours: "", deliveryHours: "" };
 
 function employeeTotalHrs(emp: CrewEmployeeHours) {
   return [emp.jobHours, emp.setupHours, emp.travelHours, emp.unloadHours, emp.deliveryHours].reduce(
@@ -45,7 +52,8 @@ export function CrewSection({
 }: Props) {
   // Rows start expanded; "Save" on a row collapses it to a compact summary
   // line so a long crew list doesn't require scrolling past a wall of open
-  // cards to add the next entry.
+  // cards to add the next entry. (Mobile card view only — the desktop
+  // table below is always flat, nothing to collapse.)
   const [collapsed, setCollapsed] = useState<Set<number>>(new Set());
 
   function addRow() {
@@ -87,33 +95,39 @@ export function CrewSection({
           </div>
         </div>
 
-        <Button
-          type="button"
-          variant="outline"
-          onClick={addRow}
-          className="w-full h-12 text-sm font-medium gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          Add Crew Entry
-        </Button>
+        {/* Mobile: card-per-entry with collapsible save state */}
+        <div className="sm:hidden space-y-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={addRow}
+            className="w-full h-12 text-sm font-medium gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Add Crew Entry
+          </Button>
 
-        {crewRows.length === 0 && <EmptyState text="Add an entry per day — add each crew member and their own hours." />}
+          {crewRows.length === 0 && <EmptyState text="Add an entry per day — add each crew member and their own hours." />}
 
-        {crewRows.map((row, i) =>
-          collapsed.has(i) ? (
-            <CrewRowSummary key={i} row={row} employees={employees} onEdit={() => expand(i)} onDelete={() => deleteRow(i)} />
-          ) : (
-            <CrewRowCard
-              key={i}
-              index={i}
-              row={row}
-              employees={employees}
-              setCrewRows={setCrewRows}
-              onSave={() => collapse(i)}
-              onDelete={() => deleteRow(i)}
-            />
-          )
-        )}
+          {crewRows.map((row, i) =>
+            collapsed.has(i) ? (
+              <CrewRowSummary key={i} row={row} employees={employees} onEdit={() => expand(i)} onDelete={() => deleteRow(i)} />
+            ) : (
+              <CrewRowCard
+                key={i}
+                index={i}
+                row={row}
+                employees={employees}
+                setCrewRows={setCrewRows}
+                onSave={() => collapse(i)}
+                onDelete={() => deleteRow(i)}
+              />
+            )
+          )}
+        </div>
+
+        {/* Desktop: dense flat table, one row per employee */}
+        <CrewDesktopTable crewRows={crewRows} setCrewRows={setCrewRows} employees={employees} />
 
         <EmployeeHoursTotals crewRows={crewRows} employees={employees} />
       </Card>
@@ -122,22 +136,144 @@ export function CrewSection({
         <SectionHeader title="Machines" count={machineRows.length} onAdd={() =>
           setMachineRows((p) => [...p, { vehicleInfo: "", hours: "" }])
         } />
-        {machineRows.length === 0 && <EmptyState text="No machines logged." />}
-        {machineRows.map((row, i) => (
-          <div key={i} className="p-3 border border-border rounded-lg space-y-3">
-            <div className="flex items-center justify-end">
-              <RowDelete onClick={() => removeRow(setMachineRows, i)} />
+
+        <div className="sm:hidden space-y-3">
+          {machineRows.length === 0 && <EmptyState text="No machines logged." />}
+          {machineRows.map((row, i) => (
+            <div key={i} className="p-3 border border-border rounded-lg space-y-3">
+              <div className="flex items-center justify-end">
+                <RowDelete onClick={() => removeRow(setMachineRows, i)} />
+              </div>
+              <Field label="Vehicle / Machine">
+                <MobileInput value={row.vehicleInfo} onChange={(e) => updateRow(setMachineRows, i, "vehicleInfo", e.target.value)} />
+              </Field>
+              <Field label="Hours">
+                <MobileInput type="number" step="0.01" value={row.hours} onChange={(e) => updateRow(setMachineRows, i, "hours", e.target.value)} />
+              </Field>
             </div>
-            <Field label="Vehicle / Machine">
-              <MobileInput value={row.vehicleInfo} onChange={(e) => updateRow(setMachineRows, i, "vehicleInfo", e.target.value)} />
-            </Field>
-            <Field label="Hours">
-              <MobileInput type="number" step="0.01" value={row.hours} onChange={(e) => updateRow(setMachineRows, i, "hours", e.target.value)} />
-            </Field>
-          </div>
-        ))}
+          ))}
+        </div>
+
+        <DenseTable columns={["Vehicle / Machine", "Hours"]}>
+          {machineRows.map((row, i) => (
+            <tr key={i} className="border-b border-border last:border-b-0 even:bg-secondary/20">
+              <td className="p-0.5">
+                <TableInput value={row.vehicleInfo} onChange={(e) => updateRow(setMachineRows, i, "vehicleInfo", e.target.value)} />
+              </td>
+              <td className="p-0.5 w-28">
+                <TableInput type="number" step="0.01" value={row.hours} onChange={(e) => updateRow(setMachineRows, i, "hours", e.target.value)} />
+              </td>
+              <td className="p-0.5 text-center">
+                <TableRowDelete onClick={() => removeRow(setMachineRows, i)} />
+              </td>
+            </tr>
+          ))}
+          {machineRows.length === 0 && (
+            <tr>
+              <td colSpan={3} className="p-3 text-center text-sm text-muted-foreground">
+                No machines logged.
+              </td>
+            </tr>
+          )}
+        </DenseTable>
       </Card>
     </>
+  );
+}
+
+/** Dense desktop table: flattens crewRows into one row per employee. */
+function CrewDesktopTable({
+  crewRows,
+  setCrewRows,
+  employees,
+}: {
+  crewRows: CrewRow[];
+  setCrewRows: React.Dispatch<React.SetStateAction<CrewRow[]>>;
+  employees: { id: string; name: string }[];
+}) {
+  function updateDate(rowIdx: number, value: string) {
+    setCrewRows((prev) => prev.map((r, i) => (i === rowIdx ? { ...r, date: value } : r)));
+  }
+
+  function updateEmployeeField(rowIdx: number, empIdx: number, field: keyof CrewEmployeeHours, value: string) {
+    setCrewRows((prev) =>
+      prev.map((r, i) =>
+        i === rowIdx
+          ? { ...r, employees: r.employees.map((e, j) => (j === empIdx ? { ...e, [field]: value } : e)) }
+          : r
+      )
+    );
+  }
+
+  function removeFlatRow(rowIdx: number, empIdx: number) {
+    setCrewRows((prev) =>
+      prev
+        .map((r, i) => (i === rowIdx ? { ...r, employees: r.employees.filter((_, j) => j !== empIdx) } : r))
+        // Drop entries left with zero employees so the table doesn't accumulate empty date rows.
+        .filter((r) => r.employees.length > 0)
+    );
+  }
+
+  function addFlatRow() {
+    setCrewRows((prev) => [...prev, { date: todayLocal(), employees: [{ employeeId: "", ...BLANK_HOURS }] }]);
+  }
+
+  const flatRows: { rowIdx: number; empIdx: number; date: string; emp: CrewEmployeeHours }[] = [];
+  crewRows.forEach((row, rowIdx) => {
+    row.employees.forEach((emp, empIdx) => {
+      flatRows.push({ rowIdx, empIdx, date: row.date, emp });
+    });
+  });
+
+  return (
+    <div>
+      <DenseTable columns={["Date", "Employee", "Job", "Setup", "Travel", "Unload", "Delivery"]}>
+        {flatRows.map(({ rowIdx, empIdx, date, emp }) => (
+          <tr key={`${rowIdx}-${empIdx}`} className="border-b border-border last:border-b-0 even:bg-secondary/20">
+            <td className="p-0.5 w-36">
+              <TableInput type="date" value={date} onChange={(e) => updateDate(rowIdx, e.target.value)} />
+            </td>
+            <td className="p-0.5 min-w-[140px]">
+              <TableSelect
+                value={emp.employeeId}
+                onChange={(v) => updateEmployeeField(rowIdx, empIdx, "employeeId", v)}
+              >
+                <option value="">Select...</option>
+                {employees.map((e) => (
+                  <option key={e.id} value={e.id}>{e.name}</option>
+                ))}
+              </TableSelect>
+            </td>
+            <td className="p-0.5 w-20">
+              <TableInput type="number" inputMode="decimal" step="0.25" value={emp.jobHours} onChange={(e) => updateEmployeeField(rowIdx, empIdx, "jobHours", e.target.value)} />
+            </td>
+            <td className="p-0.5 w-20">
+              <TableInput type="number" inputMode="decimal" step="0.25" value={emp.setupHours} onChange={(e) => updateEmployeeField(rowIdx, empIdx, "setupHours", e.target.value)} />
+            </td>
+            <td className="p-0.5 w-20">
+              <TableInput type="number" inputMode="decimal" step="0.25" value={emp.travelHours} onChange={(e) => updateEmployeeField(rowIdx, empIdx, "travelHours", e.target.value)} />
+            </td>
+            <td className="p-0.5 w-20">
+              <TableInput type="number" inputMode="decimal" step="0.25" value={emp.unloadHours} onChange={(e) => updateEmployeeField(rowIdx, empIdx, "unloadHours", e.target.value)} />
+            </td>
+            <td className="p-0.5 w-20">
+              <TableInput type="number" inputMode="decimal" step="0.25" value={emp.deliveryHours} onChange={(e) => updateEmployeeField(rowIdx, empIdx, "deliveryHours", e.target.value)} />
+            </td>
+            <td className="p-0.5 text-center">
+              <TableRowDelete onClick={() => removeFlatRow(rowIdx, empIdx)} />
+            </td>
+          </tr>
+        ))}
+        {flatRows.length === 0 && (
+          <tr>
+            <td colSpan={8} className="p-3 text-center text-sm text-muted-foreground">
+              No crew entries yet.
+            </td>
+          </tr>
+        )}
+      </DenseTable>
+      <TableAddRow label="Add Row" onClick={addFlatRow} />
+    </div>
   );
 }
 
@@ -183,7 +319,7 @@ function EmployeeHoursTotals({
   );
 }
 
-/** Compact read-only line shown once a crew entry is saved/collapsed. */
+/** Compact read-only line shown once a crew entry is saved/collapsed (mobile only). */
 function CrewRowSummary({
   row,
   employees,
@@ -228,8 +364,6 @@ function CrewRowSummary({
     </div>
   );
 }
-
-const BLANK_HOURS = { jobHours: "", setupHours: "", travelHours: "", unloadHours: "", deliveryHours: "" };
 
 function CrewRowCard({
   index: i,

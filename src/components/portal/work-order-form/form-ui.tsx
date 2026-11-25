@@ -196,6 +196,98 @@ export function EmptyState({ text }: { text: string }) {
   return <p className="text-sm text-muted-foreground py-1">{text}</p>;
 }
 
+// ── Dense desktop table primitives ──────────────────────────
+// Zoho-style spreadsheet layout for repeatable rows: a flat table with
+// borderless inline cells on sm:+ screens. Mobile keeps the card-based
+// layout (rendered separately, hidden on sm:+) — the crew uses phones in
+// the field, and a dense table doesn't work there.
+
+export function DenseTable({
+  columns,
+  children,
+}: {
+  columns: string[];
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="hidden sm:block overflow-x-auto rounded-md border border-border">
+      <table className="w-full text-sm border-collapse">
+        <thead>
+          <tr className="bg-secondary/60 border-b border-border">
+            {columns.map((col) => (
+              <th
+                key={col}
+                className="px-2 py-1.5 text-left text-xs font-semibold text-muted-foreground whitespace-nowrap"
+              >
+                {col}
+              </th>
+            ))}
+            <th className="w-9" />
+          </tr>
+        </thead>
+        <tbody>{children}</tbody>
+      </table>
+    </div>
+  );
+}
+
+export function TableInput(props: React.ComponentProps<typeof Input>) {
+  return (
+    <Input
+      {...props}
+      className={`h-8 text-sm border-transparent bg-transparent px-1.5 rounded-sm hover:border-input focus-visible:border-input focus-visible:bg-background transition-colors ${props.className || ""}`}
+    />
+  );
+}
+
+export function TableSelect({
+  value,
+  onChange,
+  children,
+  className,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className={`h-8 w-full rounded-sm border border-transparent bg-transparent px-1.5 text-sm text-foreground hover:border-input focus:border-input focus:bg-background transition-colors cursor-pointer ${className || ""}`}
+    >
+      {children}
+    </select>
+  );
+}
+
+export function TableRowDelete({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors w-8 h-8 rounded-sm"
+      title="Remove"
+    >
+      <Trash2 className="w-3.5 h-3.5" />
+    </button>
+  );
+}
+
+export function TableAddRow({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="hidden sm:inline-flex items-center gap-1 text-xs font-medium text-brand hover:underline mt-1.5"
+    >
+      <Plus className="w-3 h-3" />
+      {label}
+    </button>
+  );
+}
+
 export function Field({
   label,
   action,
