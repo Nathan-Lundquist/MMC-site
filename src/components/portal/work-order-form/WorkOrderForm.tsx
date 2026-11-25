@@ -3,8 +3,9 @@
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Save, Loader2 } from "lucide-react";
+import { Save, Loader2, ClipboardList, CalendarDays, Users, Package, CreditCard, FileText } from "lucide-react";
 import { CLEAN_UP_CATEGORY_VALUES } from "@/lib/job-categories";
+import { FormTabs } from "./form-ui";
 
 import type {
   FormProps,
@@ -32,11 +33,14 @@ import { PaymentsSection } from "./PaymentsSection";
 import { AdditionalWorkSection } from "./AdditionalWorkSection";
 import { NotesSection } from "./NotesSection";
 
+type TabKey = "info" | "time" | "crew" | "materials" | "payments" | "notes";
+
 export function WorkOrderForm({ customers, employees, materialCatalog, initialData }: FormProps) {
   const router = useRouter();
   const isEdit = !!initialData;
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [activeTab, setActiveTab] = useState<TabKey>("info");
 
   const [customerId, setCustomerId] = useState(initialData?.customerId || "");
   const [jobCategory, setJobCategory] = useState(initialData?.jobCategory || "");
@@ -68,14 +72,32 @@ export function WorkOrderForm({ customers, employees, materialCatalog, initialDa
 
   const daySummary = useMemo(() => summarizeDays(timeRows), [timeRows]);
 
+  const tabCounts = {
+    time: timeRows.length + debrisRows.length + weedingRows.length + hourlyRows.length,
+    crew: crewRows.flatMap((r) => r.employees).length + machineRows.length,
+    materials: materialRows.length + outsourcedRows.length + addlWorkRows.length,
+    payments: paymentRows.length,
+  };
+
+  const TABS: { key: TabKey; label: string; icon: React.ComponentType<{ className?: string }>; count?: number }[] = [
+    { key: "info", label: "Info", icon: ClipboardList },
+    { key: "time", label: "Time", icon: CalendarDays, count: tabCounts.time },
+    { key: "crew", label: "Crew", icon: Users, count: tabCounts.crew },
+    { key: "materials", label: "Materials", icon: Package, count: tabCounts.materials },
+    { key: "payments", label: "Payments", icon: CreditCard, count: tabCounts.payments },
+    { key: "notes", label: "Notes", icon: FileText },
+  ];
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!customerId || (isEdit && !woNumber)) {
       setError("Customer and Work Order Number are required.");
+      setActiveTab("info");
       return;
     }
     if (!jobCategory) {
       setError("Category is required.");
+      setActiveTab("info");
       return;
     }
     setError("");
@@ -151,77 +173,91 @@ export function WorkOrderForm({ customers, employees, materialCatalog, initialDa
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 pb-24">
-      <JobInfoSection
-        customers={customers}
-        employees={employees}
-        customerId={customerId}
-        setCustomerId={setCustomerId}
-        jobCategory={jobCategory}
-        setJobCategory={setJobCategory}
-        jobType={jobType}
-        setJobType={setJobType}
-        foremanId={foremanId}
-        setForemanId={setForemanId}
-        woNumber={woNumber}
-        setWoNumber={setWoNumber}
-        isEdit={isEdit}
-        estimateNumber={estimateNumber}
-        setEstimateNumber={setEstimateNumber}
-        pctComplete={pctComplete}
-        setPctComplete={setPctComplete}
-        totalHours={totalHours}
-        setTotalHours={setTotalHours}
-        estimatedHours={estimatedHours}
-        setEstimatedHours={setEstimatedHours}
-      />
+      <FormTabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
 
-      <ProjectDaysSection timeRows={timeRows} setTimeRows={setTimeRows} />
+      <div className={activeTab === "info" ? "space-y-4" : "hidden"}>
+        <JobInfoSection
+          customers={customers}
+          employees={employees}
+          customerId={customerId}
+          setCustomerId={setCustomerId}
+          jobCategory={jobCategory}
+          setJobCategory={setJobCategory}
+          jobType={jobType}
+          setJobType={setJobType}
+          foremanId={foremanId}
+          setForemanId={setForemanId}
+          woNumber={woNumber}
+          setWoNumber={setWoNumber}
+          isEdit={isEdit}
+          estimateNumber={estimateNumber}
+          setEstimateNumber={setEstimateNumber}
+          pctComplete={pctComplete}
+          setPctComplete={setPctComplete}
+          totalHours={totalHours}
+          setTotalHours={setTotalHours}
+          estimatedHours={estimatedHours}
+          setEstimatedHours={setEstimatedHours}
+        />
+      </div>
 
-      <CrewSection
-        employees={employees}
-        crewRows={crewRows}
-        setCrewRows={setCrewRows}
-        machineRows={machineRows}
-        setMachineRows={setMachineRows}
-      />
+      <div className={activeTab === "time" ? "space-y-4" : "hidden"}>
+        <ProjectDaysSection timeRows={timeRows} setTimeRows={setTimeRows} />
 
-      <WorkLogSection
-        debrisRows={debrisRows}
-        setDebrisRows={setDebrisRows}
-        weedingRows={weedingRows}
-        setWeedingRows={setWeedingRows}
-        hourlyRows={hourlyRows}
-        setHourlyRows={setHourlyRows}
-      />
+        <WorkLogSection
+          debrisRows={debrisRows}
+          setDebrisRows={setDebrisRows}
+          weedingRows={weedingRows}
+          setWeedingRows={setWeedingRows}
+          hourlyRows={hourlyRows}
+          setHourlyRows={setHourlyRows}
+        />
+      </div>
 
-      <MaterialsSection
-        materialRows={materialRows}
-        setMaterialRows={setMaterialRows}
-        outsourcedRows={outsourcedRows}
-        setOutsourcedRows={setOutsourcedRows}
-        materialCatalog={materialCatalog || []}
-      />
+      <div className={activeTab === "crew" ? "space-y-4" : "hidden"}>
+        <CrewSection
+          employees={employees}
+          crewRows={crewRows}
+          setCrewRows={setCrewRows}
+          machineRows={machineRows}
+          setMachineRows={setMachineRows}
+        />
+      </div>
 
-      <PaymentsSection paymentRows={paymentRows} setPaymentRows={setPaymentRows} />
+      <div className={activeTab === "materials" ? "space-y-4" : "hidden"}>
+        <MaterialsSection
+          materialRows={materialRows}
+          setMaterialRows={setMaterialRows}
+          outsourcedRows={outsourcedRows}
+          setOutsourcedRows={setOutsourcedRows}
+          materialCatalog={materialCatalog || []}
+        />
 
-      <AdditionalWorkSection
-        employees={employees}
-        addlWorkRows={addlWorkRows}
-        setAddlWorkRows={setAddlWorkRows}
-        addlCrewRows={addlCrewRows}
-        setAddlCrewRows={setAddlCrewRows}
-        addlMaterialRows={addlMaterialRows}
-        setAddlMaterialRows={setAddlMaterialRows}
-        addlOutsourcedRows={addlOutsourcedRows}
-        setAddlOutsourcedRows={setAddlOutsourcedRows}
-      />
+        <AdditionalWorkSection
+          employees={employees}
+          addlWorkRows={addlWorkRows}
+          setAddlWorkRows={setAddlWorkRows}
+          addlCrewRows={addlCrewRows}
+          setAddlCrewRows={setAddlCrewRows}
+          addlMaterialRows={addlMaterialRows}
+          setAddlMaterialRows={setAddlMaterialRows}
+          addlOutsourcedRows={addlOutsourcedRows}
+          setAddlOutsourcedRows={setAddlOutsourcedRows}
+        />
+      </div>
 
-      <NotesSection
-        notes={notes}
-        setNotes={setNotes}
-        materialsNotUsed={materialsNotUsed}
-        setMaterialsNotUsed={setMaterialsNotUsed}
-      />
+      <div className={activeTab === "payments" ? "space-y-4" : "hidden"}>
+        <PaymentsSection paymentRows={paymentRows} setPaymentRows={setPaymentRows} />
+      </div>
+
+      <div className={activeTab === "notes" ? "space-y-4" : "hidden"}>
+        <NotesSection
+          notes={notes}
+          setNotes={setNotes}
+          materialsNotUsed={materialsNotUsed}
+          setMaterialsNotUsed={setMaterialsNotUsed}
+        />
+      </div>
 
       {error && (
         <p className="text-sm text-destructive font-medium px-1">{error}</p>

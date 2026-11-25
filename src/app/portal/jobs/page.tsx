@@ -4,14 +4,14 @@ import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Plus, ClipboardList, Pencil, PenLine, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { Plus, ClipboardList, Pencil, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Prisma, WorkOrderStatus } from "@prisma/client";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { StatusBadge } from "@/components/portal/StatusBadge";
 import { ProfitCell } from "@/components/portal/ProfitCell";
 import { PageNumbersLink as PageNumbers, PaginationLink } from "@/components/portal/PageNumbers";
-import { CLEAN_UP_CATEGORY_VALUES, JOB_CATEGORY_FILTER_OPTIONS } from "@/lib/job-categories";
+import { JOB_CATEGORY_FILTER_OPTIONS } from "@/lib/job-categories";
 import { MANAGER_VISIBLE_ROLES } from "@/lib/constants";
 import LandscapeToolbar from "../landscape/LandscapeToolbar";
 
@@ -70,7 +70,7 @@ export default async function AllJobsPage({
         { projectStartDate: { sort: "desc", nulls: "last" } },
         { createdAt: "desc" },
       ],
-      include: { customer: true, foreman: true, _count: { select: { crewWorkLogs: true } } },
+      include: { customer: true, foreman: true },
       skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
     }),
@@ -231,11 +231,6 @@ export default async function AllJobsPage({
                     <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap hidden xl:table-cell">
                       Profit
                     </th>
-                    {tab === "active" && (
-                      <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap">
-                        Log
-                      </th>
-                    )}
                     <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap">
                       Edit
                     </th>
@@ -246,10 +241,6 @@ export default async function AllJobsPage({
                     const profitNum = wo.profit !== null ? Number(wo.profit) : null;
                     const profitPctNum = wo.profitPercent !== null ? Number(wo.profitPercent) : null;
                     const detailHref = `/portal/jobs/${wo.id}`;
-                    const isCleanUp = (CLEAN_UP_CATEGORY_VALUES as readonly string[]).includes(wo.jobCategory);
-                    const logHref = isCleanUp
-                      ? `/portal/cleanups/log?wo=${wo.id}`
-                      : `/portal/landscape/log?wo=${wo.id}`;
 
                     return (
                       <tr
@@ -299,20 +290,6 @@ export default async function AllJobsPage({
                             <ProfitCell profit={profitNum} profitPct={profitPctNum} />
                           </Link>
                         </td>
-                        {tab === "active" && (
-                          <td className="p-0">
-                            <Link
-                              href={logHref}
-                              className="flex items-center justify-center gap-1 px-3 py-1.5 text-xs font-medium text-brand hover:bg-brand/5 transition-colors"
-                            >
-                              <PenLine className="w-3 h-3" />
-                              Log
-                              {wo._count.crewWorkLogs > 0 && (
-                                <span className="text-[10px] text-muted-foreground">({wo._count.crewWorkLogs})</span>
-                              )}
-                            </Link>
-                          </td>
-                        )}
                         <td className="p-0">
                           <Link
                             href={`/portal/jobs/${wo.id}/edit`}

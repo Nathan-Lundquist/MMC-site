@@ -288,6 +288,47 @@ export function TableAddRow({ label, onClick }: { label: string; onClick: () => 
   );
 }
 
+export function FormTabs<T extends string>({
+  tabs,
+  active,
+  onChange,
+}: {
+  tabs: { key: T; label: string; icon: React.ComponentType<{ className?: string }>; count?: number }[];
+  active: T;
+  onChange: (key: T) => void;
+}) {
+  return (
+    <div className="sticky top-0 z-30 -mx-4 px-4 sm:mx-0 sm:px-0 bg-background/95 backdrop-blur border-b border-border">
+      <div className="flex items-center gap-1 overflow-x-auto">
+        {tabs.map(({ key, label, icon: Icon, count }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => onChange(key)}
+            className={`inline-flex items-center gap-1.5 shrink-0 px-3 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors whitespace-nowrap ${
+              active === key
+                ? "border-brand text-brand"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Icon className="w-4 h-4" />
+            {label}
+            {!!count && (
+              <span
+                className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
+                  active === key ? "bg-brand/10 text-brand" : "bg-secondary text-muted-foreground"
+                }`}
+              >
+                {count}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function Field({
   label,
   action,

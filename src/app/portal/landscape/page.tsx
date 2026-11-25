@@ -206,31 +206,31 @@ export default async function LandscapeJobsPage({
               <table className="w-full text-sm border-collapse">
                 <thead>
                   <tr className="bg-secondary/60 text-center border-b border-border">
-                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap">
+                    <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap">
                       WO #
                     </th>
-                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap">
+                    <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap">
                       Customer
                     </th>
-                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden sm:table-cell">
+                    <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap hidden sm:table-cell">
                       Job Type
                     </th>
-                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden md:table-cell">
+                    <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap hidden md:table-cell">
                       Foreman
                     </th>
-                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden md:table-cell">
+                    <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap hidden md:table-cell">
                       Status
                     </th>
-                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden lg:table-cell">
+                    <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap hidden lg:table-cell">
                       Date
                     </th>
-                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden lg:table-cell">
+                    <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap hidden lg:table-cell">
                       Invoice
                     </th>
-                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden xl:table-cell">
+                    <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap hidden xl:table-cell">
                       Profit
                     </th>
-                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap">
+                    <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap">
                       Edit
                     </th>
                   </tr>

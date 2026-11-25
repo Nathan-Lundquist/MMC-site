@@ -22,7 +22,6 @@ export interface WorkOrderItem {
   invoiceAmount: number | null;
   profit: number | null;
   profitPercent: number | null;
-  logCount: number;
 }
 
 export interface Customer {
@@ -86,7 +85,6 @@ export function JobQuickCreate({
         invoiceAmount: null,
         profit: null,
         profitPercent: null,
-        logCount: 0,
       });
 
       setCustomerId("");

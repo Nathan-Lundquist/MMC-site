@@ -55,7 +55,6 @@ export default async function CleanUpsPage({
         profitPercent: true,
         customer: { select: { name: true } },
         foreman: { select: { name: true } },
-        _count: { select: { crewWorkLogs: true } },
       },
     }),
     prisma.customer.findMany({
@@ -128,7 +127,6 @@ export default async function CleanUpsPage({
           invoiceAmount: wo.invoiceAmount != null ? Number(wo.invoiceAmount) : null,
           profit: wo.profit != null ? Number(wo.profit) : null,
           profitPercent: wo.profitPercent != null ? Number(wo.profitPercent) : null,
-          logCount: wo._count.crewWorkLogs,
         }))}
         customers={customers}
       />

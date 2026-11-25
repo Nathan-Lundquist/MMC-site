@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
-import { PenLine, Pencil, ClipboardList } from "lucide-react";
+import { Pencil, ClipboardList } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { CLEAN_UP_CATEGORIES } from "@/lib/job-categories";
@@ -44,36 +44,31 @@ export function CleanUpsWorkOrderList({
             <table className="w-full text-sm border-collapse">
               <thead>
                 <tr className="bg-secondary/60 text-center border-b border-border">
-                  <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap">
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap">
                     WO #
                   </th>
-                  <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap">
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap">
                     Customer
                   </th>
-                  <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden sm:table-cell">
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap hidden sm:table-cell">
                     Job Type
                   </th>
-                  <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden md:table-cell">
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap hidden md:table-cell">
                     Foreman
                   </th>
-                  <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap">
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap">
                     Status
                   </th>
-                  <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden lg:table-cell">
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap hidden lg:table-cell">
                     Date
                   </th>
-                  <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden lg:table-cell">
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap hidden lg:table-cell">
                     Invoice
                   </th>
-                  <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap hidden xl:table-cell">
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap hidden xl:table-cell">
                     Profit
                   </th>
-                  {tab === "active" && (
-                    <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap">
-                      Log
-                    </th>
-                  )}
-                  <th className="px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap">
+                  <th className="px-3 py-1.5 text-xs font-semibold text-muted-foreground whitespace-nowrap">
                     Edit
                   </th>
                 </tr>
@@ -129,20 +124,6 @@ export function CleanUpsWorkOrderList({
                           <ProfitCell profit={wo.profit} profitPct={wo.profitPercent} />
                         </Link>
                       </td>
-                      {tab === "active" && (
-                        <td className="p-0">
-                          <Link
-                            href={`/portal/cleanups/log?wo=${wo.id}`}
-                            className="flex items-center justify-center gap-1 px-3 py-1.5 text-xs font-medium text-brand hover:bg-brand/5 transition-colors"
-                          >
-                            <PenLine className="w-3 h-3" />
-                            Log
-                            {wo.logCount > 0 && (
-                              <span className="text-[10px] text-muted-foreground">({wo.logCount})</span>
-                            )}
-                          </Link>
-                        </td>
-                      )}
                       <td className="p-0">
                         <Link
                           href={`/portal/jobs/${wo.id}/edit`}
